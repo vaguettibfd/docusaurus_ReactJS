@@ -1,0 +1,349 @@
+# 📘 ReactJS – Estrutura de Projeto, Componentes e Props
+
+## Introdução
+
+O **ReactJS** permite construir interfaces de usuário a partir de **componentes**, ou seja, partes menores da interface que podem ser organizadas, combinadas e reutilizadas na construção de uma aplicação.
+
+Antes de desenvolver aplicações mais complexas, é importante compreender como um projeto ReactJS é estruturado e como seus diferentes arquivos se relacionam.
+
+Neste capítulo, utilizaremos uma aplicação simples de **Login** para explorar a organização básica de um projeto ReactJS e compreender como diferentes componentes podem ser utilizados em conjunto.
+
+Ao longo do exemplo, serão apresentados componentes construídos de duas formas:
+
+- **Componentes de Classe (Class Components)**;
+- **Componentes Funcionais (Function Components)**.
+
+Também será apresentado o conceito de **Props (Properties)**, utilizado para transmitir informações entre componentes.
+
+O exemplo permitirá acompanhar o fluxo da aplicação desde o arquivo `index.html` até os componentes responsáveis pela construção da interface.
+
+---------------------
+
+## 🎯 Objetivos de Aprendizagem
+
+Ao concluir este capítulo, você deverá ser capaz de:
+
+- compreender a estrutura básica de um projeto ReactJS;
+- identificar o papel do arquivo `index.html`;
+- compreender a função do arquivo `main.jsx`;
+- identificar o componente raiz `App`;
+- compreender o conceito de **componentização**;
+- criar e utilizar componentes React;
+- diferenciar **Componentes de Classe** e **Componentes Funcionais**;
+- compreender a utilização de JSX;
+- utilizar fragmentos (`<> </>`) para agrupar elementos;
+- compreender o funcionamento de `import` e `export`;
+- compreender o conceito de **Props**;
+- transmitir informações de um componente pai para um componente filho;
+- acessar Props utilizando `this.props` em componentes de classe;
+- utilizar desestruturação de Props em componentes funcionais;
+- compreender como diferentes componentes podem ser combinados para construir uma interface.
+
+---------------------
+
+## Estrutura do Projeto ReactJS
+
+Para compreender como os arquivos de uma aplicação ReactJS trabalham em conjunto, considere a estrutura utilizada neste capítulo.
+
+Na raiz do projeto temos o arquivo:
+
+```text
+index.html
+```
+
+O arquivo `index.html` carrega:
+
+```text
+src/main.jsx
+```
+
+O arquivo `main.jsx`, por sua vez, utiliza o componente:
+
+```text
+src/App.jsx
+```
+
+O componente `App.jsx` utiliza o componente:
+
+```text
+components/props/Login.jsx
+```
+
+Finalmente, `Login.jsx` utiliza outros componentes responsáveis pela construção da interface:
+
+```text
+Label.jsx
+Labelln.jsx
+InputText.jsx
+Button.jsx
+```
+
+Podemos representar esse fluxo da seguinte maneira:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+App.jsx
+    │
+    ▼
+Login.jsx
+    │
+    ├── Label.jsx
+    │
+    ├── Labelln.jsx
+    │
+    ├── InputText.jsx
+    │
+    └── Button.jsx
+```
+
+Essa organização demonstra uma das principais características do ReactJS: a construção da interface a partir da **composição de componentes**.
+
+---------------------
+
+## Do `index.html` aos Componentes
+
+A aplicação começa pelo arquivo:
+
+```text
+index.html
+```
+
+Nele existe um elemento que servirá como ponto de montagem da aplicação React:
+
+```html
+<div id="root"></div>
+```
+
+O mesmo arquivo carrega o módulo:
+
+```html
+<script type="module" src="/src/main.jsx"></script>
+```
+
+A partir desse ponto, o controle da construção da interface passa para os arquivos JavaScript/JSX da aplicação.
+
+O arquivo `main.jsx` inicializa o React e solicita a renderização do componente:
+
+```jsx
+<App />
+```
+
+O componente `App`, por sua vez, utiliza:
+
+```jsx
+<Login />
+```
+
+Já o componente `Login` combina componentes menores para construir a interface.
+
+Portanto, existe uma sequência de composição:
+
+```text
+HTML
+ │
+ ▼
+React
+ │
+ ▼
+App
+ │
+ ▼
+Login
+ │
+ ▼
+Componentes da Interface
+```
+
+---------------------
+
+## Componentização
+
+Um dos conceitos centrais trabalhados neste capítulo é a **componentização**.
+
+Em vez de construir toda a interface em um único arquivo, podemos dividi-la em partes menores.
+
+No exemplo apresentado, a tela de Login utiliza quatro componentes:
+
+| Componente | Responsabilidade |
+|------------|------------------|
+| `Label` | Exibir pequenos textos utilizados como rótulos. |
+| `Labelln` | Exibir textos utilizados na composição da interface. |
+| `InputText` | Criar campos de entrada de texto. |
+| `Button` | Criar um botão reutilizável. |
+
+Esses componentes são posteriormente reunidos por:
+
+```text
+Login.jsx
+```
+
+Assim:
+
+```text
+                Login
+                  │
+        ┌─────────┼─────────┐
+        │         │         │
+      Label    InputText   Button
+        │
+     Labelln
+```
+
+> O diagrama representa conceitualmente a composição da interface. Os componentes `Label`, `Labelln`, `InputText` e `Button` são utilizados por `Login` para construir a tela.
+
+Essa separação permite que os componentes sejam reutilizados em diferentes partes de uma aplicação.
+
+---------------------
+
+## Componentes de Classe e Componentes Funcionais
+
+O exemplo também apresenta duas formas de construção de componentes React.
+
+### Componentes de Classe
+
+Os componentes `Label` e `Button` são implementados utilizando classes.
+
+A estrutura básica segue o padrão:
+
+```jsx
+class Componente extends React.Component {
+    render() {
+        return (
+            ...
+        )
+    }
+}
+```
+
+Nesse modelo, o componente herda de:
+
+```javascript
+React.Component
+```
+
+e utiliza o método:
+
+```javascript
+render()
+```
+
+para definir o conteúdo que será apresentado.
+
+### Componentes Funcionais
+
+Os componentes `Labelln`, `InputText`, `Login` e `App` são implementados utilizando funções.
+
+A estrutura básica é:
+
+```jsx
+function Componente() {
+    return (
+        ...
+    )
+}
+```
+
+Nesse caso, uma função JavaScript retorna o JSX que representa a interface do componente.
+
+Ao longo do capítulo, poderemos observar as diferenças entre essas duas formas de implementação.
+
+---------------------
+
+## Introdução às Props
+
+Além da componentização, o exemplo introduz o conceito de **Props**.
+
+Props são informações transmitidas de um componente para outro.
+
+Considere:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+Nesse exemplo, o componente `Label` recebe uma propriedade chamada:
+
+```text
+texto
+```
+
+com o valor:
+
+```text
+Usuário:
+```
+
+Outro exemplo aparece no componente `InputText`:
+
+```jsx
+<InputText placeholder="user..." />
+```
+
+Nesse caso, é transmitida a prop:
+
+```text
+placeholder
+```
+
+Também podemos transmitir informações ao componente `Button`:
+
+```jsx
+<Button valor="Logar" />
+```
+
+Portanto:
+
+```text
+Componente Pai
+      │
+      │ Props
+      ▼
+Componente Filho
+```
+
+As Props permitem utilizar um mesmo componente com diferentes informações, favorecendo sua **reutilização**.
+
+---------------------
+
+## 📌 Primeiros Conceitos-Chave
+
+| Conceito | Explicação |
+|----------|------------|
+| ReactJS | Biblioteca utilizada para construção de interfaces a partir de componentes. |
+| Componente | Parte da interface que pode ser organizada e reutilizada. |
+| Componentização | Divisão da interface em componentes menores. |
+| Composição | Utilização de componentes dentro de outros componentes. |
+| Componente Raiz | Componente inicial utilizado para organizar a aplicação. No exemplo, `App`. |
+| JSX | Sintaxe utilizada pelos componentes para representar a interface. |
+| Class Component | Componente implementado utilizando uma classe que herda de `React.Component`. |
+| Function Component | Componente implementado utilizando uma função. |
+| Props | Propriedades utilizadas para transmitir informações para componentes. |
+| `import` | Permite utilizar em um arquivo recursos definidos em outros módulos. |
+| `export` | Permite disponibilizar um recurso para utilização em outros módulos. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Observe o fluxo da aplicação.**
+>
+> Antes de analisar cada componente isoladamente, procure compreender a sequência `index.html → main.jsx → App.jsx → Login.jsx`. Ela ajuda a entender como a aplicação é inicializada e como a interface é construída.
+
+> **Pense nos componentes como peças de uma interface.**
+>
+> `Label`, `InputText` e `Button` possuem responsabilidades específicas. O componente `Login` combina essas peças para formar uma interface maior.
+
+> **Props tornam os componentes reutilizáveis.**
+>
+> O mesmo componente `Label` pode apresentar diferentes textos simplesmente recebendo valores diferentes por meio da prop `texto`.
+
+> **Observe as duas formas de criar componentes.**
+>
+> Neste capítulo são utilizados tanto componentes de classe quanto componentes funcionais. Compare suas estruturas durante os próximos exemplos.
+
+---------------------

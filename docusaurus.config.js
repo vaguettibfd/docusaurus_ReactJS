@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'JavaSCript Orientado a Objetos',
+  title: 'ReactJS Básico',
   tagline: 'Da Prática a Teoria',
   favicon: 'img/favicon.ico',
 
@@ -28,7 +28,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'Leandro Vaguetti', // Usually your GitHub org/user name.
-  projectName: 'JSOOEbook', // Usually your repo name.
+  projectName: 'ReactJSEbook', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -85,9 +85,9 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'JavaScript Orientado a Objetos',
+        title: 'ReactJS Básico',
         logo: {
-          alt: 'JavaScript Orientado a Objetos Logo',
+          alt: 'ReactJS Básico Logo',
           src: 'img/ebook1-logo.svg',
         },
         items: [
