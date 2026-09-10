@@ -347,3 +347,4544 @@ As Props permitem utilizar um mesmo componente com diferentes informações, fav
 > Neste capítulo são utilizados tanto componentes de classe quanto componentes funcionais. Compare suas estruturas durante os próximos exemplos.
 
 ---------------------
+## Arquivo `index.html`
+
+O arquivo `index.html` representa o ponto inicial da aplicação no navegador.
+
+Embora a interface seja construída pelos componentes React, ainda é necessário um documento HTML responsável por fornecer a estrutura inicial da página e indicar onde a aplicação será montada.
+
+No projeto utilizado neste capítulo, dois elementos são especialmente importantes:
+
+```html
+<div id="root"></div>
+```
+
+e:
+
+```html
+<script type="module" src="/src/main.jsx"></script>
+```
+
+O primeiro define o local no qual a aplicação React será inserida.
+
+O segundo carrega o arquivo `main.jsx`, responsável por iniciar a aplicação.
+
+O fluxo inicial pode ser representado por:
+
+```text
+index.html
+    │
+    ├── <div id="root">
+    │        ▲
+    │        │ montagem da aplicação
+    │
+    └── main.jsx
+             │
+             ▼
+           React
+```
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `index.html`
+
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linhas 01–02 — Estrutura inicial do documento**
+
+```html
+<!doctype html>
+<html lang="en">
+```
+
+A primeira linha:
+
+```html
+<!doctype html>
+```
+
+indica que o documento utiliza HTML5.
+
+Em seguida:
+
+```html
+<html lang="en">
+```
+
+inicia o documento HTML e define o idioma da página por meio do atributo `lang`.
+
+O elemento `<html>` funciona como elemento principal do documento e envolve as demais estruturas da página.
+
+---------------------
+
+### **Linhas 03–08 — Cabeçalho da página**
+
+```html
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite + React</title>
+</head>
+```
+
+O elemento:
+
+```html
+<head>
+```
+
+contém informações relacionadas à configuração e aos metadados da página.
+
+A instrução:
+
+```html
+<meta charset="UTF-8" />
+```
+
+define a codificação de caracteres utilizada pelo documento.
+
+Em seguida:
+
+```html
+<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+```
+
+define o ícone utilizado pela página.
+
+A configuração:
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+```
+
+orienta o navegador sobre a forma como a página deverá ser apresentada em diferentes tamanhos de tela.
+
+Por fim:
+
+```html
+<title>Vite + React</title>
+```
+
+define o título apresentado pelo navegador para a página.
+
+---------------------
+
+### **Linhas 09–12 — Corpo da página e inicialização da aplicação**
+
+```html
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+```
+
+O elemento:
+
+```html
+<body>
+```
+
+representa o corpo da página.
+
+Dentro dele encontramos:
+
+```html
+<div id="root"></div>
+```
+
+Esse elemento possui um papel fundamental na aplicação React.
+
+Ele será utilizado como **ponto de montagem** da interface.
+
+Inicialmente, o elemento está vazio:
+
+```html
+<div id="root"></div>
+```
+
+Posteriormente, o React localizará esse elemento por meio de seu identificador:
+
+```text
+root
+```
+
+e utilizará esse espaço para inserir a interface construída pelos componentes.
+
+A próxima instrução:
+
+```html
+<script type="module" src="/src/main.jsx"></script>
+```
+
+carrega o arquivo:
+
+```text
+/src/main.jsx
+```
+
+O atributo:
+
+```html
+type="module"
+```
+
+indica que o arquivo JavaScript será tratado como um **módulo**, permitindo trabalhar com recursos como `import` e `export`.
+
+Assim, podemos representar a relação entre os dois elementos como:
+
+```text
+index.html
+     │
+     ├── #root
+     │     ▲
+     │     │
+     │   React
+     │     │
+     │
+     └── main.jsx
+```
+
+O `index.html` disponibiliza o elemento `root`, enquanto `main.jsx` será responsável por iniciar o React e utilizar esse elemento para montar a aplicação.
+
+---------------------
+
+### **Linha 13 — Finalização do documento**
+
+```html
+</html>
+```
+
+A última linha encerra o elemento `<html>` iniciado no começo do documento.
+
+Com isso, temos a estrutura completa do documento HTML que servirá como ponto inicial para a aplicação React.
+
+---------------------
+
+## O Papel do `root`
+
+O elemento:
+
+```html
+<div id="root"></div>
+```
+
+estabelece a ligação entre o documento HTML e a aplicação React.
+
+Podemos pensar no `root` como um **ponto de entrada da interface React dentro da página HTML**.
+
+O fluxo pode ser representado da seguinte forma:
+
+```text
+index.html
+     │
+     ▼
+<div id="root">
+     ▲
+     │
+     │ React monta a aplicação
+     │
+main.jsx
+     │
+     ▼
+<App />
+```
+
+No próximo arquivo estudado, `main.jsx`, veremos como o React localiza exatamente esse elemento.
+
+---------------------
+
+## O Papel de `type="module"`
+
+A instrução:
+
+```html
+<script type="module" src="/src/main.jsx"></script>
+```
+
+não apenas carrega um arquivo JavaScript.
+
+O atributo:
+
+```html
+type="module"
+```
+
+indica que o arquivo será tratado como um módulo.
+
+Isso é importante porque os arquivos utilizados no projeto trabalham com instruções como:
+
+```javascript
+import
+```
+
+e:
+
+```javascript
+export
+```
+
+Por exemplo, `main.jsx` poderá importar o componente `App`:
+
+```javascript
+import App from './App.jsx'
+```
+
+A organização em módulos permite separar a aplicação em diferentes arquivos e estabelecer explicitamente as dependências entre eles.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+| Conceito | Explicação |
+|----------|------------|
+| `index.html` | Documento HTML inicial utilizado pela aplicação. |
+| HTML5 | Versão do HTML indicada por `<!doctype html>`. |
+| `<head>` | Contém metadados e configurações do documento. |
+| `<body>` | Contém a estrutura utilizada na apresentação da página. |
+| `root` | Elemento utilizado como ponto de montagem da aplicação React. |
+| `id` | Identificador que permite localizar um elemento no documento. |
+| `<script>` | Elemento utilizado para carregar o arquivo `main.jsx`. |
+| `type="module"` | Indica que o JavaScript será tratado como módulo. |
+| ES Modules | Sistema de módulos que permite utilizar `import` e `export`. |
+| `main.jsx` | Arquivo responsável por iniciar a aplicação React no exemplo. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **O React não elimina a necessidade do `index.html`.**
+>
+> O navegador ainda precisa carregar inicialmente um documento HTML. A aplicação React é posteriormente montada dentro desse documento.
+
+> **Observe que o `root` começa vazio.**
+>
+> Não escrevemos manualmente a interface da aplicação dentro de `<div id="root"></div>`. Ela será construída pelos componentes React.
+
+> **O identificador `root` será utilizado novamente.**
+>
+> Ao estudar `main.jsx`, observe como o mesmo nome definido em `id="root"` será utilizado para localizar o ponto de montagem da aplicação.
+
+> **`type="module"` está relacionado à modularização do projeto.**
+>
+> Ele permite que o arquivo carregado trabalhe com a organização modular utilizada pelos arquivos da aplicação.
+
+---------------------
+
+## Arquivo `main.jsx`
+
+Depois que o navegador carrega o `index.html`, o arquivo `main.jsx` é responsável por **inicializar a aplicação React**.
+
+Na parte anterior, vimos que o `index.html` possui:
+
+```html
+<div id="root"></div>
+```
+
+e carrega:
+
+```html
+<script type="module" src="/src/main.jsx"></script>
+```
+
+Agora podemos compreender como `main.jsx` utiliza esse elemento `root` para montar a aplicação.
+
+O fluxo é:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ├── localiza #root
+    │
+    ├── cria a raiz React
+    │
+    └── renderiza <App />
+              │
+              ▼
+           App.jsx
+```
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/main.jsx`
+
+```jsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+createRoot(document.getElementById('root'))
+  .render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  )
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linhas 01–04 — Importações iniciais**
+
+```jsx
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+```
+
+As quatro primeiras linhas definem os recursos necessários para inicializar a aplicação.
+
+Na primeira linha:
+
+```jsx
+import { StrictMode } from 'react'
+```
+
+é importado o `StrictMode` da biblioteca React.
+
+O `StrictMode` é utilizado durante o desenvolvimento para auxiliar na identificação de possíveis problemas e incentivar a utilização de boas práticas.
+
+Na segunda linha:
+
+```jsx
+import { createRoot } from 'react-dom/client'
+```
+
+é importada a função `createRoot`.
+
+Essa função permite criar a **raiz React** que será associada a um elemento existente no documento HTML.
+
+Na terceira linha:
+
+```jsx
+import './index.css'
+```
+
+é importado o arquivo que contém os estilos globais da aplicação.
+
+Diferentemente das demais importações, não estamos importando uma função ou componente para uma variável. O arquivo CSS é carregado para que seus estilos sejam aplicados à aplicação.
+
+Finalmente:
+
+```jsx
+import App from './App.jsx'
+```
+
+importa o componente `App`.
+
+Esse componente será utilizado como **componente raiz da interface**.
+
+---------------------
+
+### **Linha 05 — Separação entre importações e inicialização**
+
+A linha 05 está em branco.
+
+Ela não possui efeito na execução do programa, mas ajuda a separar visualmente:
+
+```text
+Importações
+     │
+     ▼
+Inicialização da aplicação
+```
+
+Essa organização contribui para tornar o código mais legível.
+
+---------------------
+
+### **Linha 06 — Criação da raiz React**
+
+```jsx
+createRoot(document.getElementById('root'))
+```
+
+Essa linha estabelece a ligação entre o React e o elemento definido anteriormente no `index.html`.
+
+Primeiro é executado:
+
+```javascript
+document.getElementById('root')
+```
+
+Esse comando procura no documento HTML um elemento cujo `id` seja:
+
+```text
+root
+```
+
+No `index.html`, encontramos exatamente:
+
+```html
+<div id="root"></div>
+```
+
+Portanto:
+
+```text
+index.html                         main.jsx
+
+<div id="root"></div>    ◄────    document.getElementById('root')
+```
+
+O elemento encontrado é então fornecido para:
+
+```javascript
+createRoot(...)
+```
+
+Assim, o React cria uma raiz associada ao elemento HTML.
+
+Podemos representar esse processo como:
+
+```text
+document
+    │
+    ▼
+getElementById('root')
+    │
+    ▼
+<div id="root">
+    │
+    ▼
+createRoot(...)
+    │
+    ▼
+Raiz React
+```
+
+---------------------
+
+### **Linhas 07–11 — Renderização da aplicação**
+
+```jsx
+.render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+```
+
+Depois que a raiz React é criada, o método:
+
+```javascript
+.render(...)
+```
+
+define o conteúdo que será renderizado.
+
+Dentro dele encontramos:
+
+```jsx
+<StrictMode>
+  <App />
+</StrictMode>
+```
+
+O componente:
+
+```jsx
+<App />
+```
+
+representa a interface principal da aplicação.
+
+Ele está envolvido por:
+
+```jsx
+<StrictMode>
+```
+
+que ativa verificações adicionais durante o desenvolvimento.
+
+O resultado conceitual é:
+
+```text
+<div id="root">
+       │
+       ▼
+   StrictMode
+       │
+       ▼
+      App
+```
+
+A partir desse momento, o React passa a controlar a interface apresentada dentro do elemento `root`.
+
+---------------------
+
+## Relação entre `index.html` e `main.jsx`
+
+Agora podemos observar a ligação completa entre os dois primeiros arquivos estudados.
+
+No `index.html`:
+
+```html
+<div id="root"></div>
+```
+
+é criado o ponto de montagem.
+
+Também no `index.html`:
+
+```html
+<script type="module" src="/src/main.jsx"></script>
+```
+
+é carregado o arquivo responsável por inicializar o React.
+
+Em `main.jsx`:
+
+```javascript
+document.getElementById('root')
+```
+
+localiza esse elemento.
+
+Em seguida:
+
+```javascript
+createRoot(...)
+```
+
+cria a raiz React.
+
+Finalmente:
+
+```jsx
+.render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+```
+
+renderiza o componente `App`.
+
+O fluxo completo é:
+
+```text
+index.html
+    │
+    ├── cria <div id="root">
+    │
+    └── carrega main.jsx
+                 │
+                 ▼
+        getElementById('root')
+                 │
+                 ▼
+            createRoot()
+                 │
+                 ▼
+              render()
+                 │
+                 ▼
+           <StrictMode>
+                 │
+                 ▼
+              <App />
+```
+
+---------------------
+
+## `StrictMode`
+
+O `StrictMode` é um recurso do React utilizado para auxiliar o desenvolvimento.
+
+Ele é importado por:
+
+```jsx
+import { StrictMode } from 'react'
+```
+
+e utilizado envolvendo o componente principal:
+
+```jsx
+<StrictMode>
+  <App />
+</StrictMode>
+```
+
+No contexto do exemplo, sua função é ajudar a identificar possíveis problemas durante o desenvolvimento e reforçar boas práticas.
+
+O `StrictMode` não representa um elemento visual da interface.
+
+Ou seja:
+
+```text
+StrictMode
+    │
+    ├── auxilia o desenvolvimento
+    ├── realiza verificações adicionais
+    └── envolve <App />
+```
+
+---------------------
+
+## `createRoot()`
+
+A função:
+
+```javascript
+createRoot()
+```
+
+é responsável por criar a raiz da aplicação React.
+
+No exemplo:
+
+```javascript
+createRoot(document.getElementById('root'))
+```
+
+o argumento fornecido é o elemento HTML no qual a aplicação deverá ser montada.
+
+Podemos interpretar a instrução em duas etapas:
+
+```text
+1. Encontrar o elemento HTML
+
+document.getElementById('root')
+
+              │
+              ▼
+
+2. Criar a raiz React nesse elemento
+
+createRoot(...)
+```
+
+Depois de criada a raiz, utilizamos:
+
+```javascript
+.render(...)
+```
+
+para definir o que deverá ser apresentado.
+
+---------------------
+
+## O Componente Raiz `App`
+
+A instrução:
+
+```jsx
+import App from './App.jsx'
+```
+
+importa o componente `App`.
+
+Posteriormente:
+
+```jsx
+<App />
+```
+
+utiliza esse componente dentro da interface.
+
+O `App` funciona como **componente raiz** da aplicação apresentada neste exemplo.
+
+Isso significa que ele será responsável por iniciar a composição dos demais componentes da interface.
+
+A hierarquia estudada até este momento é:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+<App />
+```
+
+Na próxima parte, veremos que `App` utiliza outro componente:
+
+```text
+<Login />
+```
+
+ampliando a hierarquia:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+App.jsx
+    │
+    ▼
+Login.jsx
+```
+
+---------------------
+
+## CSS Global
+
+A instrução:
+
+```jsx
+import './index.css'
+```
+
+carrega o arquivo de estilos globais utilizado pela aplicação.
+
+Nesse modelo de projeto, um arquivo CSS pode ser importado diretamente pelo JavaScript/JSX.
+
+Assim:
+
+```text
+main.jsx
+    │
+    ├── index.css
+    │
+    └── App.jsx
+```
+
+O `index.css` pode definir estilos básicos que serão utilizados pela aplicação.
+
+Conforme o projeto cresce, outros arquivos de estilo podem ser organizados juntamente com seus respectivos componentes.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+| Conceito | Explicação |
+|----------|------------|
+| `main.jsx` | Arquivo responsável pela inicialização da aplicação React no exemplo. |
+| `StrictMode` | Recurso utilizado para auxiliar na identificação de problemas durante o desenvolvimento. |
+| `createRoot()` | Cria uma raiz React associada a um elemento do documento HTML. |
+| `document.getElementById()` | Localiza um elemento HTML utilizando seu identificador. |
+| `root` | Identificador do elemento utilizado como ponto de montagem da aplicação. |
+| `.render()` | Define o conteúdo que será renderizado pela raiz React. |
+| `App` | Componente raiz utilizado pela aplicação. |
+| `<App />` | Utilização do componente `App` em JSX. |
+| `index.css` | Arquivo utilizado para os estilos globais da aplicação. |
+| `import` | Permite utilizar recursos definidos em outros módulos. |
+| JSX | Sintaxe utilizada para representar componentes e elementos da interface. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Relacione `root` nos dois arquivos.**
+>
+> O `id="root"` definido em `index.html` deve corresponder ao identificador procurado por `document.getElementById('root')` em `main.jsx`.
+
+> **Não confunda a raiz HTML com o componente raiz.**
+>
+> `<div id="root">` é o elemento HTML utilizado como ponto de montagem. `App`, por sua vez, é o componente React principal renderizado nesse ponto.
+
+> **Observe a sequência `createRoot()` → `.render()`.**
+>
+> Primeiro o React cria uma raiz associada ao elemento HTML. Depois define qual componente deverá ser renderizado nessa raiz.
+
+> **`<App />` é um componente, não uma tag HTML.**
+>
+> Em JSX, componentes React são utilizados de maneira semelhante às tags HTML. A inicial maiúscula ajuda a diferenciá-los dos elementos HTML tradicionais.
+
+> **O `StrictMode` é utilizado durante o desenvolvimento.**
+>
+> Ele auxilia na identificação de situações que merecem atenção, mas não representa nenhum elemento visual da página.
+
+---------------------
+
+## Componente `App.jsx`
+
+Depois que o arquivo `main.jsx` inicializa o React, o componente `App` passa a representar o **componente raiz da interface**.
+
+Na parte anterior, vimos a seguinte instrução:
+
+```jsx
+<App />
+```
+
+Ela solicita ao React que renderize o componente definido no arquivo:
+
+```text
+/src/App.jsx
+```
+
+Neste exemplo, `App` possui uma responsabilidade simples: utilizar o componente `Login`.
+
+A hierarquia passa a ser:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+App.jsx
+    │
+    ▼
+Login.jsx
+```
+
+Essa relação introduz um conceito importante no desenvolvimento com React: **componentes podem utilizar outros componentes para construir interfaces maiores**.
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/App.jsx`
+
+```jsx
+import Login from "./components/props/Login.jsx"
+
+function App() {
+  return (
+    <>
+      <Login />
+    </>
+  )
+}
+
+export default App
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linha 01 — Importação do componente `Login`**
+
+```jsx
+import Login from "./components/props/Login.jsx"
+```
+
+A primeira linha importa o componente `Login`.
+
+O caminho:
+
+```text
+./components/props/Login.jsx
+```
+
+indica a localização do arquivo em relação ao arquivo `App.jsx`.
+
+A instrução:
+
+```javascript
+import
+```
+
+permite utilizar dentro de `App` um componente definido em outro arquivo.
+
+Podemos representar essa dependência como:
+
+```text
+App.jsx
+   │
+   │ import
+   ▼
+Login.jsx
+```
+
+Essa separação é uma característica importante da **componentização**.
+
+Em vez de implementar toda a interface diretamente em `App.jsx`, podemos dividir a aplicação em componentes menores e utilizá-los conforme necessário.
+
+---------------------
+
+### **Linha 02 — Separação entre importação e componente**
+
+A linha 02 está em branco.
+
+Ela separa visualmente:
+
+```text
+Importação
+    │
+    ▼
+Definição do componente
+```
+
+Embora não altere o funcionamento da aplicação, essa organização melhora a legibilidade do código.
+
+---------------------
+
+### **Linhas 03–09 — Definição do componente `App`**
+
+```jsx
+function App() {
+  return (
+    <>
+      <Login />
+    </>
+  )
+}
+```
+
+A instrução:
+
+```jsx
+function App() {
+```
+
+declara uma função JavaScript chamada `App`.
+
+No React, uma função que retorna uma interface utilizando JSX pode ser utilizada como um **Function Component**.
+
+Portanto:
+
+```text
+Função JavaScript
+       │
+       │ retorna JSX
+       ▼
+Function Component
+```
+
+O nome:
+
+```text
+App
+```
+
+começa com letra maiúscula.
+
+Essa convenção é importante para diferenciar componentes React de elementos HTML tradicionais.
+
+Por exemplo:
+
+```jsx
+<div>
+```
+
+representa um elemento HTML.
+
+Enquanto:
+
+```jsx
+<App />
+```
+
+representa um componente React.
+
+---------------------
+
+### **Linhas 04–08 — Retorno da interface com JSX**
+
+```jsx
+return (
+  <>
+    <Login />
+  </>
+)
+```
+
+A instrução:
+
+```javascript
+return
+```
+
+define o conteúdo que o componente deverá apresentar.
+
+O conteúdo retornado utiliza **JSX**.
+
+JSX permite escrever estruturas semelhantes ao HTML dentro do código JavaScript.
+
+Neste exemplo, o conteúdo principal retornado por `App` é:
+
+```jsx
+<Login />
+```
+
+Portanto, quando o React renderiza:
+
+```jsx
+<App />
+```
+
+o componente `App` solicita a renderização de:
+
+```jsx
+<Login />
+```
+
+A relação pode ser representada por:
+
+```text
+<App />
+   │
+   ▼
+<Login />
+```
+
+---------------------
+
+### **Linhas 05 e 07 — Utilização de Fragmento**
+
+```jsx
+<>
+  <Login />
+</>
+```
+
+Os símbolos:
+
+```jsx
+<>
+```
+
+e:
+
+```jsx
+</>
+```
+
+representam um **Fragmento (Fragment)** do React.
+
+Um fragmento permite agrupar elementos JSX sem adicionar um novo elemento HTML ao DOM.
+
+Por exemplo, poderíamos utilizar:
+
+```jsx
+<div>
+  <Login />
+</div>
+```
+
+Entretanto, nesse caso seria criado um elemento `<div>` adicional na estrutura HTML.
+
+Com:
+
+```jsx
+<>
+  <Login />
+</>
+```
+
+os elementos podem ser agrupados sem criar essa `<div>` adicional.
+
+Conceitualmente:
+
+```text
+Fragment
+   │
+   └── Login
+```
+
+O fragmento organiza o retorno JSX, mas não representa uma `<div>` adicional na interface.
+
+---------------------
+
+### **Linha 06 — Renderização do componente `Login`**
+
+```jsx
+<Login />
+```
+
+Essa instrução utiliza o componente `Login` importado na primeira linha.
+
+Observe a relação:
+
+```jsx
+import Login from "./components/props/Login.jsx"
+```
+
+e:
+
+```jsx
+<Login />
+```
+
+Primeiro, o componente é importado.
+
+Depois, ele pode ser utilizado dentro do JSX.
+
+Podemos representar esse processo como:
+
+```text
+Login.jsx
+    │
+    │ export
+    ▼
+App.jsx
+    │
+    │ import
+    ▼
+<Login />
+```
+
+O componente `Login` será responsável por organizar outros componentes menores utilizados na construção da tela.
+
+---------------------
+
+### **Linha 10 — Separação antes da exportação**
+
+A linha 10 está em branco.
+
+Ela separa a definição do componente de sua exportação.
+
+A organização do arquivo fica, portanto:
+
+```text
+Importação
+    │
+    ▼
+Componente
+    │
+    ▼
+Exportação
+```
+
+---------------------
+
+### **Linha 11 — Exportação do componente**
+
+```jsx
+export default App
+```
+
+A última linha exporta o componente `App`.
+
+A instrução:
+
+```javascript
+export default
+```
+
+indica que `App` representa a exportação padrão desse módulo.
+
+Isso permite que outro arquivo utilize:
+
+```javascript
+import App from './App.jsx'
+```
+
+Foi exatamente o que ocorreu no arquivo `main.jsx`.
+
+Assim:
+
+```text
+App.jsx
+   │
+   │ export default App
+   ▼
+main.jsx
+   │
+   │ import App
+   ▼
+<App />
+```
+
+O mecanismo de `import` e `export` permite organizar a aplicação em diferentes arquivos sem perder a relação entre eles.
+
+---------------------
+
+## Function Component
+
+O componente `App` é implementado como uma função:
+
+```jsx
+function App() {
+  return (
+    ...
+  )
+}
+```
+
+Essa forma de construção é denominada **Function Component**.
+
+Um componente funcional pode receber informações e retornar JSX para definir sua representação na interface.
+
+Neste primeiro exemplo, `App` possui uma estrutura bastante simples:
+
+```text
+App
+ │
+ └── retorna
+        │
+        ▼
+      Login
+```
+
+Posteriormente, outros componentes poderão apresentar estruturas mais elaboradas.
+
+---------------------
+
+## JSX
+
+No componente `App`, encontramos:
+
+```jsx
+<Login />
+```
+
+Essa sintaxe faz parte do **JSX**.
+
+O JSX permite representar elementos e componentes de maneira declarativa.
+
+Por exemplo, elementos HTML podem aparecer como:
+
+```jsx
+<div>
+  <p>Olá!</p>
+</div>
+```
+
+Enquanto componentes React podem aparecer como:
+
+```jsx
+<Login />
+```
+
+Uma diferença visual importante é a utilização da letra inicial maiúscula nos componentes:
+
+```text
+<div>       → elemento HTML
+
+<Login />   → componente React
+```
+
+Essa distinção será observada ao longo de todo o projeto.
+
+---------------------
+
+## Fragmentos
+
+Quando um componente precisa agrupar elementos, podemos utilizar um fragmento:
+
+```jsx
+<>
+  ...
+</>
+```
+
+No exemplo:
+
+```jsx
+<>
+  <Login />
+</>
+```
+
+o fragmento envolve o componente `Login`.
+
+Uma das principais características desse recurso é permitir o agrupamento sem criar um elemento adicional no DOM.
+
+Compare:
+
+```jsx
+<div>
+  <Login />
+</div>
+```
+
+com:
+
+```jsx
+<>
+  <Login />
+</>
+```
+
+No primeiro caso, existe uma `<div>` adicional.
+
+No segundo, o fragmento realiza apenas o agrupamento necessário ao JSX.
+
+---------------------
+
+## Composição de Componentes
+
+Até este momento, já temos dois componentes relacionados:
+
+```text
+App
+ │
+ ▼
+Login
+```
+
+`App` não precisa conhecer todos os detalhes internos de `Login`.
+
+Ele apenas utiliza:
+
+```jsx
+<Login />
+```
+
+Esse princípio permite construir interfaces maiores por meio da combinação de componentes menores.
+
+A estrutura da aplicação começa a assumir a seguinte organização:
+
+```text
+                    index.html
+                        │
+                        ▼
+                     main.jsx
+                        │
+                        ▼
+                      App
+                        │
+                        ▼
+                      Login
+                        │
+             ┌──────────┼──────────┐
+             │          │          │
+           Label    InputText    Button
+             │
+          Labelln
+```
+
+Nos próximos componentes veremos como `Login` é construído a partir dessas partes menores.
+
+---------------------
+
+## Relação entre `main.jsx` e `App.jsx`
+
+Podemos agora conectar os conceitos das duas partes.
+
+Em `main.jsx`:
+
+```jsx
+import App from './App.jsx'
+```
+
+carrega o componente.
+
+Depois:
+
+```jsx
+<App />
+```
+
+solicita sua renderização.
+
+Em `App.jsx`:
+
+```jsx
+export default App
+```
+
+disponibiliza o componente para outros módulos.
+
+Assim:
+
+```text
+App.jsx
+   │
+   │ export default
+   ▼
+main.jsx
+   │
+   │ import
+   ▼
+<App />
+   │
+   ▼
+<Login />
+```
+
+Essa relação entre **exportação, importação e composição** será repetida diversas vezes durante a construção da aplicação.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+| Conceito | Explicação |
+|----------|------------|
+| `App` | Componente raiz da interface utilizado no exemplo. |
+| Function Component | Componente React implementado utilizando uma função. |
+| JSX | Sintaxe utilizada para representar a interface dentro do código JavaScript. |
+| `<App />` | Utilização do componente `App`. |
+| `<Login />` | Utilização do componente `Login` dentro de `App`. |
+| Fragmento | Permite agrupar elementos JSX sem adicionar um elemento extra ao DOM. |
+| `<> </>` | Sintaxe simplificada utilizada para criar um fragmento. |
+| Componentização | Organização da interface em componentes menores. |
+| Composição | Construção de um componente utilizando outros componentes. |
+| `import` | Permite utilizar um recurso exportado por outro módulo. |
+| `export default` | Define a exportação padrão de um módulo. |
+| Componente Raiz | Componente principal a partir do qual a interface é organizada. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Observe a letra inicial dos componentes.**
+>
+> `App` e `Login` começam com letra maiúscula. Essa característica permite diferenciá-los visualmente de elementos HTML como `div`, `input` e `button`.
+
+> **Importar não significa renderizar.**
+>
+> A instrução `import Login ...` apenas torna o componente disponível no arquivo. A utilização `<Login />` é que o inclui na interface retornada por `App`.
+
+> **`App` não precisa implementar toda a interface.**
+>
+> Sua função pode ser organizar outros componentes. Essa divisão de responsabilidades é uma das bases da componentização.
+
+> **Observe o caminho inverso entre `import` e `export`.**
+>
+> `App.jsx` utiliza `export default App`, enquanto `main.jsx` utiliza `import App`. Da mesma forma, `Login.jsx` exportará `Login` para que `App.jsx` possa importá-lo.
+
+> **Fragmentos evitam elementos desnecessários.**
+>
+> `<> </>` permite organizar o JSX sem adicionar uma `<div>` apenas para realizar o agrupamento.
+
+---------------------
+
+## Componentes `Label.jsx` e `Labelln.jsx`
+
+Até este momento, vimos que o componente `App` utiliza:
+
+```jsx
+<Login />
+```
+
+O componente `Login`, por sua vez, será construído a partir de componentes menores.
+
+Entre esses componentes estão:
+
+```text
+Label.jsx
+Labelln.jsx
+InputText.jsx
+Button.jsx
+```
+
+Nesta parte, estudaremos `Label` e `Labelln`.
+
+Os dois componentes possuem uma característica em comum: recebem um texto por meio de **Props** e utilizam esse valor na construção da interface.
+
+Entretanto, eles foram implementados utilizando abordagens diferentes:
+
+```text
+Label.jsx
+    │
+    └── Class Component
+             │
+             └── this.props.texto
+
+
+Labelln.jsx
+    │
+    └── Function Component
+             │
+             └── { texto }
+```
+
+Essa diferença permite comparar duas formas de construção de componentes e duas maneiras de acessar Props.
+
+---------------------
+
+# Componente `Label.jsx`
+
+O componente `Label` é responsável por receber um texto e apresentá-lo na interface.
+
+No formulário de Login, ele será utilizado, por exemplo, para apresentar:
+
+```text
+Usuário:
+```
+
+e:
+
+```text
+Senha:
+```
+
+O componente é implementado utilizando uma **classe** que herda de `React.Component`.
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/components/props/Label.jsx`
+
+```jsx
+import React from 'react';
+
+export default class Label extends React.Component{
+  render(){
+    return(
+      <>
+        {this.props.texto}
+      </>
+    );
+  }
+}
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linha 01 — Importação do React**
+
+```jsx
+import React from 'react';
+```
+
+A primeira linha importa o objeto `React`.
+
+Essa importação será utilizada na declaração:
+
+```javascript
+React.Component
+```
+
+que servirá como classe-base para `Label`.
+
+---------------------
+
+### **Linha 02 — Separação entre importação e componente**
+
+A linha 02 está em branco.
+
+Ela separa visualmente a importação da declaração do componente.
+
+A organização fica:
+
+```text
+Importação
+    │
+    ▼
+Declaração da classe
+```
+
+---------------------
+
+### **Linha 03 — Declaração do componente de classe**
+
+```jsx
+export default class Label extends React.Component{
+```
+
+Essa linha reúne três elementos importantes.
+
+Primeiro:
+
+```javascript
+class Label
+```
+
+declara uma classe chamada `Label`.
+
+Em seguida:
+
+```javascript
+extends React.Component
+```
+
+indica que `Label` herda de `React.Component`.
+
+Por fim:
+
+```javascript
+export default
+```
+
+define `Label` como a exportação padrão do módulo.
+
+Podemos representar essa estrutura como:
+
+```text
+React.Component
+      ▲
+      │ extends
+      │
+    Label
+      │
+      │ export default
+      ▼
+outros componentes
+```
+
+Por herdar de `React.Component`, `Label` pode ser utilizado como um componente React baseado em classe.
+
+---------------------
+
+### **Linhas 04–10 — Método `render()`**
+
+```jsx
+render(){
+  return(
+    <>
+      {this.props.texto}
+    </>
+  );
+}
+```
+
+Componentes baseados em classe utilizam o método:
+
+```javascript
+render()
+```
+
+para definir o conteúdo que será apresentado na interface.
+
+Dentro de `render()`, encontramos:
+
+```javascript
+return(...)
+```
+
+responsável por retornar o JSX do componente.
+
+Neste caso, o JSX apresenta o valor recebido pela prop:
+
+```javascript
+texto
+```
+
+---------------------
+
+### **Linhas 06–08 — Fragmento e utilização da Prop**
+
+```jsx
+<>
+  {this.props.texto}
+</>
+```
+
+O componente utiliza novamente um **Fragmento**:
+
+```jsx
+<>
+</>
+```
+
+Dentro dele encontramos:
+
+```jsx
+{this.props.texto}
+```
+
+Em JSX, as chaves:
+
+```text
+{ }
+```
+
+permitem inserir uma expressão JavaScript dentro da estrutura da interface.
+
+Como `Label` é um componente de classe, as propriedades recebidas podem ser acessadas por:
+
+```javascript
+this.props
+```
+
+Portanto:
+
+```javascript
+this.props.texto
+```
+
+significa:
+
+```text
+this
+ │
+ ▼
+props
+ │
+ ▼
+texto
+```
+
+Ou seja, estamos acessando a prop chamada `texto` recebida pelo componente.
+
+---------------------
+
+### **Linha 11 — Finalização da classe**
+
+```jsx
+}
+```
+
+A última linha encerra a declaração da classe `Label`.
+
+Com isso, temos um componente completo que:
+
+```text
+recebe uma Prop
+      │
+      ▼
+this.props.texto
+      │
+      ▼
+render()
+      │
+      ▼
+interface
+```
+
+---------------------
+
+## Utilizando o Componente `Label`
+
+Posteriormente, o componente poderá ser utilizado da seguinte forma:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+Nesse caso:
+
+```text
+Prop        Valor
+
+texto  →   "Usuário: "
+```
+
+Dentro de `Label`, o valor poderá ser acessado utilizando:
+
+```jsx
+{this.props.texto}
+```
+
+Assim:
+
+```text
+<Login />
+    │
+    │ texto="Usuário: "
+    ▼
+<Label />
+    │
+    ▼
+this.props.texto
+    │
+    ▼
+"Usuário: "
+```
+
+O mesmo componente pode ser reutilizado com outro valor:
+
+```jsx
+<Label texto="Senha: " />
+```
+
+Agora:
+
+```text
+texto  →  "Senha: "
+```
+
+A estrutura do componente não precisa ser modificada.
+
+Apenas o valor da Prop é diferente.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos em `Label`
+
+| Conceito | Explicação |
+|----------|------------|
+| Class Component | Componente implementado utilizando uma classe. |
+| `React.Component` | Classe-base utilizada pelo componente `Label`. |
+| `extends` | Estabelece a herança de `React.Component`. |
+| `render()` | Método que define o JSX apresentado pelo componente de classe. |
+| Props | Informações recebidas pelo componente. |
+| `this.props` | Permite acessar as Props em um componente de classe. |
+| `this.props.texto` | Acessa especificamente a Prop `texto`. |
+| `{ }` | Permite inserir uma expressão JavaScript dentro do JSX. |
+| `export default` | Define `Label` como exportação padrão do módulo. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Observe que `Label` não define o texto que apresenta.**
+>
+> O texto é recebido de outro componente por meio de Props. Isso permite reutilizar `Label` com diferentes valores.
+
+> **Em um Class Component, observe o uso de `this.props`.**
+>
+> Neste exemplo, `this.props.texto` acessa a propriedade `texto` recebida pelo componente.
+
+> **O método `render()` possui uma função importante.**
+>
+> Em um componente de classe, ele define o conteúdo JSX que será apresentado.
+
+---------------------
+
+# Componente `Labelln.jsx`
+
+O componente `Labelln` possui uma finalidade semelhante à de `Label`: receber um texto e apresentá-lo na interface.
+
+Entretanto, sua implementação utiliza uma **função**, permitindo observar outra forma de construção de componentes React.
+
+No formulário utilizado neste capítulo, ele será utilizado para apresentar o texto:
+
+```text
+Login
+```
+
+Sua estrutura também introduz a **desestruturação de Props**.
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/components/props/Labelln.jsx`
+
+```jsx
+import React from 'react';
+
+export default function Labelln({ texto }) {
+  return (
+    <>
+      {texto} <br />
+    </>
+  );
+}
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linha 01 — Importação do React**
+
+```jsx
+import React from 'react';
+```
+
+O arquivo inicia importando `React`.
+
+No exemplo do material, essa importação é mantida no componente funcional.
+
+---------------------
+
+### **Linha 02 — Separação entre importação e componente**
+
+A linha 02 está em branco.
+
+Ela separa a importação da declaração do componente.
+
+---------------------
+
+### **Linha 03 — Declaração do Function Component**
+
+```jsx
+export default function Labelln({ texto }) {
+```
+
+Essa linha declara uma função chamada:
+
+```javascript
+Labelln
+```
+
+Como a função retorna JSX e será utilizada como componente React, temos um **Function Component**.
+
+A declaração também utiliza:
+
+```javascript
+export default
+```
+
+permitindo que `Labelln` seja importado por outros módulos.
+
+Observe o parâmetro:
+
+```javascript
+{ texto }
+```
+
+Ele representa a **desestruturação das Props** recebidas pelo componente.
+
+---------------------
+
+## Desestruturação de Props
+
+Um componente recebe suas Props como um objeto.
+
+Conceitualmente, podemos imaginar:
+
+```javascript
+props = {
+  texto: "Login"
+}
+```
+
+Uma forma de acessar esse valor seria:
+
+```javascript
+props.texto
+```
+
+Entretanto, `Labelln` utiliza desestruturação diretamente no parâmetro:
+
+```javascript
+function Labelln({ texto })
+```
+
+Assim, a propriedade:
+
+```text
+texto
+```
+
+é extraída do objeto recebido e pode ser utilizada diretamente dentro da função.
+
+Podemos representar:
+
+```text
+Props
+  │
+  ▼
+{
+  texto: "Login"
+}
+  │
+  │ desestruturação
+  ▼
+texto
+  │
+  ▼
+"Login"
+```
+
+---------------------
+
+### **Linhas 04–08 — Retorno JSX**
+
+```jsx
+return (
+  <>
+    {texto} <br />
+  </>
+);
+```
+
+O componente retorna JSX utilizando:
+
+```javascript
+return
+```
+
+Dentro do fragmento encontramos:
+
+```jsx
+{texto}
+```
+
+Como a Prop já foi desestruturada no parâmetro da função, não é necessário escrever:
+
+```javascript
+props.texto
+```
+
+Podemos utilizar diretamente:
+
+```javascript
+texto
+```
+
+---------------------
+
+### **Linha 06 — Exibição da Prop e quebra de linha**
+
+```jsx
+{texto} <br />
+```
+
+As chaves:
+
+```jsx
+{texto}
+```
+
+inserem o valor da variável `texto` no JSX.
+
+Em seguida:
+
+```jsx
+<br />
+```
+
+adiciona uma quebra de linha.
+
+Assim, se o componente for utilizado como:
+
+```jsx
+<Labelln texto="Login" />
+```
+
+a Prop recebida será:
+
+```text
+texto  →  "Login"
+```
+
+e o componente apresentará esse valor seguido de uma quebra de linha.
+
+---------------------
+
+### **Linha 09 — Finalização do componente**
+
+```jsx
+}
+```
+
+A última linha encerra a função `Labelln`.
+
+O fluxo do componente pode ser representado como:
+
+```text
+<Labelln texto="Login" />
+           │
+           ▼
+       Props
+           │
+           ▼
+    { texto }
+           │
+           ▼
+        texto
+           │
+           ▼
+       JSX + <br />
+```
+
+---------------------
+
+## Utilizando o Componente `Labelln`
+
+O componente poderá ser utilizado por `Login` da seguinte forma:
+
+```jsx
+<Labelln texto="Login" />
+```
+
+O valor:
+
+```text
+Login
+```
+
+é enviado por meio da Prop:
+
+```text
+texto
+```
+
+O componente recebe:
+
+```javascript
+{ texto }
+```
+
+e utiliza:
+
+```jsx
+{texto}
+```
+
+para apresentar esse conteúdo.
+
+---------------------
+
+# Comparando `Label` e `Labelln`
+
+Agora podemos comparar os dois componentes.
+
+### `Label`
+
+É implementado como classe:
+
+```jsx
+export default class Label extends React.Component
+```
+
+e acessa a Prop utilizando:
+
+```jsx
+this.props.texto
+```
+
+### `Labelln`
+
+É implementado como função:
+
+```jsx
+export default function Labelln({ texto })
+```
+
+e utiliza desestruturação para acessar diretamente:
+
+```jsx
+texto
+```
+
+Podemos resumir:
+
+| Característica | `Label` | `Labelln` |
+|----------------|---------|-----------|
+| Tipo | Class Component | Function Component |
+| Estrutura | `class` | `function` |
+| Base | `React.Component` | Função JavaScript |
+| Método `render()` | Sim | Não |
+| Prop utilizada | `texto` | `texto` |
+| Acesso à Prop | `this.props.texto` | `texto` |
+| Desestruturação | Não | Sim |
+| Retorna JSX | Sim | Sim |
+| `export default` | Sim | Sim |
+
+Apesar das diferenças de implementação, os dois componentes recebem informações por meio de **Props**.
+
+---------------------
+
+## Props: Componente Pai → Componente Filho
+
+Os dois exemplos permitem compreender uma característica importante das Props.
+
+Os valores são fornecidos quando o componente é utilizado.
+
+Por exemplo:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+ou:
+
+```jsx
+<Labelln texto="Login" />
+```
+
+Podemos representar essa relação como:
+
+```text
+Componente Pai
+      │
+      │ texto="..."
+      ▼
+Componente Filho
+      │
+      ▼
+     Prop
+```
+
+No exemplo completo, `Login` será o componente responsável por fornecer esses valores:
+
+```text
+Login
+  │
+  ├── texto="Login"
+  │       │
+  │       ▼
+  │    Labelln
+  │
+  ├── texto="Usuário: "
+  │       │
+  │       ▼
+  │     Label
+  │
+  └── texto="Senha: "
+          │
+          ▼
+        Label
+```
+
+Essa comunicação permite que componentes menores sejam reutilizados com conteúdos diferentes.
+
+---------------------
+
+## Props e Reutilização
+
+Considere:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+e:
+
+```jsx
+<Label texto="Senha: " />
+```
+
+O componente utilizado é exatamente o mesmo:
+
+```text
+Label
+```
+
+O que muda é o valor da Prop:
+
+```text
+             Label
+            /     \
+           /       \
+"Usuário: "         "Senha: "
+```
+
+Esse comportamento demonstra uma das vantagens da componentização: podemos criar uma estrutura uma única vez e configurá-la por meio das informações recebidas.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+| Conceito | Explicação |
+|----------|------------|
+| Props | Propriedades utilizadas para transmitir informações para um componente. |
+| Componente Pai | Componente que utiliza outro componente e fornece suas Props. |
+| Componente Filho | Componente que recebe as Props. |
+| Class Component | Componente implementado por meio de uma classe. |
+| Function Component | Componente implementado por meio de uma função. |
+| `React.Component` | Classe-base utilizada na implementação de `Label`. |
+| `render()` | Método utilizado pelo Class Component para retornar JSX. |
+| `this.props` | Forma utilizada no exemplo para acessar Props no componente de classe. |
+| Desestruturação | Recurso JavaScript utilizado para extrair propriedades de um objeto. |
+| `{ texto }` | Desestrutura a propriedade `texto` recebida pelo Function Component. |
+| `{this.props.texto}` | Insere no JSX a Prop `texto` em `Label`. |
+| `{texto}` | Insere no JSX a Prop desestruturada em `Labelln`. |
+| `<br />` | Elemento utilizado no exemplo para inserir uma quebra de linha. |
+| Reutilização | Possibilidade de utilizar o mesmo componente com diferentes valores de Props. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Compare os dois componentes, não apenas seus resultados.**
+>
+> `Label` e `Labelln` recebem uma Prop chamada `texto`, mas fazem isso utilizando estruturas diferentes. Essa comparação ajuda a compreender Class Components e Function Components.
+
+> **Props podem ser entendidas como informações fornecidas ao componente.**
+>
+> Quando escrevemos `<Label texto="Usuário: " />`, estamos fornecendo um valor para a propriedade `texto`.
+
+> **Observe a desestruturação em `Labelln`.**
+>
+> `{ texto }` no parâmetro permite utilizar diretamente `texto` dentro da função, evitando a escrita `props.texto`.
+
+> **Não confunda as chaves utilizadas na desestruturação com as chaves do JSX.**
+>
+> Em `function Labelln({ texto })`, as chaves fazem parte da desestruturação do objeto de Props. Em `{texto}` dentro do JSX, as chaves permitem inserir uma expressão JavaScript na interface.
+
+> **A reutilização ficará mais evidente em `Login.jsx`.**
+>
+> O mesmo `Label` será utilizado para apresentar valores diferentes, demonstrando na prática a relação entre Props e componentização.
+
+---------------------
+# Componente `InputText.jsx`
+
+O componente `InputText` é responsável por criar um campo de entrada de texto reutilizável.
+
+No formulário de Login, ele será utilizado para representar os campos destinados ao usuário e à senha.
+
+Em vez de criar diretamente diferentes elementos `<input>` no componente `Login`, será utilizado um componente que recebe por meio de **Props** a informação necessária para configurar o campo.
+
+No exemplo, a Prop utilizada será:
+
+```text
+placeholder
+```
+
+Assim, o mesmo componente poderá ser utilizado com diferentes textos de orientação.
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/components/props/InputText.jsx`
+
+```jsx
+import React from 'react';
+
+export default function InputText({ placeholder }) {
+  return (
+    <input type="text" placeholder={placeholder} />
+  );
+}
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linha 01 — Importação do React**
+
+```jsx
+import React from 'react';
+```
+
+O arquivo inicia importando `React`.
+
+No exemplo apresentado, essa importação é mantida no componente funcional.
+
+---------------------
+
+### **Linha 02 — Separação entre importação e componente**
+
+A linha 02 está em branco.
+
+Ela separa visualmente a importação da declaração do componente.
+
+---------------------
+
+### **Linha 03 — Declaração do Function Component**
+
+```jsx
+export default function InputText({ placeholder }) {
+```
+
+Essa linha declara um **Function Component** chamado:
+
+```text
+InputText
+```
+
+Assim como ocorreu em `Labelln`, as Props são recebidas utilizando desestruturação.
+
+A expressão:
+
+```javascript
+{ placeholder }
+```
+
+extrai a propriedade `placeholder` do objeto de Props recebido pelo componente.
+
+Conceitualmente:
+
+```text
+Props
+  │
+  ▼
+{
+  placeholder: "user..."
+}
+  │
+  │ desestruturação
+  ▼
+placeholder
+  │
+  ▼
+"user..."
+```
+
+A declaração também utiliza:
+
+```javascript
+export default
+```
+
+permitindo que `InputText` seja importado e utilizado por outros componentes.
+
+---------------------
+
+### **Linhas 04–06 — Retorno do campo de entrada**
+
+```jsx
+return (
+  <input type="text" placeholder={placeholder} />
+);
+```
+
+O componente retorna um elemento HTML:
+
+```html
+<input>
+```
+
+O atributo:
+
+```jsx
+type="text"
+```
+
+indica que se trata de um campo de entrada de texto.
+
+Já:
+
+```jsx
+placeholder={placeholder}
+```
+
+define dinamicamente o texto de orientação apresentado dentro do campo.
+
+Observe que existem dois usos da palavra `placeholder`:
+
+```jsx
+placeholder={placeholder}
+```
+
+O primeiro:
+
+```text
+placeholder=
+```
+
+corresponde ao atributo do elemento `<input>`.
+
+O segundo:
+
+```jsx
+{placeholder}
+```
+
+corresponde ao valor recebido pelo componente por meio das Props.
+
+Assim:
+
+```text
+Prop do componente
+        │
+        ▼
+   placeholder
+        │
+        ▼
+atributo do <input>
+        │
+        ▼
+texto apresentado no campo
+```
+
+---------------------
+
+### **Linha 07 — Finalização do componente**
+
+```jsx
+}
+```
+
+A última linha encerra a função `InputText`.
+
+O componente completo pode ser compreendido pelo seguinte fluxo:
+
+```text
+<InputText placeholder="user..." />
+                │
+                ▼
+             Props
+                │
+                ▼
+       { placeholder }
+                │
+                ▼
+          placeholder
+                │
+                ▼
+      <input type="text">
+```
+
+---------------------
+
+## Utilizando o Componente `InputText`
+
+No formulário de Login, o componente poderá ser utilizado como:
+
+```jsx
+<InputText placeholder="user..." />
+```
+
+Nesse caso:
+
+```text
+placeholder  →  "user..."
+```
+
+O componente utiliza esse valor em:
+
+```jsx
+<input type="text" placeholder={placeholder} />
+```
+
+O mesmo componente também poderá ser reutilizado:
+
+```jsx
+<InputText placeholder="password..." />
+```
+
+Agora:
+
+```text
+placeholder  →  "password..."
+```
+
+A implementação de `InputText` permanece a mesma.
+
+Somente a Prop fornecida pelo componente pai é modificada.
+
+---------------------
+
+## Props em Atributos JSX
+
+Nos componentes anteriores, utilizamos uma Prop como conteúdo:
+
+```jsx
+{texto}
+```
+
+Em `InputText`, a Prop é utilizada de outra maneira:
+
+```jsx
+placeholder={placeholder}
+```
+
+Isso demonstra que expressões JavaScript podem ser utilizadas também para definir valores de atributos em JSX.
+
+Compare:
+
+```jsx
+<Labelln texto="Login" />
+```
+
+Dentro de `Labelln`:
+
+```jsx
+{texto}
+```
+
+e:
+
+```jsx
+<InputText placeholder="user..." />
+```
+
+Dentro de `InputText`:
+
+```jsx
+<input type="text" placeholder={placeholder} />
+```
+
+Portanto, uma Prop pode ser utilizada tanto no conteúdo apresentado pelo componente quanto na configuração dos elementos que ele retorna.
+
+---------------------
+
+## Input Não Controlado
+
+No exemplo apresentado, `InputText` apenas cria o campo:
+
+```jsx
+<input type="text" placeholder={placeholder} />
+```
+
+Não existe um estado associado ao valor digitado e também não existe, neste momento, um evento para acompanhar suas alterações.
+
+Por isso, o exemplo apresenta um **input não controlado**.
+
+Neste capítulo, o objetivo está concentrado na **componentização** e na utilização de **Props**.
+
+A captura e o gerenciamento dos valores digitados poderão ser tratados posteriormente com outros recursos do React.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos em `InputText`
+
+| Conceito | Explicação |
+|----------|------------|
+| Function Component | Componente implementado utilizando uma função. |
+| Props | Informações recebidas pelo componente. |
+| `placeholder` | Prop utilizada para configurar o texto de orientação do campo. |
+| Desestruturação | Permite extrair `placeholder` diretamente das Props. |
+| `<input>` | Elemento HTML utilizado para entrada de dados. |
+| `type="text"` | Define o campo como entrada de texto. |
+| `placeholder={placeholder}` | Utiliza uma expressão JavaScript para definir dinamicamente o atributo. |
+| Input não controlado | Campo cujo valor não está sendo gerenciado por um estado React no exemplo. |
+| Reutilização | Permite utilizar o mesmo `InputText` com diferentes valores de `placeholder`. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Observe onde a Prop está sendo utilizada.**
+>
+> Em `Labelln`, `texto` aparece como conteúdo do componente. Em `InputText`, `placeholder` é utilizado para definir dinamicamente um atributo do elemento `<input>`.
+
+> **Não confunda os dois `placeholder`.**
+>
+> Em `placeholder={placeholder}`, o primeiro identifica o atributo do elemento e o segundo representa a variável obtida por meio da desestruturação das Props.
+
+> **O componente ainda não captura o valor digitado.**
+>
+> Neste momento, `InputText` tem como objetivo demonstrar componentização e Props. O gerenciamento do conteúdo do campo exige outros recursos que serão estudados posteriormente.
+
+---------------------
+
+# Componente `Button.jsx`
+
+O próximo componente representa um botão reutilizável.
+
+No formulário de Login, ele será utilizado para apresentar:
+
+```text
+Logar
+```
+
+Assim como `Label`, o componente `Button` é implementado utilizando uma classe que herda de:
+
+```javascript
+React.Component
+```
+
+O texto apresentado pelo botão será recebido por meio da Prop:
+
+```text
+valor
+```
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/components/props/Button.jsx`
+
+```jsx
+import React from 'react';
+
+export default class Button extends React.Component {
+  render() {
+    return (
+      <button>
+        {this.props.valor}
+      </button>
+    );
+  }
+}
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linha 01 — Importação do React**
+
+```jsx
+import React from 'react';
+```
+
+O arquivo importa `React`, que será utilizado na declaração:
+
+```javascript
+React.Component
+```
+
+---------------------
+
+### **Linha 02 — Separação entre importação e componente**
+
+A linha 02 está em branco.
+
+Ela separa a importação da declaração da classe.
+
+---------------------
+
+### **Linha 03 — Declaração do componente `Button`**
+
+```jsx
+export default class Button extends React.Component {
+```
+
+Essa linha declara uma classe chamada:
+
+```text
+Button
+```
+
+A expressão:
+
+```javascript
+extends React.Component
+```
+
+estabelece que `Button` herda de `React.Component`.
+
+Portanto, sua estrutura é semelhante à utilizada anteriormente em `Label`:
+
+```text
+React.Component
+       ▲
+       │
+       ├── Label
+       │
+       └── Button
+```
+
+A declaração também utiliza:
+
+```javascript
+export default
+```
+
+para disponibilizar `Button` como exportação padrão do módulo.
+
+---------------------
+
+### **Linhas 04–10 — Método `render()`**
+
+```jsx
+render() {
+  return (
+    <button>
+      {this.props.valor}
+    </button>
+  );
+}
+```
+
+Como `Button` é um componente de classe, utiliza:
+
+```javascript
+render()
+```
+
+para definir o JSX que será apresentado.
+
+Dentro do `return`, encontramos um elemento HTML:
+
+```jsx
+<button>
+</button>
+```
+
+Esse elemento representa o botão que será apresentado na interface.
+
+---------------------
+
+### **Linhas 06–08 — Elemento `<button>` e Prop `valor`**
+
+```jsx
+<button>
+  {this.props.valor}
+</button>
+```
+
+O conteúdo do botão não está definido diretamente no componente.
+
+Em vez de escrever:
+
+```jsx
+<button>
+  Logar
+</button>
+```
+
+o componente utiliza:
+
+```jsx
+{this.props.valor}
+```
+
+Assim como vimos em `Label`, `this.props` permite acessar as Props recebidas por um componente de classe.
+
+A propriedade utilizada é:
+
+```text
+valor
+```
+
+Portanto:
+
+```text
+this
+ │
+ ▼
+props
+ │
+ ▼
+valor
+```
+
+O valor recebido será utilizado como conteúdo do elemento `<button>`.
+
+---------------------
+
+### **Linha 11 — Finalização da classe**
+
+```jsx
+}
+```
+
+A última linha encerra a classe `Button`.
+
+Seu funcionamento pode ser representado por:
+
+```text
+<Button valor="Logar" />
+          │
+          ▼
+        Props
+          │
+          ▼
+ this.props.valor
+          │
+          ▼
+       "Logar"
+          │
+          ▼
+  <button>Logar</button>
+```
+
+---------------------
+
+## Utilizando o Componente `Button`
+
+No componente `Login`, o botão será utilizado como:
+
+```jsx
+<Button valor="Logar" />
+```
+
+Nesse caso:
+
+```text
+valor  →  "Logar"
+```
+
+Dentro do componente, esse valor será acessado por:
+
+```jsx
+{this.props.valor}
+```
+
+O resultado será um botão cujo texto é definido pela Prop recebida.
+
+O componente também poderia ser reutilizado com outros valores:
+
+```jsx
+<Button valor="Cadastrar" />
+```
+
+ou:
+
+```jsx
+<Button valor="Cancelar" />
+```
+
+A estrutura de `Button` não precisaria ser modificada.
+
+---------------------
+
+# Comparando `InputText` e `Button`
+
+Os dois componentes representam elementos de uma interface, mas utilizam formas diferentes de implementação.
+
+`InputText` é um **Function Component**:
+
+```jsx
+export default function InputText({ placeholder })
+```
+
+e recebe sua Prop utilizando desestruturação:
+
+```javascript
+{ placeholder }
+```
+
+Já `Button` é um **Class Component**:
+
+```jsx
+export default class Button extends React.Component
+```
+
+e acessa sua Prop utilizando:
+
+```javascript
+this.props.valor
+```
+
+Podemos comparar:
+
+| Característica | `InputText` | `Button` |
+|----------------|-------------|----------|
+| Tipo | Function Component | Class Component |
+| Estrutura | `function` | `class` |
+| Prop utilizada | `placeholder` | `valor` |
+| Acesso à Prop | `placeholder` | `this.props.valor` |
+| Desestruturação | Sim | Não |
+| Método `render()` | Não | Sim |
+| Elemento retornado | `<input>` | `<button>` |
+| `export default` | Sim | Sim |
+| Reutilizável | Sim | Sim |
+
+---------------------
+
+## Evolução da Composição da Interface
+
+Agora já conhecemos os quatro componentes utilizados por `Login`:
+
+```text
+Label.jsx
+Labelln.jsx
+InputText.jsx
+Button.jsx
+```
+
+Cada um possui uma responsabilidade específica:
+
+| Componente | Tipo | Prop | Responsabilidade |
+|------------|------|------|------------------|
+| `Label` | Class Component | `texto` | Apresentar um texto utilizado como rótulo. |
+| `Labelln` | Function Component | `texto` | Apresentar um texto seguido de uma quebra de linha. |
+| `InputText` | Function Component | `placeholder` | Apresentar um campo de entrada de texto. |
+| `Button` | Class Component | `valor` | Apresentar um botão com texto configurável. |
+
+Podemos visualizar a futura composição:
+
+```text
+Login
+  │
+  ├── Labelln
+  │      └── texto
+  │
+  ├── Label
+  │      └── texto
+  │
+  ├── InputText
+  │      └── placeholder
+  │
+  ├── Label
+  │      └── texto
+  │
+  ├── InputText
+  │      └── placeholder
+  │
+  └── Button
+         └── valor
+```
+
+O componente `Login` não precisará implementar novamente o funcionamento de cada elemento.
+
+Sua responsabilidade será **combinar e configurar esses componentes por meio das Props**.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+| Conceito | Explicação |
+|----------|------------|
+| Function Component | Forma utilizada para implementar `InputText`. |
+| Class Component | Forma utilizada para implementar `Button`. |
+| Props | Informações fornecidas aos componentes. |
+| Desestruturação de Props | Forma utilizada por `InputText` para acessar `placeholder`. |
+| `this.props` | Forma utilizada por `Button` para acessar suas Props. |
+| `placeholder` | Prop utilizada para configurar o campo de entrada. |
+| `valor` | Prop utilizada para definir o texto do botão. |
+| `<input>` | Elemento HTML utilizado para entrada de dados. |
+| `<button>` | Elemento HTML utilizado para representar um botão. |
+| JSX | Permite combinar elementos e expressões JavaScript na interface. |
+| Input não controlado | Campo cujo valor não é gerenciado por estado no exemplo. |
+| Reutilização | Possibilidade de utilizar os componentes com diferentes valores de Props. |
+| Componentização | Divisão da interface em componentes com responsabilidades específicas. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Observe como as Props tornam os componentes configuráveis.**
+>
+> `InputText` não precisa saber antecipadamente qual texto deverá aparecer como `placeholder`, assim como `Button` não precisa saber qual texto deverá apresentar.
+
+> **Compare novamente Function Component e Class Component.**
+>
+> `InputText` recebe `placeholder` por desestruturação, enquanto `Button` utiliza `this.props.valor`. Essa diferença reforça as duas formas de implementação apresentadas neste capítulo.
+
+> **Componentização não significa apenas dividir arquivos.**
+>
+> Cada componente deve possuir uma responsabilidade clara. Neste exemplo, `InputText` representa um campo de entrada e `Button` representa um botão.
+
+> **Ainda não existe comportamento associado ao botão.**
+>
+> O componente apresenta o elemento `<button>` e seu texto, mas o material ainda não adiciona uma ação de clique. Neste momento, o foco permanece na estrutura dos componentes e na utilização de Props.
+
+> **Observe como estamos preparando o `Login`.**
+>
+> Agora já possuímos todas as peças necessárias. Na próxima parte, `Login.jsx` reunirá `Label`, `Labelln`, `InputText` e `Button`, demonstrando de forma completa a composição e a passagem de Props.
+
+---------------------
+# Componente `Login.jsx`
+
+Depois de criarmos os componentes:
+
+```text
+Label.jsx
+Labelln.jsx
+InputText.jsx
+Button.jsx
+```
+
+podemos utilizá-los em conjunto para construir uma interface maior.
+
+Essa responsabilidade será atribuída ao componente:
+
+```text
+Login.jsx
+```
+
+Diferentemente dos componentes anteriores, `Login` não representa apenas um elemento específico da interface.
+
+Sua principal responsabilidade é **organizar e combinar outros componentes**.
+
+A composição pode ser representada por:
+
+```text
+Login
+  │
+  ├── Labelln
+  │
+  ├── Label
+  │
+  ├── InputText
+  │
+  ├── Label
+  │
+  ├── InputText
+  │
+  └── Button
+```
+
+Além de utilizar esses componentes, `Login` fornece os valores das Props necessárias para configurá-los.
+
+---------------------
+
+## 💻 Código Completo
+
+**Arquivo:** `/src/components/props/Login.jsx`
+
+```jsx
+import Label from "./Label.jsx"
+import Labelln from "./Labelln.jsx"
+import Button from "./Button.jsx"
+import InputText from "./InputText.jsx"
+
+function Login() {
+  return (
+    <>
+      <Labelln texto="Login"/>
+      <Label texto="Usuário: "/>
+      <InputText placeholder="user..."/> <br />
+      <Label texto="Senha: "/>
+      <InputText placeholder="password..."/> <br />
+      <Button valor="Logar" />
+    </>
+  )
+}
+
+export default Login
+```
+
+---------------------
+
+## 📘 Comentários e Explicações Linha a Linha
+
+### **Linhas 01–04 — Importação dos componentes**
+
+```jsx
+import Label from "./Label.jsx"
+import Labelln from "./Labelln.jsx"
+import Button from "./Button.jsx"
+import InputText from "./InputText.jsx"
+```
+
+As primeiras linhas importam os quatro componentes utilizados para construir a interface de Login.
+
+Cada componente está definido em seu próprio arquivo:
+
+```text
+Login.jsx
+    │
+    ├── Label.jsx
+    ├── Labelln.jsx
+    ├── Button.jsx
+    └── InputText.jsx
+```
+
+Como todos esses componentes foram definidos utilizando:
+
+```javascript
+export default
+```
+
+podemos importá-los diretamente pelo nome utilizado no arquivo `Login.jsx`.
+
+Por exemplo:
+
+```jsx
+import Label from "./Label.jsx"
+```
+
+torna o componente `Label` disponível para utilização dentro do JSX de `Login`.
+
+Essa organização demonstra a **modularização** da aplicação.
+
+Cada componente possui sua própria implementação, enquanto `Login` é responsável por reuni-los.
+
+---------------------
+
+### **Linha 05 — Separação entre importações e componente**
+
+A linha 05 está em branco.
+
+Ela separa visualmente:
+
+```text
+Importações
+     │
+     ▼
+Definição do componente
+```
+
+Essa separação não interfere na execução, mas contribui para a organização e a legibilidade do código.
+
+---------------------
+
+### **Linhas 06–17 — Definição do componente `Login`**
+
+```jsx
+function Login() {
+  return (
+    <>
+      <Labelln texto="Login"/>
+      <Label texto="Usuário: "/>
+      <InputText placeholder="user..."/> <br />
+      <Label texto="Senha: "/>
+      <InputText placeholder="password..."/> <br />
+      <Button valor="Logar" />
+    </>
+  )
+}
+```
+
+A instrução:
+
+```jsx
+function Login() {
+```
+
+declara um **Function Component** chamado `Login`.
+
+Assim como `App`, esse componente utiliza uma função JavaScript que retorna JSX.
+
+Entretanto, existe uma diferença importante.
+
+`App` utilizava apenas:
+
+```jsx
+<Login />
+```
+
+Já `Login` combina diversos componentes menores.
+
+Podemos representar:
+
+```text
+App
+ │
+ ▼
+Login
+ │
+ ├── Labelln
+ ├── Label
+ ├── InputText
+ ├── Label
+ ├── InputText
+ └── Button
+```
+
+Isso demonstra como componentes simples podem ser combinados para construir componentes maiores.
+
+---------------------
+
+### **Linhas 07–16 — Retorno JSX**
+
+```jsx
+return (
+  <>
+    <Labelln texto="Login"/>
+    <Label texto="Usuário: "/>
+    <InputText placeholder="user..."/> <br />
+    <Label texto="Senha: "/>
+    <InputText placeholder="password..."/> <br />
+    <Button valor="Logar" />
+  </>
+)
+```
+
+O `return` define a interface que será apresentada pelo componente.
+
+Nesse caso, o JSX não é composto diretamente apenas por elementos HTML.
+
+Grande parte da interface é construída utilizando os componentes criados anteriormente:
+
+```text
+Labelln
+Label
+InputText
+Button
+```
+
+Isso demonstra a **composição de componentes**.
+
+---------------------
+
+### **Linhas 08 e 15 — Fragmento**
+
+```jsx
+<>
+```
+
+e:
+
+```jsx
+</>
+```
+
+delimitam um **Fragmento**.
+
+O fragmento permite que `Login` retorne vários elementos sem precisar adicionar uma `<div>` apenas para agrupá-los.
+
+Dentro dele estão todos os componentes utilizados para construir a interface.
+
+Conceitualmente:
+
+```text
+Fragment
+   │
+   ├── Labelln
+   ├── Label
+   ├── InputText
+   ├── Label
+   ├── InputText
+   └── Button
+```
+
+---------------------
+
+### **Linha 09 — Título da interface**
+
+```jsx
+<Labelln texto="Login"/>
+```
+
+O componente `Labelln` recebe a Prop:
+
+```text
+texto
+```
+
+com o valor:
+
+```text
+Login
+```
+
+Na parte anterior, vimos que `Labelln` recebe essa propriedade utilizando desestruturação:
+
+```jsx
+function Labelln({ texto })
+```
+
+e apresenta o valor utilizando:
+
+```jsx
+{texto}
+```
+
+Portanto, o fluxo é:
+
+```text
+Login.jsx
+    │
+    │ texto="Login"
+    ▼
+Labelln
+    │
+    ▼
+{ texto }
+    │
+    ▼
+"Login"
+```
+
+---------------------
+
+### **Linhas 10–11 — Campo destinado ao usuário**
+
+```jsx
+<Label texto="Usuário: "/>
+<InputText placeholder="user..."/> <br />
+```
+
+Essas duas instruções constroem a parte da interface destinada ao usuário.
+
+Primeiro:
+
+```jsx
+<Label texto="Usuário: "/>
+```
+
+utiliza o componente `Label` e fornece:
+
+```text
+texto  →  "Usuário: "
+```
+
+Como `Label` é um Class Component, o valor será acessado internamente por:
+
+```jsx
+this.props.texto
+```
+
+Em seguida:
+
+```jsx
+<InputText placeholder="user..."/>
+```
+
+utiliza o componente `InputText` e fornece:
+
+```text
+placeholder  →  "user..."
+```
+
+Como `InputText` é um Function Component com desestruturação, o valor é recebido por:
+
+```javascript
+{ placeholder }
+```
+
+e utilizado no elemento:
+
+```jsx
+<input type="text" placeholder={placeholder} />
+```
+
+O elemento:
+
+```jsx
+<br />
+```
+
+adiciona uma quebra de linha após o campo.
+
+---------------------
+
+### **Linhas 12–13 — Campo destinado à senha**
+
+```jsx
+<Label texto="Senha: "/>
+<InputText placeholder="password..."/> <br />
+```
+
+A mesma estrutura utilizada anteriormente é reutilizada.
+
+O componente:
+
+```jsx
+<Label texto="Senha: "/>
+```
+
+recebe agora outro valor para a Prop `texto`:
+
+```text
+texto  →  "Senha: "
+```
+
+Já:
+
+```jsx
+<InputText placeholder="password..."/>
+```
+
+recebe:
+
+```text
+placeholder  →  "password..."
+```
+
+Observe que não foi necessário criar novos componentes para representar esses campos.
+
+Os mesmos componentes:
+
+```text
+Label
+InputText
+```
+
+foram reutilizados com Props diferentes.
+
+Podemos visualizar:
+
+```text
+                Label
+               /     \
+              /       \
+      "Usuário: "    "Senha: "
+
+
+              InputText
+               /     \
+              /       \
+        "user..."   "password..."
+```
+
+Essa reutilização é uma das principais vantagens da componentização.
+
+---------------------
+
+### **Linha 14 — Botão da interface**
+
+```jsx
+<Button valor="Logar" />
+```
+
+A última parte da interface utiliza o componente:
+
+```text
+Button
+```
+
+A Prop:
+
+```text
+valor
+```
+
+recebe:
+
+```text
+Logar
+```
+
+Como `Button` é um Class Component, o valor será acessado internamente utilizando:
+
+```jsx
+{this.props.valor}
+```
+
+O fluxo é:
+
+```text
+Login
+  │
+  │ valor="Logar"
+  ▼
+Button
+  │
+  ▼
+this.props.valor
+  │
+  ▼
+"Logar"
+```
+
+---------------------
+
+### **Linha 18 — Separação antes da exportação**
+
+A linha 18 está em branco.
+
+Ela separa a declaração do componente de sua exportação.
+
+---------------------
+
+### **Linha 19 — Exportação do componente**
+
+```jsx
+export default Login
+```
+
+A última linha exporta `Login` como conteúdo padrão do módulo.
+
+Isso permite que `App.jsx` utilize:
+
+```jsx
+import Login from "./components/props/Login.jsx"
+```
+
+e posteriormente:
+
+```jsx
+<Login />
+```
+
+Portanto:
+
+```text
+Login.jsx
+    │
+    │ export default Login
+    ▼
+App.jsx
+    │
+    │ import Login
+    ▼
+<Login />
+```
+
+---------------------
+
+## Passagem de Props
+
+O componente `Login` permite visualizar claramente como ocorre a passagem de Props.
+
+Considere:
+
+```jsx
+<Label texto="Usuário: "/>
+```
+
+Nesse caso, `Login` é o **componente pai**, enquanto `Label` é o **componente filho**.
+
+A informação é transmitida da seguinte forma:
+
+```text
+Login
+  │
+  │ texto="Usuário: "
+  ▼
+Label
+  │
+  ▼
+this.props.texto
+```
+
+Outro exemplo:
+
+```jsx
+<InputText placeholder="user..."/>
+```
+
+Nesse caso:
+
+```text
+Login
+  │
+  │ placeholder="user..."
+  ▼
+InputText
+  │
+  ▼
+{ placeholder }
+```
+
+Portanto, no exemplo apresentado, as Props estabelecem um fluxo de informações do componente pai para seus componentes filhos.
+
+---------------------
+
+## Props Diferentes para Componentes Diferentes
+
+Cada componente pode definir as propriedades necessárias para sua responsabilidade.
+
+No exemplo:
+
+```jsx
+<Labelln texto="Login"/>
+```
+
+utiliza:
+
+```text
+texto
+```
+
+Assim como:
+
+```jsx
+<Label texto="Usuário: "/>
+```
+
+Já:
+
+```jsx
+<InputText placeholder="user..."/>
+```
+
+utiliza:
+
+```text
+placeholder
+```
+
+e:
+
+```jsx
+<Button valor="Logar" />
+```
+
+utiliza:
+
+```text
+valor
+```
+
+Podemos resumir:
+
+| Componente | Prop | Valor utilizado no exemplo |
+|------------|------|-----------------------------|
+| `Labelln` | `texto` | `"Login"` |
+| `Label` | `texto` | `"Usuário: "` |
+| `InputText` | `placeholder` | `"user..."` |
+| `Label` | `texto` | `"Senha: "` |
+| `InputText` | `placeholder` | `"password..."` |
+| `Button` | `valor` | `"Logar"` |
+
+Isso demonstra que as Props funcionam como uma forma de **configurar cada utilização de um componente**.
+
+---------------------
+
+## Reutilização de Componentes
+
+Um dos aspectos mais importantes do exemplo está na reutilização.
+
+`Label` é utilizado duas vezes:
+
+```jsx
+<Label texto="Usuário: "/>
+```
+
+e:
+
+```jsx
+<Label texto="Senha: "/>
+```
+
+Da mesma forma, `InputText` é utilizado duas vezes:
+
+```jsx
+<InputText placeholder="user..."/>
+```
+
+e:
+
+```jsx
+<InputText placeholder="password..."/>
+```
+
+Não foi necessário criar:
+
+```text
+LabelUsuario
+LabelSenha
+InputUsuario
+InputSenha
+```
+
+Os mesmos componentes foram configurados com diferentes Props.
+
+Assim:
+
+```text
+Componente
+    │
+    ├── estrutura reutilizável
+    │
+    └── Props
+          │
+          ▼
+    configuração específica
+```
+
+---------------------
+
+## Separação de Responsabilidades
+
+A estrutura criada também demonstra a **separação de responsabilidades**.
+
+Cada componente possui uma função específica:
+
+```text
+Labelln
+   │
+   └── apresenta texto e quebra de linha
+
+Label
+   │
+   └── apresenta um texto
+
+InputText
+   │
+   └── apresenta um campo de entrada
+
+Button
+   │
+   └── apresenta um botão
+
+Login
+   │
+   └── organiza os componentes
+```
+
+O componente `Login` não precisa conhecer os detalhes de implementação de cada componente.
+
+Por exemplo, ele não precisa saber que `Label` utiliza:
+
+```javascript
+this.props.texto
+```
+
+ou que `InputText` utiliza:
+
+```javascript
+{ placeholder }
+```
+
+Ele apenas fornece as Props esperadas.
+
+Essa divisão torna a estrutura da aplicação mais organizada.
+
+---------------------
+
+## Hierarquia Completa da Aplicação
+
+Agora já podemos visualizar toda a estrutura estudada neste capítulo:
+
+```text
+index.html
+    │
+    │ carrega
+    ▼
+main.jsx
+    │
+    │ renderiza
+    ▼
+App
+    │
+    │ utiliza
+    ▼
+Login
+    │
+    ├── Labelln
+    │      └── texto="Login"
+    │
+    ├── Label
+    │      └── texto="Usuário: "
+    │
+    ├── InputText
+    │      └── placeholder="user..."
+    │
+    ├── Label
+    │      └── texto="Senha: "
+    │
+    ├── InputText
+    │      └── placeholder="password..."
+    │
+    └── Button
+           └── valor="Logar"
+```
+
+Essa hierarquia demonstra como uma aplicação React pode ser construída progressivamente.
+
+Começamos com:
+
+```text
+index.html
+```
+
+que disponibiliza o ponto de montagem.
+
+Depois:
+
+```text
+main.jsx
+```
+
+inicializa o React.
+
+Em seguida:
+
+```text
+App.jsx
+```
+
+organiza a aplicação.
+
+Por fim:
+
+```text
+Login.jsx
+```
+
+combina componentes menores para construir a interface.
+
+---------------------
+
+## Composição × Reutilização × Props
+
+Os três conceitos podem ser observados simultaneamente no componente `Login`.
+
+### Composição
+
+`Login` é construído utilizando outros componentes:
+
+```text
+Login
+  │
+  ├── Label
+  ├── Labelln
+  ├── InputText
+  └── Button
+```
+
+### Reutilização
+
+`Label` e `InputText` aparecem mais de uma vez:
+
+```jsx
+<Label texto="Usuário: "/>
+<Label texto="Senha: "/>
+```
+
+e:
+
+```jsx
+<InputText placeholder="user..."/>
+<InputText placeholder="password..."/>
+```
+
+### Props
+
+Cada utilização pode receber valores diferentes:
+
+```text
+Componente reutilizável
+          │
+          │ Props
+          ▼
+Configuração específica
+```
+
+Esses conceitos trabalham em conjunto e constituem elementos importantes para a organização de interfaces em React.
+
+---------------------
+
+## Formulário Apresentado no Exemplo
+
+Embora o componente represente visualmente uma tela de Login, neste momento o exemplo está concentrado na **estrutura da interface e no uso de Props**.
+
+Os campos:
+
+```jsx
+<InputText placeholder="user..."/>
+```
+
+e:
+
+```jsx
+<InputText placeholder="password..."/>
+```
+
+ainda não possuem gerenciamento dos valores digitados.
+
+Da mesma forma:
+
+```jsx
+<Button valor="Logar" />
+```
+
+ainda não possui uma ação associada ao clique.
+
+Portanto, neste estágio:
+
+```text
+Interface de Login
+      │
+      ├── componentes
+      ├── Props
+      ├── composição
+      └── apresentação
+```
+
+O comportamento do formulário poderá ser acrescentado posteriormente com outros recursos do React.
+
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+| Conceito | Explicação |
+|----------|------------|
+| `Login` | Function Component responsável por organizar a interface apresentada no exemplo. |
+| Componente Pai | Componente que utiliza e fornece Props para outros componentes. |
+| Componente Filho | Componente utilizado por outro componente e que pode receber Props. |
+| Props | Informações transmitidas para configurar componentes. |
+| Composição | Construção de uma interface por meio da combinação de componentes. |
+| Reutilização | Utilização do mesmo componente mais de uma vez com diferentes Props. |
+| Modularização | Organização dos componentes em arquivos separados. |
+| `import` | Torna os componentes exportados disponíveis em `Login.jsx`. |
+| `export default` | Disponibiliza `Login` para utilização em outro módulo. |
+| Fragmento | Agrupa os elementos retornados por `Login` sem adicionar uma `<div>` extra. |
+| `texto` | Prop utilizada pelos componentes `Label` e `Labelln`. |
+| `placeholder` | Prop utilizada por `InputText`. |
+| `valor` | Prop utilizada por `Button`. |
+| Separação de Responsabilidades | Distribuição das diferentes partes da interface entre componentes específicos. |
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Observe que `Login` é responsável principalmente pela composição.**
+>
+> Ele não implementa novamente um campo de entrada, um botão ou um rótulo. Em vez disso, utiliza componentes que já possuem essas responsabilidades.
+
+> **O componente pai fornece as Props.**
+>
+> Em `<Label texto="Usuário: " />`, `Login` fornece a Prop `texto`, enquanto `Label` é responsável por utilizá-la.
+
+> **Reutilizar um componente não significa apresentar sempre a mesma informação.**
+>
+> As Props permitem utilizar a mesma estrutura com valores diferentes. Por isso, `Label` pode representar tanto `"Usuário: "` quanto `"Senha: "`.
+
+> **A interface ainda não possui a lógica de autenticação.**
+>
+> Os campos não estão sendo gerenciados por estado e o botão ainda não possui uma ação associada. O objetivo deste exemplo é compreender estrutura, componentização e Props.
+
+> **Observe a aplicação como uma hierarquia.**
+>
+> A sequência `index.html → main.jsx → App → Login → componentes` ajuda a compreender como partes menores são organizadas para formar a interface completa.
+
+---------------------
+---------------------
+
+## 📌 Conceitos-Chave Envolvidos
+
+Ao longo deste capítulo, acompanhamos o fluxo completo de uma aplicação ReactJS simples, desde o documento HTML inicial até a composição da interface de Login.
+
+Os principais conceitos estudados podem ser sintetizados da seguinte forma:
+
+| Conceito | Explicação |
+|----------|------------|
+| `index.html` | Documento HTML inicial que disponibiliza o ponto de montagem da aplicação React. |
+| `root` | Elemento HTML no qual a interface React é montada. |
+| `main.jsx` | Arquivo responsável por inicializar a aplicação React. |
+| `createRoot()` | Cria uma raiz React associada ao elemento definido no documento HTML. |
+| `.render()` | Define o conteúdo que será renderizado pela raiz React. |
+| `StrictMode` | Recurso utilizado durante o desenvolvimento para auxiliar na identificação de possíveis problemas. |
+| `App` | Componente raiz da interface apresentado no exemplo. |
+| Componente | Parte da interface que possui uma responsabilidade específica e pode ser combinada com outros componentes. |
+| Componentização | Divisão da interface em componentes menores. |
+| Composição | Construção de componentes maiores utilizando componentes menores. |
+| Reutilização | Utilização do mesmo componente em diferentes situações, alterando sua configuração por meio de Props. |
+| JSX | Sintaxe utilizada para representar elementos e componentes dentro do código JavaScript. |
+| Fragmento | Permite agrupar elementos JSX sem adicionar um elemento HTML adicional ao DOM. |
+| `<> </>` | Sintaxe simplificada utilizada para representar um fragmento. |
+| Function Component | Componente React implementado utilizando uma função. |
+| Class Component | Componente React implementado utilizando uma classe que herda de `React.Component`. |
+| `React.Component` | Classe-base utilizada pelos componentes de classe apresentados no capítulo. |
+| `render()` | Método utilizado pelos Class Components para retornar JSX. |
+| Props | Informações fornecidas a um componente para configurar sua utilização. |
+| `this.props` | Forma utilizada nos componentes de classe do exemplo para acessar Props. |
+| Desestruturação de Props | Recurso utilizado nos componentes funcionais para acessar diretamente propriedades recebidas. |
+| `import` | Permite utilizar recursos disponibilizados por outros módulos. |
+| `export default` | Define a exportação padrão de um módulo. |
+| Modularização | Organização da aplicação em diferentes arquivos e componentes. |
+
+---------------------
+
+## Integração dos Conceitos
+
+A estrutura construída ao longo do capítulo pode ser representada pela seguinte hierarquia:
+
+```text
+index.html
+    │
+    │ carrega
+    ▼
+main.jsx
+    │
+    │ inicializa o React
+    ▼
+App.jsx
+    │
+    │ utiliza
+    ▼
+Login.jsx
+    │
+    ├── Labelln.jsx
+    │      └── texto
+    │
+    ├── Label.jsx
+    │      └── texto
+    │
+    ├── InputText.jsx
+    │      └── placeholder
+    │
+    ├── Label.jsx
+    │      └── texto
+    │
+    ├── InputText.jsx
+    │      └── placeholder
+    │
+    └── Button.jsx
+           └── valor
+```
+
+Cada arquivo possui uma responsabilidade dentro dessa estrutura.
+
+O `index.html` disponibiliza:
+
+```html
+<div id="root"></div>
+```
+
+que representa o ponto no qual a aplicação será montada.
+
+O `main.jsx` localiza esse elemento:
+
+```javascript
+document.getElementById('root')
+```
+
+cria a raiz React:
+
+```javascript
+createRoot(...)
+```
+
+e renderiza:
+
+```jsx
+<App />
+```
+
+`App`, por sua vez, utiliza:
+
+```jsx
+<Login />
+```
+
+Finalmente, `Login` combina os componentes menores responsáveis pela construção da interface.
+
+Assim, podemos visualizar o processo como:
+
+```text
+Documento HTML
+      │
+      ▼
+Inicialização do React
+      │
+      ▼
+Componente Raiz
+      │
+      ▼
+Componente Login
+      │
+      ▼
+Componentes Reutilizáveis
+      │
+      ▼
+Interface
+```
+
+---------------------
+
+## Componentes de Classe × Componentes Funcionais
+
+O exemplo apresentou intencionalmente duas formas de implementação de componentes.
+
+### Componentes de Classe
+
+Foram implementados como Class Components:
+
+```text
+Label
+Button
+```
+
+Sua estrutura utiliza:
+
+```jsx
+class Componente extends React.Component {
+  render() {
+    return (
+      ...
+    );
+  }
+}
+```
+
+As Props são acessadas, nos exemplos, utilizando:
+
+```javascript
+this.props
+```
+
+Como em:
+
+```jsx
+{this.props.texto}
+```
+
+e:
+
+```jsx
+{this.props.valor}
+```
+
+### Componentes Funcionais
+
+Foram implementados como Function Components:
+
+```text
+App
+Login
+Labelln
+InputText
+```
+
+Sua estrutura básica utiliza uma função:
+
+```jsx
+function Componente() {
+  return (
+    ...
+  )
+}
+```
+
+Em `Labelln` e `InputText`, as Props são recebidas utilizando desestruturação:
+
+```javascript
+{ texto }
+```
+
+e:
+
+```javascript
+{ placeholder }
+```
+
+Podemos comparar:
+
+| Característica | Class Component | Function Component |
+|----------------|-----------------|--------------------|
+| Estrutura principal | `class` | `function` |
+| Herança de `React.Component` | Sim | Não |
+| Método `render()` | Sim | Não |
+| Retorna JSX | Sim | Sim |
+| Pode receber Props | Sim | Sim |
+| Acesso utilizado no exemplo | `this.props` | Desestruturação |
+| Exemplo do capítulo | `Label`, `Button` | `App`, `Login`, `Labelln`, `InputText` |
+
+Apesar das diferenças estruturais, ambas as formas permitem criar componentes que podem ser utilizados na composição de uma interface.
+
+---------------------
+
+## Props e Reutilização
+
+As Props foram utilizadas para fornecer informações aos componentes.
+
+Em:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+a Prop:
+
+```text
+texto
+```
+
+recebe:
+
+```text
+"Usuário: "
+```
+
+Já em:
+
+```jsx
+<InputText placeholder="user..." />
+```
+
+a Prop:
+
+```text
+placeholder
+```
+
+recebe:
+
+```text
+"user..."
+```
+
+E em:
+
+```jsx
+<Button valor="Logar" />
+```
+
+a Prop:
+
+```text
+valor
+```
+
+recebe:
+
+```text
+"Logar"
+```
+
+O fluxo apresentado no capítulo é:
+
+```text
+Componente Pai
+      │
+      │ Props
+      ▼
+Componente Filho
+```
+
+No componente `Login`, isso fica especialmente evidente:
+
+```text
+                     Login
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+       texto      placeholder      valor
+          │            │            │
+          ▼            ▼            ▼
+     Label/Labelln  InputText      Button
+```
+
+A utilização de Props permite modificar informações apresentadas pelos componentes sem modificar sua implementação.
+
+---------------------
+
+## Componentização e Separação de Responsabilidades
+
+A interface apresentada poderia ser escrita diretamente em um único componente.
+
+Entretanto, o exemplo divide sua construção em:
+
+```text
+Label
+Labelln
+InputText
+Button
+Login
+```
+
+Cada componente possui uma responsabilidade específica.
+
+Essa organização permite compreender que **componentização não significa apenas criar vários arquivos**.
+
+Os componentes representam partes da interface com responsabilidades próprias.
+
+No exemplo:
+
+```text
+Label
+  └── apresenta texto
+
+Labelln
+  └── apresenta texto e quebra de linha
+
+InputText
+  └── apresenta campo de entrada
+
+Button
+  └── apresenta botão
+
+Login
+  └── organiza os componentes
+
+App
+  └── organiza a interface principal
+```
+
+Essa separação favorece a organização e a reutilização dos componentes.
+
+---------------------
+
+## 💡 Dicas do Professor
+
+> **Procure compreender a hierarquia antes de analisar componentes isoladamente.**
+>
+> O fluxo `index.html → main.jsx → App → Login → componentes` ajuda a visualizar como a aplicação é construída.
+
+> **Um componente deve possuir uma responsabilidade clara.**
+>
+> No exemplo, `InputText` representa um campo de entrada, enquanto `Button` representa um botão. `Login` possui uma responsabilidade diferente: organizar esses componentes.
+
+> **Props permitem configurar componentes reutilizáveis.**
+>
+> O mesmo `Label` pode apresentar `"Usuário: "` ou `"Senha: "` sem que sua implementação seja modificada.
+
+> **Compare Class Components e Function Components.**
+>
+> O capítulo apresenta as duas estruturas para permitir essa comparação. Observe principalmente `render()`, `this.props` e a desestruturação das Props.
+
+> **Importar um componente não significa utilizá-lo na interface.**
+>
+> `import` disponibiliza o componente no módulo. É sua utilização no JSX, como `<Login />`, que o inclui na composição da interface.
+
+> **Observe o sentido das Props.**
+>
+> Nos exemplos estudados, as informações são fornecidas pelo componente pai e recebidas pelos componentes filhos.
+
+> **A tela ainda não implementa autenticação.**
+>
+> O objetivo do exemplo é estudar a estrutura do projeto, componentização e Props. Os campos ainda não possuem gerenciamento de estado e o botão não possui comportamento associado ao clique.
+
+---------------------
+
+## 💡 Resumo Final
+
+Neste capítulo estudamos a estrutura básica de uma aplicação ReactJS e acompanhamos o caminho percorrido desde o carregamento do documento HTML até a construção de uma interface composta por diferentes componentes.
+
+O processo começa em:
+
+```text
+index.html
+```
+
+Nesse arquivo, o elemento:
+
+```html
+<div id="root"></div>
+```
+
+define o ponto de montagem da aplicação.
+
+O arquivo:
+
+```text
+main.jsx
+```
+
+é carregado e utiliza:
+
+```javascript
+createRoot(document.getElementById('root'))
+```
+
+para criar uma raiz React associada ao elemento `root`.
+
+Em seguida, o componente:
+
+```jsx
+<App />
+```
+
+é renderizado.
+
+`App` funciona como componente raiz da interface e utiliza:
+
+```jsx
+<Login />
+```
+
+O componente `Login` demonstra a composição de componentes ao reunir:
+
+```text
+Label
+Labelln
+InputText
+Button
+```
+
+Durante essa construção, foram apresentadas duas formas de implementação de componentes.
+
+`Label` e `Button` foram construídos como **Class Components**, utilizando:
+
+```javascript
+extends React.Component
+```
+
+e:
+
+```javascript
+render()
+```
+
+Já `App`, `Login`, `Labelln` e `InputText` foram apresentados como **Function Components**.
+
+Também estudamos **Props**, utilizadas para transmitir informações aos componentes.
+
+Por exemplo:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+fornece a Prop `texto` ao componente `Label`.
+
+Em componentes de classe, vimos o acesso utilizando:
+
+```javascript
+this.props.texto
+```
+
+Nos componentes funcionais apresentados, utilizamos desestruturação:
+
+```javascript
+function Labelln({ texto })
+```
+
+A reutilização de `Label` e `InputText` com valores diferentes demonstrou como as Props permitem configurar um componente sem alterar sua estrutura.
+
+Assim, o exemplo integrou os conceitos de **estrutura de projeto, JSX, modularização, componentes, composição, reutilização e Props** na construção de uma interface ReactJS.
+
+---------------------
+
+## 📌 O que você aprendeu
+
+Ao concluir este capítulo, você deverá ser capaz de:
+
+- identificar os principais arquivos envolvidos na inicialização de uma aplicação ReactJS;
+- compreender o papel do `index.html`;
+- identificar o elemento utilizado como ponto de montagem da aplicação;
+- compreender a função do arquivo `main.jsx`;
+- utilizar conceitualmente `createRoot()` e `.render()`;
+- compreender o papel do componente raiz `App`;
+- compreender o conceito de JSX;
+- reconhecer componentes pela utilização de nomes iniciados com letra maiúscula;
+- compreender o conceito de Function Component;
+- compreender o conceito de Class Component;
+- identificar o papel de `React.Component`;
+- compreender a função do método `render()` em componentes de classe;
+- utilizar fragmentos para agrupar elementos JSX;
+- compreender o funcionamento básico de `import` e `export default`;
+- compreender o conceito de componentização;
+- compreender a composição entre componentes;
+- identificar relações entre componentes pais e filhos;
+- compreender o conceito de Props;
+- acessar Props utilizando `this.props` nos componentes de classe apresentados;
+- utilizar desestruturação para acessar Props em componentes funcionais;
+- utilizar Props como conteúdo de um componente;
+- utilizar valores recebidos por Props em atributos JSX;
+- compreender como Props favorecem a reutilização de componentes;
+- identificar a responsabilidade dos componentes `Label`, `Labelln`, `InputText`, `Button` e `Login`;
+- compreender a hierarquia utilizada para construir a interface apresentada no capítulo.
+
+---------------------
+
+## 📚 Exercícios de Fixação
+
+- [Exercício de Fixação – Estrutura de Projeto, Componentes e Props](LINK_DO_EXERCICIO)
+
+---------------------
