@@ -1,0 +1,1906 @@
+
+# 📘 Componentes e Estados no ReactJS
+
+No capítulo anterior, vimos como uma aplicação React pode ser organizada em
+**componentes** e como as **props** permitem transmitir informações entre eles.
+
+Agora avançaremos para outro conceito fundamental do React: o **estado**,
+também chamado de **state**.
+
+Aplicações reais precisam reagir às ações do usuário. Por exemplo:
+
+- um usuário pode digitar seu nome em um campo;
+- uma mensagem de erro pode aparecer quando um valor é inválido;
+- um botão pode alterar seu texto depois de ser clicado;
+- informações exibidas na tela podem mudar durante a execução.
+
+Para que um componente consiga armazenar informações que podem mudar ao longo
+do tempo, utilizamos o conceito de **estado**.
+
+---
+
+## O que é um estado?
+
+Um **estado (state)** representa uma informação interna de um componente que
+pode mudar durante sua execução.
+
+Imagine um botão que inicialmente apresenta:
+
+```text
+Logar
+```
+
+Depois que o usuário clica nesse botão, queremos que seu texto seja alterado:
+
+```text
+Você clicou!
+```
+
+O texto apresentado pelo botão precisa ser armazenado e posteriormente
+modificado. Esse é um exemplo de informação que pode ser controlada por um
+estado.
+
+:::info Estado e interface
+
+Quando um estado utilizado pela interface é atualizado, o React realiza uma
+nova renderização do componente para que a interface represente o novo estado
+da aplicação.
+
+Esse comportamento está relacionado à **reatividade** do React.
+
+:::
+
+---
+
+## Props e State
+
+Embora **props** e **state** armazenem informações utilizadas pelos
+componentes, possuem finalidades diferentes.
+
+| Props | State |
+|---|---|
+| São recebidas de outro componente | Pertence ao próprio componente |
+| Permitem transmitir informações | Permite armazenar informações internas |
+| Não devem ser modificadas pelo componente receptor | Pode ser atualizado durante a execução |
+| Favorecem a comunicação entre componentes | Permite criar interfaces reativas |
+
+### Props
+
+Nas props, uma informação é enviada de um componente para outro:
+
+```text
+Componente Pai
+      │
+      │ props
+      ▼
+Componente Filho
+```
+
+Por exemplo:
+
+```jsx
+<Label texto="Usuário:" />
+```
+
+O componente `Label` recebe `"Usuário:"` por meio da prop `texto`.
+
+### State
+
+No state, a informação é mantida pelo próprio componente:
+
+```text
+┌─────────────────────┐
+│     Componente      │
+│                     │
+│        state        │
+│          │          │
+│          ▼          │
+│    Interface (UI)   │
+└─────────────────────┘
+```
+
+:::tip Props x State
+
+**Props** permitem que um componente receba informações.
+
+**State** permite que o componente mantenha e atualize informações durante sua
+execução.
+
+:::
+
+---
+
+# O Hook `useState`
+
+Em **Function Components**, podemos criar estados utilizando o Hook `useState`.
+
+```jsx
+import React, { useState } from 'react';
+```
+
+A estrutura básica é:
+
+```jsx
+const [valor, setValor] = useState(valorInicial);
+```
+
+Podemos interpretar essa declaração assim:
+
+```text
+const [valor, setValor] = useState(valorInicial);
+       │       │                  │
+       │       │                  └── valor inicial
+       │       │
+       │       └── função de atualização
+       │
+       └── valor atual do estado
+```
+
+Por exemplo:
+
+```jsx
+const [nome, setNome] = useState("");
+```
+
+Nesse caso:
+
+- `nome` contém o valor atual;
+- `setNome` permite atualizar o estado;
+- `""` é o valor inicial.
+
+Para atualizar o estado, utilizamos:
+
+```jsx
+setNome("Maria");
+```
+
+:::warning Importante
+
+Uma variável de estado não deve ser alterada diretamente:
+
+```jsx
+nome = "Maria";
+```
+
+Utilizamos sua função de atualização:
+
+```jsx
+setNome("Maria");
+```
+
+:::
+
+---
+
+## Estrutura utilizada neste capítulo
+
+Continuaremos utilizando a aplicação de login:
+
+```text
+index.html
+    │
+    ▼
+src/main.jsx
+    │
+    ▼
+src/App.jsx
+    │
+    ▼
+src/componentes/state/Login.jsx
+    │
+    ├── Label.jsx
+    ├── Labelln.jsx
+    ├── InputText.jsx
+    ├── InputPassword.jsx
+    └── Button.jsx
+```
+
+Nos próximos exemplos veremos como estados podem ser utilizados para armazenar
+valores, responder às interações do usuário e alterar dinamicamente a
+interface.
+
+# Estado em um Function Component
+
+Vamos iniciar com o componente `Label.jsx`.
+
+Ele recebe uma informação por meio de uma **prop** e utiliza essa informação
+para definir o valor inicial de um **estado**.
+
+## Código completo — `Label.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function Label({ texto }) {
+
+  const [valor, setValor] = useState(texto);
+
+  return (
+    <>
+      {valor}
+    </>
+  );
+}
+```
+
+---
+
+## Entendendo o código
+
+### Importação do `useState`
+
+```jsx
+import React, { useState } from 'react';
+```
+
+Além do React, importamos o Hook `useState`, utilizado para criar estados em
+componentes funcionais.
+
+---
+
+### Recebendo uma prop
+
+```jsx
+export default function Label({ texto }) {
+```
+
+O componente recebe a prop `texto` por desestruturação.
+
+Por exemplo:
+
+```jsx
+<Label texto="Usuário:" />
+```
+
+Nesse caso:
+
+```text
+texto = "Usuário:"
+```
+
+---
+
+### Criando o estado
+
+```jsx
+const [valor, setValor] = useState(texto);
+```
+
+Temos:
+
+- `valor`: valor atual do estado;
+- `setValor`: função que poderá atualizar o estado;
+- `texto`: valor utilizado para inicializar o estado.
+
+O fluxo inicial é:
+
+```text
+prop texto
+    │
+    ▼
+useState(texto)
+    │
+    ▼
+estado valor
+    │
+    ▼
+Interface
+```
+
+---
+
+### Renderizando o estado
+
+```jsx
+return (
+  <>
+    {valor}
+  </>
+);
+```
+
+A expressão:
+
+```jsx
+{valor}
+```
+
+faz com que o conteúdo armazenado no estado seja apresentado na interface.
+
+:::info
+
+Neste exemplo, a prop `texto` fornece o **valor inicial** do estado.
+
+Depois de criado, `valor` passa a representar o estado interno do componente.
+
+:::
+
+---
+
+## Reatividade
+
+Se posteriormente executarmos:
+
+```jsx
+setValor("Novo valor");
+```
+
+o estado será atualizado.
+
+Quando essa alteração influencia a interface, o React realiza uma nova
+renderização do componente, apresentando o novo valor.
+
+```text
+valor atual
+    │
+    ▼
+setValor(...)
+    │
+    ▼
+novo estado
+    │
+    ▼
+nova renderização
+```
+
+### Conceitos trabalhados
+
+Neste componente utilizamos:
+
+- Function Component;
+- props;
+- `useState`;
+- estado interno;
+- função de atualização;
+- JSX;
+- fragmentos;
+- reatividade.
+
+# Estado em Componentes de Classe
+
+Até agora utilizamos **Function Components** com Hooks.
+
+Entretanto, o React também possui a forma tradicional de construção de
+componentes utilizando **classes**.
+
+Vamos observar essa abordagem no componente `Labelln.jsx`.
+
+## Código completo — `Labelln.jsx`
+
+```jsx
+import React from 'react';
+
+export default class Labelln extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      valor: props.texto
+    };
+  }
+
+  render() {
+    return (
+      <>
+        {this.state.valor} <br/>
+      </>
+    );
+  }
+}
+```
+
+---
+
+## Definindo um componente de classe
+
+```jsx
+export default class Labelln extends React.Component {
+```
+
+Diferentemente de:
+
+```jsx
+function Label() {
+```
+
+agora estamos criando uma classe que herda de:
+
+```jsx
+React.Component
+```
+
+Isso permite que o componente utilize recursos como `props` e `state`.
+
+---
+
+## O construtor
+
+```jsx
+constructor(props) {
+  super(props);
+
+  this.state = {
+    valor: props.texto
+  };
+}
+```
+
+O construtor é executado quando o componente é criado.
+
+### `super(props)`
+
+```jsx
+super(props);
+```
+
+Chama o construtor da classe pai `React.Component`.
+
+### `this.state`
+
+O estado é definido como um objeto:
+
+```jsx
+this.state = {
+  valor: props.texto
+};
+```
+
+Nesse exemplo, o estado `valor` é inicializado com a prop `texto`.
+
+---
+
+## O método `render()`
+
+Componentes de classe utilizam o método:
+
+```jsx
+render()
+```
+
+para definir o JSX que será apresentado.
+
+```jsx
+render() {
+  return (
+    <>
+      {this.state.valor} <br/>
+    </>
+  );
+}
+```
+
+Para acessar um valor do estado utilizamos:
+
+```jsx
+this.state.valor
+```
+
+---
+
+## Function Component x Class Component
+
+Podemos comparar as duas formas.
+
+### Function Component
+
+```jsx
+const [valor, setValor] = useState(texto);
+```
+
+### Class Component
+
+```jsx
+this.state = {
+  valor: props.texto
+};
+```
+
+Para atualizar o estado em componentes de classe, utiliza-se `setState()`.
+
+:::info Componentes de classe
+
+Componentes de classe representam uma abordagem tradicional de construção de
+componentes React.
+
+Eles ainda podem ser encontrados em projetos existentes, enquanto os exemplos
+modernos frequentemente utilizam **Function Components e Hooks**.
+
+:::
+
+---
+
+## Fragmentos
+
+Observe também:
+
+```jsx
+<>
+  {this.state.valor} <br/>
+</>
+```
+
+Os fragmentos:
+
+```jsx
+<>
+</>
+```
+
+permitem agrupar elementos sem adicionar uma nova tag ao DOM.
+
+### Conceitos trabalhados
+
+- Class Components;
+- `React.Component`;
+- `constructor`;
+- `props`;
+- `super(props)`;
+- `this.state`;
+- `setState()`;
+- `render()`;
+- fragmentos.
+
+# Inputs Controlados
+
+Agora utilizaremos estados para armazenar informações digitadas pelo usuário.
+
+Criaremos o componente:
+
+```text
+InputText.jsx
+```
+
+Além de armazenar o texto digitado, ele verificará se o campo está vazio.
+
+---
+
+## Código completo — `InputText.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function InputText({ placeholder }) {
+
+  const [valor, setValor] = useState("");
+  const [erro, setErro] = useState(false);
+
+  function handleChange(e) {
+
+    const novoValor = e.target.value;
+
+    setValor(novoValor);
+
+    // verifica se está vazio
+    setErro(novoValor.trim() === "");
+  }
+
+  return (
+    <>
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={valor}
+        onChange={handleChange}
+      />
+
+      {erro && <p>⚠️ O campo não pode ficar vazio.</p>}
+    </>
+  );
+}
+```
+
+---
+
+# Dois estados no mesmo componente
+
+O componente possui dois estados:
+
+```jsx
+const [valor, setValor] = useState("");
+const [erro, setErro] = useState(false);
+```
+
+O primeiro armazena o conteúdo digitado:
+
+```text
+valor
+```
+
+O segundo informa se existe uma situação de erro:
+
+```text
+erro
+```
+
+Inicialmente:
+
+```text
+valor = ""
+erro  = false
+```
+
+:::tip
+
+Um componente pode possuir vários estados independentes.
+
+Cada chamada a `useState()` cria um estado.
+
+:::
+
+---
+
+# Eventos em React
+
+Observe o atributo:
+
+```jsx
+onChange={handleChange}
+```
+
+O evento `onChange` ocorre quando o conteúdo do campo é alterado.
+
+Quando o usuário digita, a função:
+
+```jsx
+handleChange
+```
+
+é executada.
+
+---
+
+## O objeto de evento
+
+A função recebe um parâmetro:
+
+```jsx
+function handleChange(e) {
+```
+
+Esse parâmetro representa o evento ocorrido.
+
+Podemos obter o valor atual do input com:
+
+```jsx
+e.target.value
+```
+
+No nosso exemplo:
+
+```jsx
+const novoValor = e.target.value;
+```
+
+O fluxo é:
+
+```text
+Usuário digita
+      │
+      ▼
+   onChange
+      │
+      ▼
+handleChange(e)
+      │
+      ▼
+e.target.value
+      │
+      ▼
+   novoValor
+```
+
+---
+
+## Atualizando o estado
+
+Depois de obter o conteúdo digitado:
+
+```jsx
+setValor(novoValor);
+```
+
+atualizamos o estado `valor`.
+
+Temos então:
+
+```text
+INPUT
+  │
+  │ onChange
+  ▼
+handleChange
+  │
+  ▼
+setValor
+  │
+  ▼
+STATE
+```
+
+---
+
+# O que é um input controlado?
+
+Observe:
+
+```jsx
+<input
+  type="text"
+  placeholder={placeholder}
+  value={valor}
+  onChange={handleChange}
+/>
+```
+
+O valor apresentado pelo input depende de:
+
+```jsx
+value={valor}
+```
+
+Como `valor` é um estado React, esse elemento é denominado **input
+controlado**.
+
+```text
+          ┌─────────────┐
+          │    STATE    │
+          │    valor    │
+          └──────┬──────┘
+                 │
+                 ▼
+              <input>
+                 │
+                 │ onChange
+                 ▼
+          handleChange()
+                 │
+                 ▼
+             setValor()
+                 │
+                 └────────► STATE
+```
+
+:::info Input controlado
+
+Em um input controlado, o valor apresentado pelo campo está sincronizado com
+um estado do React.
+
+Isso facilita operações como validação e manipulação dos dados digitados.
+
+:::
+
+---
+
+# Validação do campo
+
+Também verificamos se o campo está vazio:
+
+```jsx
+setErro(novoValor.trim() === "");
+```
+
+O método:
+
+```js
+trim()
+```
+
+remove espaços existentes no início e no final da string.
+
+Assim:
+
+```text
+""       → vazio
+"   "    → vazio após trim()
+"Maria"  → possui conteúdo
+```
+
+Se o campo estiver vazio:
+
+```jsx
+setErro(true);
+```
+
+Caso contrário:
+
+```jsx
+setErro(false);
+```
+
+---
+
+# Renderização condicional
+
+Observe:
+
+```jsx
+{erro && <p>⚠️ O campo não pode ficar vazio.</p>}
+```
+
+Esse recurso é denominado **renderização condicional**.
+
+Podemos interpretar:
+
+```text
+erro === true
+      │
+      ▼
+exibe a mensagem
+```
+
+Quando:
+
+```text
+erro === false
+```
+
+o elemento não é apresentado.
+
+A estrutura geral é:
+
+```jsx
+condicao && <Componente />
+```
+
+O elemento JSX será renderizado quando a condição for verdadeira.
+
+---
+
+## Conceitos trabalhados
+
+Neste componente utilizamos:
+
+- `useState`;
+- múltiplos estados;
+- `onChange`;
+- eventos;
+- `e.target.value`;
+- inputs controlados;
+- validação;
+- `trim()`;
+- renderização condicional.
+
+# Controlando um Campo de Senha
+
+Agora aplicaremos os mesmos conceitos a um campo de senha.
+
+Criaremos:
+
+```text
+InputPassword.jsx
+```
+
+---
+
+## Código completo — `InputPassword.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function InputPassword({ placeholder }) {
+
+  const [senha, setSenha] = useState("");
+
+  function handleChange(e) {
+    setSenha(e.target.value);
+  }
+
+  return (
+    <>
+      <input
+        type="password"
+        placeholder={placeholder}
+        value={senha}
+        onChange={handleChange}
+      />
+
+      {(senha !== "") && <p>Senha digitada: {senha}</p>}
+    </>
+  );
+}
+```
+
+---
+
+## Estado da senha
+
+Criamos o estado:
+
+```jsx
+const [senha, setSenha] = useState("");
+```
+
+Temos:
+
+```text
+senha
+```
+
+como valor atual e:
+
+```text
+setSenha
+```
+
+como função de atualização.
+
+O estado começa vazio:
+
+```text
+senha = ""
+```
+
+---
+
+## Capturando a digitação
+
+A função:
+
+```jsx
+function handleChange(e) {
+  setSenha(e.target.value);
+}
+```
+
+é executada sempre que o usuário altera o campo.
+
+O fluxo é:
+
+```text
+Digitação
+   │
+   ▼
+onChange
+   │
+   ▼
+handleChange(e)
+   │
+   ▼
+e.target.value
+   │
+   ▼
+setSenha(...)
+   │
+   ▼
+state senha
+```
+
+---
+
+# `type="password"`
+
+O elemento:
+
+```jsx
+<input type="password" />
+```
+
+utiliza um tipo nativo do HTML destinado à entrada de senhas.
+
+Os caracteres digitados são ocultados visualmente pelo navegador.
+
+No nosso componente:
+
+```jsx
+<input
+  type="password"
+  placeholder={placeholder}
+  value={senha}
+  onChange={handleChange}
+/>
+```
+
+o campo também é **controlado**, pois seu valor depende do estado `senha`.
+
+---
+
+# Renderização condicional
+
+O exemplo utiliza:
+
+```jsx
+{(senha !== "") && <p>Senha digitada: {senha}</p>}
+```
+
+A condição:
+
+```jsx
+senha !== ""
+```
+
+verifica se existe algum conteúdo.
+
+Se houver:
+
+```text
+senha possui conteúdo
+        │
+        ▼
+condição verdadeira
+        │
+        ▼
+mensagem apresentada
+```
+
+Se o estado estiver vazio, a mensagem não será renderizada.
+
+:::warning Exemplo didático
+
+Exibir a senha digitada na página **não é uma prática segura para aplicações
+reais**.
+
+Essa apresentação é utilizada neste exemplo exclusivamente para permitir a
+visualização da alteração do estado e da renderização condicional.
+
+:::
+
+---
+
+## Conceitos trabalhados
+
+- input controlado;
+- `useState`;
+- `onChange`;
+- `e.target.value`;
+- `type="password"`;
+- estado;
+- renderização condicional.
+
+# Eventos e Alteração de Estado
+
+Até agora utilizamos principalmente o evento:
+
+```jsx
+onChange
+```
+
+Agora veremos outro evento muito comum:
+
+```jsx
+onClick
+```
+
+Criaremos um botão cujo texto será alterado depois de um clique.
+
+---
+
+## Código completo — `Button.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function Button({ valor }) {
+
+  const [texto, setTexto] = useState(valor);
+
+  function handleClick() {
+    setTexto("Você clicou!");
+  }
+
+  return (
+    <button onClick={handleClick}>
+      {texto}
+    </button>
+  );
+}
+```
+
+---
+
+# Prop como valor inicial
+
+O componente recebe:
+
+```jsx
+{ valor }
+```
+
+Por exemplo:
+
+```jsx
+<Button valor="Logar" />
+```
+
+A prop é utilizada para inicializar o estado:
+
+```jsx
+const [texto, setTexto] = useState(valor);
+```
+
+Inicialmente:
+
+```text
+valor = "Logar"
+        │
+        ▼
+useState(valor)
+        │
+        ▼
+texto = "Logar"
+```
+
+---
+
+# Evento `onClick`
+
+Observe:
+
+```jsx
+<button onClick={handleClick}>
+```
+
+Quando o usuário clicar no botão, o React executará:
+
+```jsx
+handleClick
+```
+
+A função é:
+
+```jsx
+function handleClick() {
+  setTexto("Você clicou!");
+}
+```
+
+Ela modifica o estado `texto`.
+
+---
+
+## Fluxo completo
+
+Inicialmente:
+
+```text
+texto = "Logar"
+```
+
+A interface apresenta:
+
+```text
+┌───────────┐
+│   Logar   │
+└───────────┘
+```
+
+O usuário clica:
+
+```text
+       clique
+         │
+         ▼
+handleClick()
+         │
+         ▼
+setTexto("Você clicou!")
+         │
+         ▼
+novo estado
+```
+
+O React renderiza novamente o componente:
+
+```text
+┌──────────────────┐
+│  Você clicou!    │
+└──────────────────┘
+```
+
+---
+
+# Eventos em React
+
+Os eventos React são utilizados como propriedades JSX.
+
+Alguns exemplos:
+
+```jsx
+onClick={funcao}
+onChange={funcao}
+```
+
+Observe que os nomes seguem a convenção **camelCase**.
+
+Por exemplo:
+
+```text
+HTML             React
+
+onclick    →     onClick
+onchange   →     onChange
+```
+
+---
+
+## Props x State neste exemplo
+
+Este componente demonstra muito claramente a diferença entre os dois.
+
+### Prop
+
+```jsx
+valor
+```
+
+É recebida de fora:
+
+```jsx
+<Button valor="Logar" />
+```
+
+### State
+
+```jsx
+texto
+```
+
+É interno e pode mudar:
+
+```jsx
+setTexto("Você clicou!");
+```
+
+Podemos representar:
+
+```text
+valor (prop)
+    │
+    ▼
+useState(valor)
+    │
+    ▼
+texto (state)
+    │
+    │ clique
+    ▼
+setTexto(...)
+    │
+    ▼
+novo texto
+```
+
+---
+
+## Conceitos trabalhados
+
+- `useState`;
+- estado dinâmico;
+- `onClick`;
+- manipulação de eventos;
+- props;
+- atualização de estado;
+- re-renderização;
+- reatividade.
+
+# Integrando os Componentes
+
+Agora que cada componente possui uma responsabilidade específica, podemos
+integrá-los para construir a interface de login.
+
+Utilizaremos:
+
+```text
+Login.jsx
+    │
+    ├── Labelln.jsx
+    ├── Label.jsx
+    ├── InputText.jsx
+    ├── InputPassword.jsx
+    └── Button.jsx
+```
+
+---
+
+## Código completo — `Login.jsx`
+
+```jsx
+import Label from "./Label.jsx";
+import Labelln from "./Labelln.jsx";
+import Button from "./Button.jsx";
+import InputText from "./InputText.jsx";
+import InputPassword from "./InputPassword.jsx";
+
+function Login() {
+
+  return (
+    <>
+      <Labelln texto="Login" />
+
+      <Label texto="Usuário: " />
+      <InputText placeholder="user..." />
+      <br />
+
+      <Label texto="Senha: " />
+      <InputPassword placeholder="password..." />
+      <br />
+
+      <Button valor="Logar" />
+    </>
+  );
+}
+
+export default Login;
+```
+
+---
+
+# Importando os componentes
+
+No início do arquivo encontramos:
+
+```jsx
+import Label from "./Label.jsx";
+import Labelln from "./Labelln.jsx";
+import Button from "./Button.jsx";
+import InputText from "./InputText.jsx";
+import InputPassword from "./InputPassword.jsx";
+```
+
+Cada funcionalidade está implementada em um componente separado.
+
+```text
+Label
+    └── apresenta rótulos
+
+Labelln
+    └── apresenta o título
+
+InputText
+    └── controla o campo de usuário
+
+InputPassword
+    └── controla o campo de senha
+
+Button
+    └── controla o botão
+```
+
+---
+
+# Construindo a interface
+
+O título é criado com:
+
+```jsx
+<Labelln texto="Login" />
+```
+
+Depois temos o campo de usuário:
+
+```jsx
+<Label texto="Usuário: " />
+<InputText placeholder="user..." />
+```
+
+E o campo de senha:
+
+```jsx
+<Label texto="Senha: " />
+<InputPassword placeholder="password..." />
+```
+
+Finalmente:
+
+```jsx
+<Button valor="Logar" />
+```
+
+---
+
+# Props personalizando componentes
+
+Observe que os componentes são reutilizados com informações diferentes.
+
+Por exemplo:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+e:
+
+```jsx
+<Label texto="Senha: " />
+```
+
+O componente é o mesmo:
+
+```text
+Label
+```
+
+mas a prop:
+
+```text
+texto
+```
+
+permite personalizar seu conteúdo.
+
+O mesmo acontece com:
+
+```jsx
+<InputText placeholder="user..." />
+```
+
+e:
+
+```jsx
+<InputPassword placeholder="password..." />
+```
+
+---
+
+# Separação de responsabilidades
+
+Um ponto importante é que `Login.jsx` não possui estado próprio neste exemplo.
+
+Ele apenas **organiza os componentes filhos**.
+
+```text
+                    Login
+                      │
+        ┌─────────────┼──────────────┐
+        │             │              │
+        ▼             ▼              ▼
+      Label       InputText        Button
+                      │
+                      ▼
+                   Estado
+```
+
+Cada componente mantém a lógica necessária para sua própria responsabilidade.
+
+Por exemplo:
+
+```text
+InputText
+   ├── valor
+   ├── erro
+   └── handleChange
+```
+
+Enquanto:
+
+```text
+Button
+   ├── texto
+   └── handleClick
+```
+
+---
+
+# Componentização
+
+A estrutura final demonstra uma das principais características do React:
+**componentização**.
+
+Em vez de construir toda a interface em um único arquivo:
+
+```text
+Login gigante
+```
+
+dividimos a aplicação:
+
+```text
+Login
+ ├── Label
+ ├── InputText
+ ├── Label
+ ├── InputPassword
+ └── Button
+```
+
+Cada componente possui uma responsabilidade específica e pode ser reutilizado.
+
+:::tip Reutilização
+
+Um componente como:
+
+```jsx
+<InputText />
+```
+
+não precisa ser exclusivo da tela de login.
+
+Ele pode ser reutilizado em outros formulários, reduzindo a duplicação de
+código.
+
+:::
+
+---
+
+# Visão geral do fluxo
+
+Podemos representar a aplicação desenvolvida neste capítulo assim:
+
+```text
+                    Login
+                      │
+        ┌─────────────┼────────────────────┐
+        │             │                    │
+        ▼             ▼                    ▼
+     Labels         Inputs               Button
+                      │                    │
+                      ▼                    ▼
+                    State                State
+                      │                    │
+                      ▼                    ▼
+                   onChange             onClick
+                      │                    │
+                      ▼                    ▼
+               atualização           atualização
+                      │                    │
+                      └─────────┬──────────┘
+                                ▼
+                         nova renderização
+```
+
+---
+
+# Consolidando os conceitos
+
+Ao longo deste capítulo utilizamos diferentes recursos do React.
+
+## Props
+
+Permitem enviar informações para componentes:
+
+```jsx
+<Label texto="Usuário:" />
+```
+
+## State
+
+Permite armazenar informações que podem mudar:
+
+```jsx
+const [valor, setValor] = useState("");
+```
+
+## Eventos
+
+Permitem responder às ações do usuário:
+
+```jsx
+onChange={handleChange}
+```
+
+e:
+
+```jsx
+onClick={handleClick}
+```
+
+## Inputs controlados
+
+Mantêm o valor do campo sincronizado com um estado:
+
+```jsx
+<input
+  value={valor}
+  onChange={handleChange}
+/>
+```
+
+## Renderização condicional
+
+Permite apresentar elementos de acordo com uma condição:
+
+```jsx
+{erro && <p>O campo não pode ficar vazio.</p>}
+```
+
+## Componentização
+
+Permite dividir a interface em partes independentes e reutilizáveis:
+
+```text
+Login
+ ├── Label
+ ├── InputText
+ ├── InputPassword
+ └── Button
+```
+
+---
+
+## Resumo
+
+Neste capítulo avançamos de componentes que apenas recebem informações para
+componentes capazes de **manter estado e reagir às ações do usuário**.
+
+O fluxo fundamental estudado pode ser resumido como:
+
+```text
+Interação do usuário
+        │
+        ▼
+      Evento
+        │
+        ▼
+Função manipuladora
+        │
+        ▼
+Atualização do estado
+        │
+        ▼
+React atualiza a interface
+```
+
+Essa relação entre **estado, eventos e renderização** será fundamental para a
+construção de interfaces cada vez mais interativas em ReactJS.
+
+:::info Conceitos-chave
+
+Ao concluir este conteúdo, revise principalmente:
+
+- componentes;
+- props;
+- state;
+- `useState`;
+- `setState()`;
+- eventos;
+- `onChange`;
+- `onClick`;
+- inputs controlados;
+- renderização condicional;
+- componentização;
+- separação de responsabilidades;
+- reutilização de componentes.
+
+:::
+
+---
+
+# Exercício de Fixação
+
+Neste capítulo foram apresentados diferentes componentes React envolvendo
+**props**, **states**, **eventos**, **inputs controlados** e **renderização
+condicional**.
+
+Agora você deverá colocar em prática os conceitos estudados, implementando,
+executando e validando todos os códigos apresentados ao longo do conteúdo.
+
+## Atividade
+
+Utilizando o projeto ReactJS desenvolvido nas aulas anteriores, crie a
+estrutura:
+
+```text
+src/
+└── componentes/
+    └── state/
+        ├── Login.jsx
+        ├── Label.jsx
+        ├── Labelln.jsx
+        ├── InputText.jsx
+        ├── InputPassword.jsx
+        └── Button.jsx
+```
+
+Implemente em cada arquivo os códigos apresentados neste capítulo.
+
+Em seguida, ajuste o componente `App.jsx` para utilizar o componente
+`Login.jsx`.
+
+Por exemplo:
+
+```jsx
+import Login from "./componentes/state/Login.jsx";
+
+function App() {
+  return (
+    <>
+      <Login />
+    </>
+  );
+}
+
+export default App;
+```
+
+Execute a aplicação e verifique o funcionamento de todos os componentes.
+
+---
+
+## Testes e validações
+
+Durante a execução, realize os seguintes testes:
+
+### 1. Componente `Labelln`
+
+Verifique se o componente:
+
+```jsx
+<Labelln texto="Login" />
+```
+
+apresenta corretamente o texto:
+
+```text
+Login
+```
+
+Observe que esse componente utiliza **state em um componente de classe**.
+
+---
+
+### 2. Componente `Label`
+
+Verifique se:
+
+```jsx
+<Label texto="Usuário: " />
+```
+
+e:
+
+```jsx
+<Label texto="Senha: " />
+```
+
+apresentam corretamente os valores recebidos pelas props.
+
+Identifique no código onde a prop `texto` é utilizada para inicializar o
+estado do componente.
+
+---
+
+### 3. Componente `InputText`
+
+Digite diferentes valores no campo de usuário.
+
+Verifique se o valor digitado é armazenado no estado:
+
+```jsx
+valor
+```
+
+Apague todo o conteúdo do campo e observe se a mensagem:
+
+```text
+⚠️ O campo não pode ficar vazio.
+```
+
+é apresentada.
+
+Teste também inserir apenas espaços no campo e observe o comportamento da
+validação realizada com:
+
+```jsx
+trim()
+```
+
+---
+
+### 4. Componente `InputPassword`
+
+Digite uma senha no campo correspondente.
+
+Verifique se:
+
+- os caracteres são ocultados pelo `type="password"`;
+- o estado `senha` é atualizado durante a digitação;
+- a mensagem condicional é apresentada quando o estado possui conteúdo;
+- a mensagem deixa de ser apresentada quando o campo é esvaziado.
+
+:::warning
+
+A apresentação da senha digitada é utilizada exclusivamente para fins
+didáticos neste exercício.
+
+Não utilize esse comportamento em aplicações reais.
+
+:::
+
+---
+
+### 5. Componente `Button`
+
+Observe inicialmente o texto:
+
+```text
+Logar
+```
+
+Clique no botão.
+
+Verifique se o texto é alterado para:
+
+```text
+Você clicou!
+```
+
+Identifique no código a sequência responsável por essa alteração:
+
+```text
+onClick
+   │
+   ▼
+handleClick()
+   │
+   ▼
+setTexto(...)
+   │
+   ▼
+novo estado
+   │
+   ▼
+nova renderização
+```
+
+---
+
+### 6. Componente `Login`
+
+Por fim, verifique se o componente `Login.jsx` integra corretamente:
+
+```text
+Login
+ │
+ ├── Labelln
+ ├── Label
+ ├── InputText
+ ├── Label
+ ├── InputPassword
+ └── Button
+```
+
+Observe que o componente `Login` é responsável por organizar os demais
+componentes, enquanto cada componente filho mantém sua própria
+responsabilidade.
+
+---
+
+## Validação final
+
+Ao concluir os testes, certifique-se de que a aplicação permite observar:
+
+- passagem de valores por **props**;
+- utilização de **state**;
+- utilização do Hook **`useState`**;
+- utilização de estado em **Class Components**;
+- atualização de estados;
+- eventos **`onChange`** e **`onClick`**;
+- captura de valores com **`e.target.value`**;
+- funcionamento de **inputs controlados**;
+- validação de campo vazio;
+- utilização de **renderização condicional**;
+- re-renderização após alterações de estado;
+- integração e reutilização dos componentes.
+
+:::tip Desafio de observação
+
+Durante os testes, procure identificar sempre o seguinte fluxo:
+
+```text
+Interação do usuário
+        │
+        ▼
+      Evento
+        │
+        ▼
+Função manipuladora
+        │
+        ▼
+Atualização do estado
+        │
+        ▼
+Atualização da interface
+```
+
+Compreender esse fluxo é mais importante do que apenas reproduzir os códigos.
+
+:::
+
+## Resultado esperado
+
+Ao final do exercício, a aplicação deverá apresentar uma interface de login
+funcional para fins didáticos, permitindo testar os diferentes comportamentos
+implementados nos componentes deste capítulo.
+
+O objetivo do exercício não é acrescentar novas funcionalidades, mas
+**executar, testar e compreender o funcionamento dos códigos apresentados**.
