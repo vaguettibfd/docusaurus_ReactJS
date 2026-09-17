@@ -1,0 +1,1695 @@
+
+# 📘 Componentes e Estilos (CSS)
+
+Nos capítulos anteriores, aprendemos a construir aplicações React utilizando
+**componentes**, **props** e **states**.
+
+Já conseguimos criar componentes reutilizáveis, transmitir informações entre
+eles e desenvolver interfaces capazes de reagir às ações do usuário.
+
+Agora avançaremos para outro aspecto fundamental do desenvolvimento Front-End:
+a **apresentação visual da aplicação**.
+
+Neste capítulo, utilizaremos **CSS (Cascading Style Sheets)** para estilizar os
+componentes React desenvolvidos anteriormente.
+
+---
+
+## Separando estrutura, comportamento e apresentação
+
+Durante o desenvolvimento de uma aplicação React, podemos pensar em três
+aspectos principais:
+
+```text
+JSX
+ │
+ └── Estrutura da interface
+
+JavaScript / React
+ │
+ └── Comportamento e estado
+
+CSS
+ │
+ └── Apresentação visual
+```
+
+Nos componentes que desenvolveremos, os arquivos `.jsx` continuarão
+responsáveis pela estrutura e pelo comportamento, enquanto arquivos `.css`
+serão utilizados para definir características visuais.
+
+Por exemplo:
+
+```text
+Label.jsx
+   │
+   └── importa
+         │
+         ▼
+     Label.css
+```
+
+:::info CSS
+
+**CSS (Cascading Style Sheets)** é a linguagem utilizada para definir a
+apresentação visual de documentos HTML.
+
+Com CSS podemos controlar, entre outras características:
+
+- cores;
+- tamanhos;
+- fontes;
+- margens;
+- espaçamentos;
+- bordas;
+- alinhamentos;
+- posicionamento;
+- efeitos visuais.
+
+:::
+
+---
+
+# Estrutura do projeto
+
+Continuaremos utilizando a aplicação de login desenvolvida nos capítulos
+anteriores.
+
+A organização será:
+
+```text
+src/
+│
+├── main.jsx
+├── App.jsx
+│
+└── componentes/
+    └── CSS/
+        ├── Login.jsx
+        ├── Login.css
+        ├── Label.jsx
+        ├── Label.css
+        ├── LabelTitle.jsx
+        ├── LabelTitle.css
+        ├── InputText.jsx
+        ├── InputText.css
+        ├── InputPassword.jsx
+        ├── InputPassword.css
+        ├── Button.jsx
+        └── Button.css
+```
+
+O fluxo principal da aplicação permanece:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+App.jsx
+    │
+    ▼
+Login.jsx
+    │
+    ├── LabelTitle.jsx ─────► LabelTitle.css
+    ├── Label.jsx ──────────► Label.css
+    ├── InputText.jsx ──────► InputText.css
+    ├── InputPassword.jsx ──► InputPassword.css
+    └── Button.jsx ─────────► Button.css
+              │
+              ▼
+          Login.css
+```
+
+Observe que agora cada componente pode importar sua própria folha de estilos.
+
+---
+
+# Importando CSS em um componente React
+
+Uma folha de estilos pode ser importada diretamente pelo componente:
+
+```jsx
+import "./Label.css";
+```
+
+Ao realizar essa importação, as regras definidas no arquivo CSS passam a fazer
+parte dos estilos carregados pela aplicação.
+
+Para associar uma classe CSS a um elemento JSX utilizamos:
+
+```jsx
+className="nome-da-classe"
+```
+
+Por exemplo:
+
+```jsx
+<label className="label">
+  Usuário:
+</label>
+```
+
+:::warning `class` x `className`
+
+No HTML tradicional utilizamos:
+
+```html
+<label class="label">
+```
+
+Em JSX utilizamos:
+
+```jsx
+<label className="label">
+```
+
+Portanto, ao escrever componentes React, utilize **`className`** para
+associar classes CSS aos elementos.
+
+:::
+
+---
+
+# Estilizando o componente `Label`
+
+O componente `Label` continuará recebendo o texto por meio de uma prop e
+mantendo esse valor em um estado.
+
+A diferença é que agora adicionaremos uma classe CSS ao elemento `<label>`.
+
+## `Label.jsx`
+
+```jsx
+import "./Label.css";
+import React, { useState } from "react";
+
+export default function Label({ texto }) {
+
+  const [valor, setValor] = useState(texto);
+
+  return (
+    <label className="label">
+      {valor}
+    </label>
+  );
+}
+```
+
+Observe:
+
+```jsx
+className="label"
+```
+
+Essa propriedade associa o elemento à classe:
+
+```css
+.label
+```
+
+definida em `Label.css`.
+
+---
+
+## `Label.css`
+
+```css
+.label {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+```
+
+Vamos analisar cada propriedade.
+
+| Propriedade | Função |
+|---|---|
+| `display: block` | Faz o elemento ocupar uma linha como bloco |
+| `font-size: 1.2rem` | Define o tamanho da fonte |
+| `margin-bottom: 0.3rem` | Cria um espaço abaixo do rótulo |
+| `color: #333` | Define a cor do texto |
+
+### `display`
+
+```css
+display: block;
+```
+
+Faz com que o elemento `<label>` seja apresentado como bloco.
+
+Isso facilita a organização vertical:
+
+```text
+Usuário:
+[ campo de entrada ]
+```
+
+### `font-size`
+
+```css
+font-size: 1.2rem;
+```
+
+Define o tamanho da fonte utilizando a unidade relativa `rem`.
+
+:::tip Unidades relativas
+
+O uso de unidades relativas, como `rem`, permite que os tamanhos acompanhem
+melhor as configurações de fonte do navegador.
+
+Isso contribui para a escalabilidade da interface.
+
+:::
+
+### `margin-bottom`
+
+```css
+margin-bottom: 0.3rem;
+```
+
+Cria um pequeno espaço abaixo do elemento.
+
+Podemos representar:
+
+```text
+Usuário:
+   ↕ espaço
+[ input ]
+```
+
+### `color`
+
+```css
+color: #333;
+```
+
+Define uma tonalidade de cinza escuro para o texto.
+
+---
+
+# Criando um título para o formulário
+
+No capítulo anterior utilizamos componentes para apresentar os diferentes
+textos da interface.
+
+Agora criaremos um componente específico para o título:
+
+```text
+LabelTitle.jsx
+```
+
+Isso permite aplicar uma estilização diferente ao título da tela.
+
+## `LabelTitle.jsx`
+
+```jsx
+import "./LabelTitle.css";
+import React, { useState } from "react";
+
+export default function LabelTitle({ texto }) {
+
+  const [valor, setValor] = useState(texto);
+
+  return (
+    <label className="labelTitle">
+      {valor}
+    </label>
+  );
+}
+```
+
+Sua estrutura é semelhante ao `Label.jsx`.
+
+A principal diferença está na classe:
+
+```jsx
+className="labelTitle"
+```
+
+---
+
+## `LabelTitle.css`
+
+```css
+.labelTitle {
+  display: block;
+  font-size: 1.9rem;
+  margin-bottom: 0.3rem;
+  color: #004999;
+}
+```
+
+Temos:
+
+| Propriedade | Função |
+|---|---|
+| `display: block` | Faz o título ocupar a linha |
+| `font-size: 1.9rem` | Aumenta o destaque do título |
+| `margin-bottom: 0.3rem` | Cria espaçamento inferior |
+| `color: #004999` | Define a cor azul do título |
+
+Observe a diferença entre os dois componentes:
+
+```text
+Label
+ └── font-size: 1.2rem
+ └── color: #333
+
+LabelTitle
+ └── font-size: 1.9rem
+ └── color: #004999
+```
+
+Isso cria uma **hierarquia visual**.
+
+O usuário consegue perceber rapidamente que:
+
+```text
+Login          ← título
+
+Usuário:       ← rótulo
+[ input ]
+
+Senha:         ← rótulo
+[ input ]
+```
+
+:::tip Consistência visual
+
+Manter uma paleta coerente de cores e tamanhos ajuda a criar uma identidade
+visual consistente para a aplicação.
+
+:::
+
+---
+
+# Estilizando o campo de texto
+
+Agora aplicaremos CSS ao componente `InputText`.
+
+O comportamento estudado anteriormente será mantido:
+
+- estado para armazenar o valor;
+- estado para indicar erro;
+- evento `onChange`;
+- validação;
+- renderização condicional.
+
+Acrescentaremos apenas sua apresentação visual.
+
+## `InputText.jsx`
+
+```jsx
+import "./InputText.css";
+import React, { useState } from "react";
+
+export default function InputText({ placeholder }) {
+
+  const [valor, setValor] = useState("");
+  const [erro, setErro] = useState(false);
+
+  function handleChange(e) {
+
+    const novoValor = e.target.value;
+
+    setValor(novoValor);
+    setErro(novoValor.trim() === "");
+  }
+
+  return (
+    <>
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={valor}
+        onChange={handleChange}
+      />
+
+      {erro && <p>⚠️ O campo não pode ficar vazio.</p>}
+    </>
+  );
+}
+```
+
+---
+
+## `InputText.css`
+
+```css
+input[type="text"] {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+  margin-bottom: 0.3rem;
+}
+
+input[type="text"]:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 3px rgba(0, 102, 204, 0.4);
+}
+
+p {
+  font-size: 0.85rem;
+  color: #cc0000;
+  margin: 0.2rem 0 0;
+}
+```
+
+---
+
+# Seletores CSS
+
+Observe:
+
+```css
+input[type="text"]
+```
+
+Esse é um **seletor de atributo**.
+
+Ele seleciona elementos:
+
+```html
+<input>
+```
+
+que possuam:
+
+```html
+type="text"
+```
+
+Assim:
+
+```text
+input
+  │
+  └── type="text"
+          │
+          ▼
+input[type="text"]
+```
+
+---
+
+## Largura
+
+```css
+width: 100%;
+```
+
+Faz o input ocupar toda a largura disponível de seu contêiner.
+
+---
+
+## Espaçamento interno
+
+```css
+padding: 0.6rem;
+```
+
+O `padding` cria espaço entre o conteúdo e as bordas do elemento.
+
+```text
+┌──────────────────────────┐
+│  ↔ padding               │
+│    texto digitado        │
+│                          │
+└──────────────────────────┘
+```
+
+---
+
+## Bordas
+
+```css
+border: 1px solid #ccc;
+```
+
+Define:
+
+```text
+1px     → espessura
+solid   → estilo
+#ccc    → cor
+```
+
+Também utilizamos:
+
+```css
+border-radius: 4px;
+```
+
+para arredondar levemente os cantos.
+
+---
+
+# `box-sizing`
+
+Observe:
+
+```css
+box-sizing: border-box;
+```
+
+Por padrão, largura, padding e borda podem interferir no tamanho final do
+elemento.
+
+Com:
+
+```css
+box-sizing: border-box;
+```
+
+o navegador considera padding e borda dentro da largura definida.
+
+Isso é especialmente útil quando utilizamos:
+
+```css
+width: 100%;
+```
+
+---
+
+# Pseudoclasse `:focus`
+
+Também temos:
+
+```css
+input[type="text"]:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 3px rgba(0, 102, 204, 0.4);
+}
+```
+
+A pseudoclasse:
+
+```css
+:focus
+```
+
+é aplicada quando o elemento recebe foco.
+
+Por exemplo, quando o usuário clica no campo:
+
+```text
+campo normal
+     │
+     │ clique
+     ▼
+campo com foco
+     │
+     ▼
+:foco visual
+```
+
+A borda passa a utilizar:
+
+```css
+border-color: #0066cc;
+```
+
+e recebe uma sombra:
+
+```css
+box-shadow: 0 0 3px rgba(0, 102, 204, 0.4);
+```
+
+:::info Feedback visual
+
+Alterações visuais durante o foco ajudam o usuário a identificar qual elemento
+da interface está ativo.
+
+:::
+
+---
+
+# Transições
+
+Observe:
+
+```css
+transition: border-color 0.3s ease;
+```
+
+A propriedade `transition` faz com que a mudança visual da borda ocorra de
+forma gradual.
+
+Podemos interpretar:
+
+```text
+border-color
+     │
+     ├── duração: 0.3s
+     │
+     └── comportamento: ease
+```
+
+---
+
+# Estilizando o campo de senha
+
+Aplicaremos uma abordagem semelhante ao componente `InputPassword`.
+
+## `InputPassword.jsx`
+
+```jsx
+import "./InputPassword.css";
+import React, { useState } from "react";
+
+export default function InputPassword({ placeholder }) {
+
+  const [senha, setSenha] = useState("");
+
+  function handleChange(e) {
+    setSenha(e.target.value);
+  }
+
+  return (
+    <>
+      <input
+        type="password"
+        placeholder={placeholder}
+        value={senha}
+        onChange={handleChange}
+      />
+
+      {(senha !== "") && <p>Senha digitada: {senha}</p>}
+    </>
+  );
+}
+```
+
+---
+
+## `InputPassword.css`
+
+```css
+input[type="password"] {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  margin-bottom: 0.3rem;
+}
+
+input[type="password"]:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 3px rgba(40, 167, 69, 0.4);
+}
+
+p {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0.2rem 0 0;
+  font-style: italic;
+}
+```
+
+O seletor agora é:
+
+```css
+input[type="password"]
+```
+
+Portanto, essas regras são aplicadas aos campos cujo tipo seja:
+
+```html
+type="password"
+```
+
+---
+
+## Estilo durante o foco
+
+Quando o campo recebe foco:
+
+```css
+input[type="password"]:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 3px rgba(40, 167, 69, 0.4);
+}
+```
+
+A borda e a sombra utilizam uma tonalidade verde.
+
+O `box-shadow` cria um destaque visual ao redor do campo.
+
+:::warning Exemplo didático
+
+Como estudamos no capítulo anterior, a exibição do conteúdo da senha é
+utilizada apenas para permitir a visualização da alteração do estado.
+
+Em uma aplicação real, não devemos exibir a senha digitada dessa forma.
+
+:::
+
+---
+
+# Estilizando o botão
+
+O componente `Button` também continuará utilizando estado e o evento
+`onClick`.
+
+Agora adicionaremos:
+
+```jsx
+className="btn"
+```
+
+para permitir sua estilização.
+
+## `Button.jsx`
+
+```jsx
+import "./Button.css";
+import React, { useState } from "react";
+
+export default function Button({ valor }) {
+
+  const [texto, setTexto] = useState(valor);
+
+  function handleClick() {
+    setTexto("Você clicou!");
+  }
+
+  return (
+    <button className="btn" onClick={handleClick}>
+      {texto}
+    </button>
+  );
+}
+```
+
+---
+
+## `Button.css`
+
+```css
+.btn {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #0066cc;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #004999;
+}
+```
+
+---
+
+# Cor de fundo e texto
+
+A propriedade:
+
+```css
+background-color: #0066cc;
+```
+
+define a cor de fundo do botão.
+
+Enquanto:
+
+```css
+color: white;
+```
+
+define a cor do texto.
+
+---
+
+# Removendo a borda
+
+```css
+border: none;
+```
+
+remove a borda padrão do botão.
+
+Em seguida:
+
+```css
+border-radius: 4px;
+```
+
+arredonda seus cantos.
+
+---
+
+# Alterando o cursor
+
+```css
+cursor: pointer;
+```
+
+faz com que o navegador apresente o cursor de interação ao passar sobre o
+botão.
+
+Isso ajuda a indicar visualmente que o elemento pode ser clicado.
+
+---
+
+# Pseudoclasse `:hover`
+
+Observe:
+
+```css
+.btn:hover {
+  background-color: #004999;
+}
+```
+
+A pseudoclasse:
+
+```css
+:hover
+```
+
+é aplicada quando o ponteiro do mouse está sobre o elemento.
+
+Temos:
+
+```text
+Botão normal
+#0066cc
+    │
+    │ ponteiro sobre o botão
+    ▼
+:hover
+    │
+    ▼
+#004999
+```
+
+:::tip Feedback de interação
+
+O efeito `hover` fornece feedback visual ao usuário e ajuda a indicar que o
+elemento é interativo.
+
+:::
+
+---
+
+# Integrando os componentes em `Login.jsx`
+
+Agora reuniremos os componentes estilizados em uma única interface.
+
+O componente `Login.jsx` será responsável por organizar:
+
+```text
+Login
+ │
+ ├── LabelTitle
+ │
+ ├── Label + InputText
+ │
+ ├── Label + InputPassword
+ │
+ └── Button
+```
+
+## `Login.jsx`
+
+```jsx
+import "./Login.css";
+
+import Label from "./Label.jsx";
+import LabelTitle from "./LabelTitle.jsx";
+import Button from "./Button.jsx";
+import InputText from "./InputText.jsx";
+import InputPassword from "./InputPassword.jsx";
+
+function Login() {
+
+  return (
+    <div className="login-container">
+
+      <form className="login-form">
+
+        <LabelTitle texto="Login" />
+
+        <div className="form-group">
+          <Label texto="Usuário:" />
+          <InputText placeholder="user..." />
+        </div>
+
+        <div className="form-group">
+          <Label texto="Senha:" />
+          <InputPassword placeholder="password..." />
+        </div>
+
+        <Button valor="Logar" />
+
+      </form>
+
+    </div>
+  );
+}
+
+export default Login;
+```
+
+Agora temos três classes importantes:
+
+```text
+login-container
+login-form
+form-group
+```
+
+Cada uma possui uma responsabilidade diferente na organização visual.
+
+---
+
+# Estilizando a tela de Login
+
+## `Login.css`
+
+```css
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+  width: 100vmax;
+}
+
+.login-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+```
+
+---
+
+# O container principal
+
+A classe:
+
+```css
+.login-container
+```
+
+é responsável pela organização geral da tela.
+
+```css
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+  width: 100vmax;
+}
+```
+
+---
+
+# Introdução ao Flexbox
+
+A propriedade:
+
+```css
+display: flex;
+```
+
+transforma o elemento em um **Flex Container**.
+
+Seus elementos filhos passam a ser organizados utilizando o modelo Flexbox.
+
+```text
+.login-container
+       │
+       │ display: flex
+       ▼
+┌───────────────────────────────┐
+│                               │
+│          login-form           │
+│                               │
+└───────────────────────────────┘
+```
+
+:::info Flexbox
+
+**Flexbox** é um modelo de layout CSS utilizado para organizar e alinhar
+elementos de maneira flexível.
+
+Ele é especialmente útil para:
+
+- centralização;
+- alinhamento;
+- distribuição de espaço;
+- organização em linhas ou colunas.
+
+:::
+
+---
+
+# Centralização horizontal
+
+```css
+justify-content: center;
+```
+
+Centraliza o conteúdo no eixo principal.
+
+Neste caso:
+
+```text
+←────────── [ formulário ] ──────────→
+```
+
+---
+
+# Centralização vertical
+
+```css
+align-items: center;
+```
+
+Centraliza os elementos no outro eixo.
+
+Combinando:
+
+```css
+display: flex;
+justify-content: center;
+align-items: center;
+```
+
+obtemos:
+
+```text
+┌──────────────────────────────────┐
+│                                  │
+│                                  │
+│          ┌────────────┐          │
+│          │   Login    │          │
+│          │            │          │
+│          │ formulário │          │
+│          └────────────┘          │
+│                                  │
+│                                  │
+└──────────────────────────────────┘
+```
+
+---
+
+# Unidade `vh`
+
+Observe:
+
+```css
+height: 100vh;
+```
+
+A unidade:
+
+```text
+vh = viewport height
+```
+
+representa uma porcentagem da altura visível da janela.
+
+Assim:
+
+```text
+100vh
+```
+
+corresponde à altura total da viewport.
+
+---
+
+# Fundo da aplicação
+
+```css
+background-color: #f5f5f5;
+```
+
+define um fundo cinza claro para a tela.
+
+Isso ajuda a destacar visualmente o formulário branco.
+
+---
+
+# O formulário
+
+A classe:
+
+```css
+.login-form
+```
+
+define a aparência do formulário.
+
+```css
+.login-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+```
+
+Visualmente temos:
+
+```text
+       Fundo da página
+┌──────────────────────────────┐
+│                              │
+│     ┌──────────────────┐     │
+│     │      Login       │     │
+│     │                  │     │
+│     │ Usuário          │     │
+│     │ [____________]   │     │
+│     │                  │     │
+│     │ Senha            │     │
+│     │ [____________]   │     │
+│     │                  │     │
+│     │ [    Logar    ]  │     │
+│     └──────────────────┘     │
+│                              │
+└──────────────────────────────┘
+```
+
+Esse tipo de apresentação é frequentemente chamado de **Card Layout**.
+
+---
+
+# Sombra
+
+Observe:
+
+```css
+box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+```
+
+A sombra ajuda a destacar o formulário do fundo.
+
+Temos:
+
+```text
+0px     → deslocamento horizontal
+4px     → deslocamento vertical
+10px    → desfoque
+rgba()  → cor e transparência
+```
+
+---
+
+# Agrupando Label e Input
+
+No `Login.jsx`, cada campo está dentro de:
+
+```jsx
+<div className="form-group">
+```
+
+Sua estilização é:
+
+```css
+.form-group {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+```
+
+A propriedade:
+
+```css
+flex-direction: column;
+```
+
+faz com que os elementos sejam organizados verticalmente.
+
+Assim:
+
+```text
+form-group
+    │
+    ├── Label
+    │
+    └── Input
+```
+
+é apresentado como:
+
+```text
+Label
+  ↓
+Input
+```
+
+em vez de:
+
+```text
+Label → Input
+```
+
+Isso facilita a leitura e a organização do formulário.
+
+---
+
+# Utilizando o novo Login no `App.jsx`
+
+Agora precisamos indicar ao componente principal que queremos utilizar a
+versão estilizada da tela de login.
+
+## `App.jsx`
+
+```jsx
+// import Login from "./componentes/props/Login.jsx";
+// import Login from "./componentes/state/Login.jsx";
+
+import Login from "./componentes/CSS/Login.jsx";
+
+function App() {
+
+  return (
+    <>
+      <Login />
+    </>
+  );
+}
+
+export default App;
+```
+
+O componente `App` continua simples.
+
+Sua responsabilidade é renderizar:
+
+```jsx
+<Login />
+```
+
+A diferença está na versão importada:
+
+```jsx
+import Login from "./componentes/CSS/Login.jsx";
+```
+
+Assim, podemos manter versões diferentes do mesmo exemplo durante o processo
+de aprendizagem:
+
+```text
+componentes/
+│
+├── props/
+│   └── Login.jsx
+│
+├── state/
+│   └── Login.jsx
+│
+└── CSS/
+    └── Login.jsx
+```
+
+:::tip Evolução do projeto
+
+Essa organização permite observar a evolução da aplicação:
+
+```text
+Componentes
+    │
+    ▼
+Props
+    │
+    ▼
+State
+    │
+    ▼
+Eventos
+    │
+    ▼
+CSS
+    │
+    ▼
+Interface estilizada
+```
+
+:::
+
+---
+
+# Visão geral da aplicação
+
+Agora nossa aplicação possui uma combinação de diferentes conceitos:
+
+```text
+                         Login.jsx
+                             │
+            ┌────────────────┼─────────────────┐
+            │                │                 │
+            ▼                ▼                 ▼
+         Componentes       Estados            CSS
+            │                │                 │
+            ▼                ▼                 ▼
+       reutilização      reatividade       aparência
+            │                │                 │
+            └────────────────┼─────────────────┘
+                             ▼
+                       Interface final
+```
+
+Também podemos observar a relação entre cada componente e sua folha de estilo:
+
+```text
+Label.jsx ─────────────► Label.css
+
+LabelTitle.jsx ────────► LabelTitle.css
+
+InputText.jsx ─────────► InputText.css
+
+InputPassword.jsx ─────► InputPassword.css
+
+Button.jsx ────────────► Button.css
+
+Login.jsx ─────────────► Login.css
+```
+
+---
+
+# Conceitos-chave
+
+Neste capítulo trabalhamos com:
+
+| Conceito | Aplicação |
+|---|---|
+| CSS | Define a apresentação visual |
+| `className` | Associa classes CSS ao JSX |
+| `display` | Define o comportamento de exibição |
+| `width` e `height` | Controlam dimensões |
+| `padding` | Define espaçamento interno |
+| `margin` | Define espaçamento externo |
+| `border` | Define bordas |
+| `border-radius` | Arredonda os cantos |
+| `color` | Define a cor do texto |
+| `background-color` | Define a cor de fundo |
+| `box-shadow` | Adiciona sombra |
+| `:focus` | Estiliza elementos que possuem foco |
+| `:hover` | Estiliza elementos sob o ponteiro |
+| `transition` | Suaviza mudanças de propriedades |
+| Flexbox | Organiza e alinha elementos |
+| `flex-direction` | Define a direção dos elementos flexíveis |
+| `justify-content` | Controla alinhamento no eixo principal |
+| `align-items` | Controla alinhamento no eixo transversal |
+| `vh` | Unidade relativa à altura da viewport |
+| `rem` | Unidade relativa ao tamanho base da fonte |
+
+---
+
+# Exercício de Fixação
+
+Neste capítulo adicionamos **estilização CSS** aos componentes desenvolvidos
+anteriormente.
+
+O objetivo deste exercício é implementar, executar, testar e validar todos os
+códigos apresentados.
+
+## Atividade
+
+Crie a estrutura:
+
+```text
+src/
+└── componentes/
+    └── CSS/
+        ├── Login.jsx
+        ├── Login.css
+        ├── Label.jsx
+        ├── Label.css
+        ├── LabelTitle.jsx
+        ├── LabelTitle.css
+        ├── InputText.jsx
+        ├── InputText.css
+        ├── InputPassword.jsx
+        ├── InputPassword.css
+        ├── Button.jsx
+        └── Button.css
+```
+
+Implemente os códigos apresentados ao longo deste capítulo.
+
+Depois, configure o `App.jsx` para utilizar:
+
+```jsx
+import Login from "./componentes/CSS/Login.jsx";
+```
+
+Execute a aplicação:
+
+```bash
+npm run dev
+```
+
+---
+
+## Testando `Label`
+
+Verifique se:
+
+```jsx
+<Label texto="Usuário:" />
+```
+
+apresenta corretamente o texto.
+
+Observe se as regras de `Label.css` foram aplicadas:
+
+```css
+.label
+```
+
+Verifique principalmente:
+
+- tamanho da fonte;
+- cor;
+- espaçamento inferior;
+- comportamento em bloco.
+
+---
+
+## Testando `LabelTitle`
+
+Verifique se:
+
+```jsx
+<LabelTitle texto="Login" />
+```
+
+possui maior destaque visual que os demais rótulos.
+
+Compare:
+
+```text
+LabelTitle
+   │
+   └── título
+
+Label
+   │
+   └── rótulo
+```
+
+---
+
+## Testando `InputText`
+
+Digite diferentes valores no campo.
+
+Verifique se o comportamento estudado anteriormente continua funcionando:
+
+```text
+digitação
+    │
+    ▼
+onChange
+    │
+    ▼
+estado
+```
+
+Em seguida, verifique a estilização.
+
+Clique no campo e observe se o seletor:
+
+```css
+input[type="text"]:focus
+```
+
+modifica a borda e adiciona o efeito visual.
+
+Apague o conteúdo e verifique também a mensagem de erro.
+
+---
+
+## Testando `InputPassword`
+
+Digite uma senha e verifique se o estado continua sendo atualizado.
+
+Observe também a mudança visual quando o campo recebe foco:
+
+```css
+input[type="password"]:focus
+```
+
+Compare o comportamento visual com o `InputText`.
+
+---
+
+## Testando `Button`
+
+Verifique inicialmente:
+
+```text
+Logar
+```
+
+Passe o ponteiro sobre o botão e observe o efeito:
+
+```css
+.btn:hover
+```
+
+Depois clique no botão.
+
+O texto deverá ser alterado para:
+
+```text
+Você clicou!
+```
+
+Assim, podemos observar que a estilização CSS não modifica o funcionamento do
+estado e dos eventos implementados anteriormente.
+
+---
+
+## Testando o layout
+
+Observe a interface completa.
+
+Verifique se o formulário está:
+
+- centralizado horizontalmente;
+- centralizado verticalmente;
+- destacado sobre o fundo;
+- organizado em formato de card;
+- com Label e Input organizados verticalmente;
+- com espaçamento adequado entre os campos.
+
+Identifique no CSS quais propriedades são responsáveis por cada
+comportamento.
+
+---
+
+## Validação final
+
+Ao concluir os testes, procure identificar a relação:
+
+```text
+Componente JSX
+      │
+      ├── estrutura
+      ├── props
+      ├── state
+      ├── eventos
+      │
+      └── className
+             │
+             ▼
+         Arquivo CSS
+             │
+             ▼
+      Apresentação visual
+```
+
+:::tip Objetivo do exercício
+
+O objetivo não é apenas reproduzir a aparência da aplicação.
+
+Durante os testes, identifique **qual regra CSS é responsável por cada
+alteração visual** e observe que o CSS trabalha em conjunto com os conceitos
+de componentes, props, states e eventos estudados anteriormente.
+
+:::
+
+---
+
+# Resumo
+
+Neste capítulo evoluímos nossa aplicação React adicionando **estilos CSS** aos
+componentes.
+
+Mantivemos os conceitos estudados anteriormente:
+
+```text
+Componentes
+Props
+State
+Eventos
+Inputs controlados
+Renderização condicional
+```
+
+e acrescentamos:
+
+```text
+CSS
+Classes
+Seletores
+Pseudoclasses
+Espaçamentos
+Cores
+Bordas
+Sombras
+Flexbox
+```
+
+A aplicação passa, portanto, a combinar:
+
+```text
+Estrutura
+    +
+Comportamento
+    +
+Apresentação
+    =
+Interface React
+```
+
+Nos próximos conteúdos, essa separação será importante para construir
+interfaces cada vez mais organizadas, reutilizáveis e visualmente
+consistentes.
