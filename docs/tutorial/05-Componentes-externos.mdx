@@ -1,0 +1,2309 @@
+# 📘 Bibliotecas de Componentes Externos
+
+Nos capítulos anteriores, construímos e estilizamos nossa aplicação React
+utilizando diferentes abordagens.
+
+Inicialmente, utilizamos **CSS tradicional**, criando arquivos específicos para
+definir a aparência dos componentes.
+
+Depois, utilizamos **Tailwind CSS**, aplicando classes utilitárias diretamente
+nos elementos JSX.
+
+Agora conheceremos uma terceira possibilidade: utilizar **bibliotecas de
+componentes externos**.
+
+Essas bibliotecas disponibilizam componentes de interface prontos para serem
+utilizados em aplicações React.
+
+Alguns exemplos são:
+
+- Material UI;
+- Ant Design;
+- React Bootstrap;
+- PrimeReact.
+
+Podemos representar essa evolução da seguinte maneira:
+
+```text
+CSS tradicional
+      │
+      ▼
+Criamos nossos estilos
+      │
+      ▼
+Componente + arquivo CSS
+
+
+Tailwind
+      │
+      ▼
+Utilizamos classes utilitárias
+      │
+      ▼
+Componente + className
+
+
+Biblioteca de componentes
+      │
+      ▼
+Utilizamos componentes prontos
+      │
+      ▼
+Componente React + Design System
+```
+
+:::info Biblioteca de componentes
+
+Uma **biblioteca de componentes** disponibiliza elementos de interface
+reutilizáveis que podem ser incorporados à aplicação.
+
+Esses componentes normalmente já possuem características como:
+
+- aparência visual;
+- espaçamento;
+- estados de interação;
+- comportamentos;
+- variações;
+- padronização.
+
+Assim, em vez de construirmos todos os elementos da interface a partir de
+elementos HTML básicos, podemos utilizar componentes fornecidos pela
+biblioteca.
+
+:::
+
+---
+
+# Algumas bibliotecas disponíveis
+
+Existem diferentes bibliotecas de componentes para React.
+
+Entre elas:
+
+| Biblioteca | Característica |
+|---|---|
+| Material UI | Biblioteca baseada nos princípios do Material Design |
+| Ant Design | Design System com ampla variedade de componentes |
+| React Bootstrap | Componentes Bootstrap implementados para React |
+| PrimeReact | Biblioteca com diversos componentes de interface |
+
+A escolha de uma biblioteca pode considerar diferentes fatores, como:
+
+```text
+Biblioteca
+    │
+    ├── componentes disponíveis
+    ├── documentação
+    ├── facilidade de utilização
+    ├── compatibilidade com o projeto
+    ├── manutenção
+    └── adoção pela comunidade
+```
+
+:::tip Analisando bibliotecas
+
+Ferramentas como **NPM Trends** podem ser utilizadas para comparar a evolução
+de downloads de diferentes pacotes publicados no NPM.
+
+Entretanto, quantidade de downloads não deve ser o único critério para a
+escolha de uma biblioteca.
+
+É importante analisar também as necessidades específicas do projeto.
+
+:::
+
+---
+
+# Ant Design
+
+Neste capítulo utilizaremos o **Ant Design**, também chamado de **AntD**.
+
+O Ant Design fornece diversos componentes prontos para construção de
+interfaces.
+
+Entre os componentes que utilizaremos estão:
+
+```text
+Typography
+Input
+Input.Password
+Button
+Alert
+Card
+Space
+```
+
+Também utilizaremos:
+
+```text
+message
+```
+
+para apresentar mensagens temporárias ao usuário.
+
+A ideia será reconstruir a mesma interface de Login utilizada nos capítulos
+anteriores.
+
+Assim, poderemos comparar diretamente as diferentes estratégias de
+estilização.
+
+---
+
+# Evolução da aplicação
+
+Até agora tivemos:
+
+```text
+componentes/
+│
+├── props/
+│
+│   └── Login.jsx
+│
+├── state/
+│
+│   └── Login.jsx
+│
+├── CSS/
+│
+│   └── Login.jsx
+│
+└── tailwind/
+    └── Login.jsx
+```
+
+Agora acrescentaremos:
+
+```text
+componentes/
+│
+└── antd/
+    ├── Label.jsx
+    ├── LabelTitle.jsx
+    ├── InputText.jsx
+    ├── InputPassword.jsx
+    ├── Button.jsx
+    └── Login.jsx
+```
+
+A nova versão continuará utilizando componentes próprios da nossa aplicação.
+
+A diferença é que internamente esses componentes utilizarão componentes
+fornecidos pelo Ant Design.
+
+Por exemplo:
+
+```text
+Nosso componente            Ant Design
+
+Label.jsx            ───►   Typography.Text
+
+LabelTitle.jsx       ───►   Typography.Title
+
+InputText.jsx        ───►   Input
+                         └─► Alert
+
+InputPassword.jsx    ───►   Input.Password
+
+Button.jsx           ───►   Button
+                         └─► message
+
+Login.jsx            ───►   Card
+                         └─► Space
+```
+
+:::tip
+
+Essa abordagem permite continuar utilizando a **componentização** estudada nos
+capítulos anteriores.
+
+Não precisamos abandonar nossos componentes.
+
+Podemos construir componentes próprios utilizando componentes fornecidos por
+outras bibliotecas.
+
+:::
+
+---
+
+# Design System
+
+Antes de começarmos a implementação, é importante compreender o conceito de
+**Design System**.
+
+Um Design System reúne padrões utilizados para manter consistência na
+construção de interfaces.
+
+Esses padrões podem envolver:
+
+```text
+Design System
+     │
+     ├── cores
+     ├── tipografia
+     ├── espaçamento
+     ├── componentes
+     ├── estados visuais
+     └── padrões de interação
+```
+
+Quando utilizamos componentes pertencentes ao mesmo Design System, eles tendem
+a compartilhar uma identidade visual comum.
+
+Por exemplo:
+
+```text
+Input
+Button
+Card
+Alert
+Typography
+      │
+      └───────────────┐
+                      ▼
+               Design System
+                      │
+                      ▼
+             Consistência visual
+```
+
+:::info
+
+Uma das vantagens de uma biblioteca como o Ant Design é que não estamos
+utilizando apenas componentes isolados.
+
+Os componentes fazem parte de um **sistema visual consistente**.
+
+:::
+
+---
+
+# Instalando o Ant Design
+
+No terminal do projeto, execute:
+
+```bash
+npm install antd @ant-design/icons
+```
+
+Esse comando adicionará ao projeto:
+
+```text
+antd
+```
+
+e:
+
+```text
+@ant-design/icons
+```
+
+:::tip StackBlitz
+
+Se estiver utilizando StackBlitz, execute o comando no terminal do projeto.
+
+Após a instalação, as dependências serão adicionadas ao `package.json`.
+
+Não é necessário alterar manualmente as versões de `react` e `react-dom`
+existentes no projeto.
+
+:::
+
+---
+
+# Configuração inicial
+
+No arquivo:
+
+```text
+src/main.jsx
+```
+
+importaremos o arquivo de reset do Ant Design.
+
+## `main.jsx`
+
+```jsx
+import "./index.css";
+
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+
+import "antd/dist/reset.css";
+
+import App from "./App.jsx";
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+A novidade é:
+
+```jsx
+import "antd/dist/reset.css";
+```
+
+Esse arquivo fornece estilos básicos utilizados pelo Ant Design.
+
+O restante da estrutura permanece igual ao que já utilizamos:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+App.jsx
+```
+
+---
+
+# Utilizando a versão Ant Design
+
+Agora ajustaremos o `App.jsx` para utilizar a nova versão do componente
+`Login`.
+
+## `App.jsx`
+
+```jsx
+import Login from "./componentes/antd/Login.jsx";
+
+function App() {
+
+  return (
+    <>
+      <Login />
+    </>
+  );
+}
+
+export default App;
+```
+
+Assim, podemos continuar mantendo diferentes implementações da mesma
+interface:
+
+```text
+Login com Props
+
+Login com State
+
+Login com CSS
+
+Login com Tailwind
+
+Login com Ant Design
+```
+
+Isso permite observar como a aplicação evolui sem alterar sua organização
+principal.
+
+---
+
+# Componente `Label.jsx`
+
+Nos capítulos anteriores utilizamos o elemento HTML:
+
+```jsx
+<label>
+```
+
+Nesta versão utilizaremos:
+
+```jsx
+Typography.Text
+```
+
+do Ant Design.
+
+## `Label.jsx`
+
+```jsx
+import React from "react";
+import { Typography } from "antd";
+
+const { Text } = Typography;
+
+export default function Label({ texto }) {
+
+  return (
+    <Text
+      strong
+      style={{
+        fontSize: 16,
+        color: "#333"
+      }}
+    >
+      {texto}
+    </Text>
+  );
+}
+```
+
+---
+
+# Importando `Typography`
+
+Observe:
+
+```jsx
+import { Typography } from "antd";
+```
+
+Estamos importando um componente disponibilizado pela biblioteca.
+
+Em seguida:
+
+```jsx
+const { Text } = Typography;
+```
+
+extraímos:
+
+```text
+Typography.Text
+```
+
+para utilizá-lo simplesmente como:
+
+```jsx
+<Text>
+```
+
+---
+
+# A propriedade `strong`
+
+No componente temos:
+
+```jsx
+<Text strong>
+```
+
+A propriedade:
+
+```text
+strong
+```
+
+aplica maior destaque ao texto.
+
+Assim, não precisamos criar uma classe CSS específica apenas para aplicar peso
+à fonte.
+
+---
+
+# Complementando com `style`
+
+Também encontramos:
+
+```jsx
+style={{
+  fontSize: 16,
+  color: "#333"
+}}
+```
+
+O Ant Design fornece a base visual do componente, mas ainda podemos
+complementar sua apresentação.
+
+Nesse caso definimos:
+
+```text
+fontSize
+   │
+   └── tamanho da fonte
+
+color
+   │
+   └── cor do texto
+```
+
+:::info
+
+Utilizar uma biblioteca de componentes não significa que nunca poderemos
+personalizar os elementos.
+
+Podemos combinar os componentes da biblioteca com configurações adicionais
+quando necessário.
+
+:::
+
+---
+
+# Componente `LabelTitle.jsx`
+
+Para o título utilizaremos outro recurso do `Typography`.
+
+Agora utilizaremos:
+
+```text
+Typography.Title
+```
+
+## `LabelTitle.jsx`
+
+```jsx
+import React from "react";
+import { Typography } from "antd";
+
+const { Title } = Typography;
+
+export default function LabelTitle({ texto }) {
+
+  return (
+    <Title
+      level={2}
+      style={{
+        color: "#1677ff",
+        textAlign: "center",
+        marginBottom: 24
+      }}
+    >
+      {texto}
+    </Title>
+  );
+}
+```
+
+---
+
+# `Typography.Title`
+
+A propriedade:
+
+```jsx
+level={2}
+```
+
+define o nível visual do título.
+
+O Ant Design permite trabalhar com diferentes níveis:
+
+```text
+level={1}
+level={2}
+level={3}
+level={4}
+level={5}
+```
+
+Isso ajuda a manter uma hierarquia tipográfica.
+
+No nosso exemplo:
+
+```jsx
+<Title level={2}>
+```
+
+será utilizado como título do formulário.
+
+---
+
+# Personalizando o título
+
+Também utilizamos:
+
+```jsx
+style={{
+  color: "#1677ff",
+  textAlign: "center",
+  marginBottom: 24
+}}
+```
+
+Temos:
+
+```text
+color
+  │
+  └── cor azul
+
+textAlign
+  │
+  └── centralização
+
+marginBottom
+  │
+  └── espaçamento inferior
+```
+
+Visualmente:
+
+```text
+┌────────────────────────────┐
+│                            │
+│           Login            │
+│                            │
+│ Usuário                    │
+│ [______________________]   │
+│                            │
+└────────────────────────────┘
+```
+
+---
+
+# Componente `InputText.jsx`
+
+Agora começaremos a observar uma vantagem importante de utilizar componentes
+prontos.
+
+No capítulo anterior construímos o campo utilizando:
+
+```jsx
+<input>
+```
+
+e adicionamos manualmente diferentes classes Tailwind.
+
+Agora utilizaremos:
+
+```jsx
+<Input />
+```
+
+do Ant Design.
+
+Também utilizaremos:
+
+```jsx
+<Alert />
+```
+
+para apresentar a mensagem de validação.
+
+## `InputText.jsx`
+
+```jsx
+import React, { useState } from "react";
+import { Input, Alert } from "antd";
+
+export default function InputText({ placeholder }) {
+
+  const [valor, setValor] = useState("");
+  const [erro, setErro] = useState(false);
+
+  const handleChange = (e) => {
+
+    const novoValor = e.target.value;
+
+    setValor(novoValor);
+
+    setErro(novoValor.trim() === "");
+  };
+
+  return (
+    <div>
+
+      <Input
+        placeholder={placeholder}
+        value={valor}
+        onChange={handleChange}
+        size="large"
+        status={erro ? "error" : ""}
+      />
+
+      {erro && (
+        <Alert
+          message="O campo não pode ficar vazio."
+          type="error"
+          showIcon
+          style={{ marginTop: 8 }}
+        />
+      )}
+
+    </div>
+  );
+}
+```
+
+---
+
+# Estado e biblioteca de componentes
+
+É importante observar que os conceitos de React continuam funcionando
+normalmente.
+
+Temos:
+
+```jsx
+const [valor, setValor] = useState("");
+const [erro, setErro] = useState(false);
+```
+
+e:
+
+```jsx
+const handleChange = (e) => {
+
+  const novoValor = e.target.value;
+
+  setValor(novoValor);
+
+  setErro(novoValor.trim() === "");
+};
+```
+
+Portanto:
+
+```text
+Usuário digita
+      │
+      ▼
+onChange
+      │
+      ▼
+handleChange()
+      │
+      ├── setValor()
+      │
+      └── setErro()
+              │
+              ▼
+        nova renderização
+```
+
+A utilização do Ant Design **não substitui o state do React**.
+
+O que muda é o componente visual utilizado para apresentar o campo.
+
+---
+
+# Componente `Input`
+
+Observe:
+
+```jsx
+<Input
+  placeholder={placeholder}
+  value={valor}
+  onChange={handleChange}
+  size="large"
+  status={erro ? "error" : ""}
+/>
+```
+
+Temos propriedades que já conhecemos:
+
+```text
+placeholder
+value
+onChange
+```
+
+e propriedades fornecidas pelo componente do Ant Design:
+
+```text
+size
+status
+```
+
+---
+
+# `size="large"`
+
+A propriedade:
+
+```jsx
+size="large"
+```
+
+define uma versão maior do campo.
+
+Isso modifica automaticamente características visuais como altura e
+espaçamento interno.
+
+Não precisamos escrever:
+
+```css
+padding: ...
+height: ...
+font-size: ...
+```
+
+O componente já possui uma variação preparada para isso.
+
+---
+
+# Estado visual de erro
+
+Observe:
+
+```jsx
+status={erro ? "error" : ""}
+```
+
+Temos uma expressão condicional:
+
+```text
+erro === true
+      │
+      ▼
+status="error"
+```
+
+Quando não existe erro:
+
+```text
+erro === false
+      │
+      ▼
+status=""
+```
+
+Assim, o próprio componente `Input` apresenta visualmente o estado de erro.
+
+Podemos representar:
+
+```text
+state erro
+    │
+    ├── false
+    │      │
+    │      ▼
+    │   Input normal
+    │
+    └── true
+           │
+           ▼
+      status="error"
+           │
+           ▼
+      Input com indicação
+      visual de erro
+```
+
+---
+
+# Componente `Alert`
+
+Além do estado visual do campo, apresentaremos uma mensagem:
+
+```jsx
+<Alert
+  message="O campo não pode ficar vazio."
+  type="error"
+  showIcon
+  style={{ marginTop: 8 }}
+/>
+```
+
+Temos:
+
+| Propriedade | Função |
+|---|---|
+| `message` | Define a mensagem apresentada |
+| `type="error"` | Define o tipo do alerta |
+| `showIcon` | Exibe o ícone correspondente |
+| `style` | Complementa a apresentação |
+
+A renderização continua sendo condicional:
+
+```jsx
+{erro && (
+  <Alert ... />
+)}
+```
+
+Portanto:
+
+```text
+React
+  │
+  └── decide SE o Alert aparece
+
+Ant Design
+  │
+  └── define COMO o Alert aparece
+```
+
+:::tip
+
+Essa relação é importante.
+
+A biblioteca fornece o componente visual, mas continuamos utilizando a lógica
+React para controlar o comportamento da aplicação.
+
+:::
+
+---
+
+# Componente `InputPassword.jsx`
+
+Para o campo de senha, o Ant Design disponibiliza um componente específico:
+
+```text
+Input.Password
+```
+
+## `InputPassword.jsx`
+
+```jsx
+import React, { useState } from "react";
+import { Input, Typography } from "antd";
+
+const { Text } = Typography;
+
+export default function InputPassword({ placeholder }) {
+
+  const [senha, setSenha] = useState("");
+
+  return (
+    <div>
+
+      <Input.Password
+        placeholder={placeholder}
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)}
+        size="large"
+      />
+
+      {/*
+      Exemplo alternativo de feedback:
+
+      <Text type="secondary" italic>
+        Senha digitada: {senha}
+      </Text>
+      */}
+
+    </div>
+  );
+}
+```
+
+---
+
+# `Input.Password`
+
+Anteriormente utilizamos:
+
+```jsx
+<input type="password" />
+```
+
+Agora utilizamos:
+
+```jsx
+<Input.Password />
+```
+
+O componente já fornece o comportamento visual associado ao campo de senha.
+
+Uma característica importante é a possibilidade de **mostrar ou ocultar a
+senha** por meio do controle incorporado ao componente.
+
+Assim:
+
+```text
+Input.Password
+      │
+      ├── campo de senha
+      ├── aparência padronizada
+      └── controle de exibição/ocultação
+```
+
+Isso demonstra outra característica das bibliotecas de componentes:
+determinados elementos já possuem **comportamentos de interface integrados**.
+
+---
+
+# Feedback opcional
+
+O código apresenta também uma possibilidade alternativa:
+
+```jsx
+<Text type="secondary" italic>
+  Senha digitada: {senha}
+</Text>
+```
+
+Temos:
+
+```text
+type="secondary"
+      │
+      └── estilo textual secundário
+
+italic
+      │
+      └── texto em itálico
+```
+
+O exemplo está comentado porque não é necessário para o funcionamento do
+formulário.
+
+:::warning Senhas
+
+A apresentação da senha digitada é apenas um exemplo didático para demonstrar
+o funcionamento do state.
+
+Não devemos apresentar a senha dessa maneira em uma aplicação real.
+
+:::
+
+---
+
+# Componente `Button.jsx`
+
+Agora utilizaremos o botão fornecido pelo Ant Design.
+
+Como já possuímos um componente chamado `Button`, utilizaremos um **alias** na
+importação.
+
+## `Button.jsx`
+
+```jsx
+import React, { useState } from "react";
+
+import {
+  Button as AntButton,
+  message
+} from "antd";
+
+export default function Button({ valor }) {
+
+  const [texto, setTexto] = useState(valor);
+
+  const handleClick = () => {
+
+    setTexto("Você clicou!");
+
+    message.success(
+      "Botão clicado com sucesso!"
+    );
+  };
+
+  return (
+    <AntButton
+      type="primary"
+      block
+      size="large"
+      onClick={handleClick}
+    >
+      {texto}
+    </AntButton>
+  );
+}
+```
+
+---
+
+# Utilizando um alias
+
+Observe:
+
+```jsx
+import {
+  Button as AntButton
+} from "antd";
+```
+
+Temos dois componentes chamados:
+
+```text
+Button
+```
+
+Nosso arquivo:
+
+```text
+Button.jsx
+```
+
+e o componente:
+
+```text
+Button
+```
+
+do Ant Design.
+
+Para evitar confusão, utilizamos:
+
+```text
+Button as AntButton
+```
+
+Assim:
+
+```jsx
+<AntButton>
+```
+
+representa o componente fornecido pela biblioteca.
+
+:::info Alias
+
+Um **alias** permite utilizar outro nome para um elemento importado.
+
+Neste exemplo:
+
+```text
+Button
+   │
+   │ as
+   ▼
+AntButton
+```
+
+:::
+
+---
+
+# `type="primary"`
+
+O botão utiliza:
+
+```jsx
+type="primary"
+```
+
+Essa propriedade seleciona a aparência principal do componente.
+
+Assim, não precisamos criar manualmente regras como:
+
+```css
+background-color: ...;
+color: ...;
+border: ...;
+```
+
+A aparência é fornecida pelo Design System.
+
+---
+
+# Propriedade `block`
+
+Também temos:
+
+```jsx
+block
+```
+
+Essa propriedade faz com que o botão ocupe toda a largura disponível.
+
+Podemos relacionar ao conceito visto anteriormente:
+
+```text
+CSS
+width: 100%
+
+Tailwind
+w-full
+
+Ant Design
+block
+```
+
+São formas diferentes de obter um comportamento visual semelhante.
+
+---
+
+# `size="large"`
+
+Novamente utilizamos:
+
+```jsx
+size="large"
+```
+
+Assim, `Input`, `Input.Password` e `Button` mantêm uma proporção visual
+consistente.
+
+```text
+Input
+     │
+     └── size="large"
+
+Input.Password
+     │
+     └── size="large"
+
+Button
+     │
+     └── size="large"
+```
+
+---
+
+# Feedback com `message`
+
+No evento de clique temos:
+
+```jsx
+message.success(
+  "Botão clicado com sucesso!"
+);
+```
+
+Essa função apresenta uma mensagem temporária de sucesso.
+
+O fluxo passa a ser:
+
+```text
+Clique
+  │
+  ▼
+handleClick()
+  │
+  ├── setTexto()
+  │       │
+  │       ▼
+  │  "Você clicou!"
+  │
+  └── message.success()
+          │
+          ▼
+     feedback visual
+```
+
+Anteriormente o botão apenas modificava seu próprio texto.
+
+Agora também utilizamos um recurso de feedback fornecido pelo Ant Design.
+
+---
+
+# Integrando os componentes em `Login.jsx`
+
+Finalmente, reuniremos os componentes na tela de Login.
+
+Nesta etapa utilizaremos dois novos componentes do Ant Design:
+
+```text
+Card
+Space
+```
+
+## `Login.jsx`
+
+```jsx
+import React from "react";
+
+import {
+  Card,
+  Space
+} from "antd";
+
+import Label from "./Label.jsx";
+import LabelTitle from "./LabelTitle.jsx";
+import Button from "./Button.jsx";
+import InputText from "./InputText.jsx";
+import InputPassword from "./InputPassword.jsx";
+
+export default function Login() {
+
+  return (
+    <div
+      style={{
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: "#f5f5f5",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}
+    >
+
+      <Card
+        style={{ width: 360 }}
+        bordered
+      >
+
+        <LabelTitle texto="Login" />
+
+        <Space
+          direction="vertical"
+          style={{ width: "100%" }}
+          size="middle"
+        >
+
+          <div>
+            <Label texto="Usuário:" />
+            <InputText
+              placeholder="Digite seu usuário"
+            />
+          </div>
+
+          <div>
+            <Label texto="Senha:" />
+            <InputPassword
+              placeholder="Digite sua senha"
+            />
+          </div>
+
+          <Button valor="Logar" />
+
+        </Space>
+
+      </Card>
+
+    </div>
+  );
+}
+```
+
+---
+
+# Organização da tela
+
+A estrutura pode ser visualizada como:
+
+```text
+Login
+ │
+ ▼
+div centralizador
+ │
+ ▼
+Card
+ │
+ ├── LabelTitle
+ │
+ │
+ └── Space
+      │
+      ├── Label
+      │    └── InputText
+      │
+      ├── Label
+      │    └── InputPassword
+      │
+      └── Button
+```
+
+---
+
+# Centralizando o Card
+
+O elemento externo utiliza:
+
+```jsx
+style={{
+  height: "100vh",
+  width: "100vw",
+  backgroundColor: "#f5f5f5",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center"
+}}
+```
+
+Esses conceitos já foram estudados no capítulo de CSS.
+
+Temos:
+
+```text
+display: flex
+      │
+      ▼
+ativa Flexbox
+
+justifyContent: "center"
+      │
+      ▼
+centralização no eixo principal
+
+alignItems: "center"
+      │
+      ▼
+centralização no outro eixo
+```
+
+Portanto:
+
+```text
+┌──────────────────────────────────┐
+│                                  │
+│                                  │
+│          ┌────────────┐          │
+│          │            │          │
+│          │   Login    │          │
+│          │            │          │
+│          └────────────┘          │
+│                                  │
+│                                  │
+└──────────────────────────────────┘
+```
+
+:::tip
+
+Observe que não precisamos reaprender Flexbox.
+
+O conhecimento adquirido nos capítulos anteriores continua sendo utilizado
+mesmo quando adotamos uma biblioteca de componentes.
+
+:::
+
+---
+
+# Componente `Card`
+
+Observe:
+
+```jsx
+<Card
+  style={{ width: 360 }}
+  bordered
+>
+```
+
+O componente:
+
+```text
+Card
+```
+
+cria um container visual para agrupar conteúdos relacionados.
+
+Ele já fornece características visuais padronizadas.
+
+No exemplo, complementamos com:
+
+```jsx
+style={{ width: 360 }}
+```
+
+para definir a largura.
+
+Também utilizamos:
+
+```jsx
+bordered
+```
+
+para apresentar a borda do Card.
+
+Podemos representar:
+
+```text
+Card
+ │
+ ├── container
+ ├── espaçamento interno
+ ├── borda
+ └── aparência padronizada
+```
+
+---
+
+# Componente `Space`
+
+Dentro do `Card` temos:
+
+```jsx
+<Space
+  direction="vertical"
+  style={{ width: "100%" }}
+  size="middle"
+>
+```
+
+O componente `Space` é utilizado para organizar o espaçamento entre seus
+elementos filhos.
+
+Temos:
+
+```text
+direction="vertical"
+       │
+       ▼
+organização vertical
+```
+
+```text
+size="middle"
+       │
+       ▼
+espaçamento entre elementos
+```
+
+e:
+
+```jsx
+style={{ width: "100%" }}
+```
+
+para que o container ocupe toda a largura disponível.
+
+Visualmente:
+
+```text
+Space
+ │
+ ├── Grupo Usuário
+ │
+ │
+ │   espaço
+ │
+ ├── Grupo Senha
+ │
+ │
+ │   espaço
+ │
+ └── Button
+```
+
+---
+
+# Comparando as três estratégias de estilização
+
+Agora podemos comparar as abordagens utilizadas nos últimos capítulos.
+
+## CSS tradicional
+
+```text
+Componente.jsx
+      │
+      ▼
+className="..."
+      │
+      ▼
+arquivo.css
+      │
+      ▼
+propriedades CSS
+```
+
+Exemplo:
+
+```jsx
+<button className="btn">
+```
+
+```css
+.btn {
+  width: 100%;
+  background-color: #0066cc;
+  color: white;
+}
+```
+
+---
+
+## Tailwind
+
+```text
+Componente.jsx
+      │
+      ▼
+className
+      │
+      ▼
+classes utilitárias
+```
+
+Exemplo:
+
+```jsx
+<button
+  className="w-full bg-blue-600 text-white"
+>
+```
+
+---
+
+## Ant Design
+
+```text
+Componente.jsx
+      │
+      ▼
+componente da biblioteca
+      │
+      ▼
+propriedades
+      │
+      ▼
+Design System
+```
+
+Exemplo:
+
+```jsx
+<AntButton
+  type="primary"
+  block
+  size="large"
+>
+```
+
+Podemos resumir:
+
+| Abordagem | Estratégia |
+|---|---|
+| CSS | Criamos nossas próprias regras |
+| Tailwind | Combinamos classes utilitárias |
+| Ant Design | Utilizamos componentes e propriedades predefinidas |
+
+---
+
+# Componentes HTML e Ant Design
+
+Também podemos comparar alguns elementos:
+
+| HTML / React | Ant Design |
+|---|---|
+| `<input type="text">` | `<Input>` |
+| `<input type="password">` | `<Input.Password>` |
+| `<button>` | `<Button>` |
+| `<p>` ou `<span>` | `<Typography.Text>` |
+| `<h1>`, `<h2>`... | `<Typography.Title>` |
+| `div` estilizada | `<Card>` |
+| espaçamentos manuais | `<Space>` |
+| mensagem criada manualmente | `<Alert>` |
+| feedback manual | `message` |
+
+:::info
+
+Os componentes da biblioteca não eliminam os conceitos HTML e CSS.
+
+Eles fornecem **abstrações prontas** construídas para resolver problemas
+comuns de interface.
+
+:::
+
+---
+
+# Reutilização dos nossos componentes
+
+Um aspecto importante deste exemplo é que ainda possuímos:
+
+```text
+Label.jsx
+LabelTitle.jsx
+InputText.jsx
+InputPassword.jsx
+Button.jsx
+Login.jsx
+```
+
+Ou seja, continuamos aplicando:
+
+```text
+componentização
+      │
+      ▼
+encapsulamento
+      │
+      ▼
+reutilização
+```
+
+A diferença é que nossos componentes agora encapsulam componentes de outra
+biblioteca.
+
+Por exemplo:
+
+```text
+Nossa aplicação
+     │
+     ▼
+InputText.jsx
+     │
+     ├── lógica React
+     │      ├── state
+     │      └── validação
+     │
+     └── interface
+            ├── Input
+            └── Alert
+                 │
+                 ▼
+             Ant Design
+```
+
+Essa composição é uma característica importante do desenvolvimento com React.
+
+---
+
+# Principais recursos utilizados
+
+Ao longo deste capítulo utilizamos:
+
+| Recurso | Utilização |
+|---|---|
+| `Typography.Text` | Textos e rótulos |
+| `Typography.Title` | Títulos |
+| `Input` | Campo de texto |
+| `Input.Password` | Campo de senha |
+| `Alert` | Feedback de erro |
+| `Button` | Botão de ação |
+| `message` | Mensagem temporária |
+| `Card` | Container visual |
+| `Space` | Espaçamento entre elementos |
+| `size` | Variação de tamanho |
+| `status` | Estado visual |
+| `type` | Variação do componente |
+| `block` | Ocupa a largura disponível |
+| `bordered` | Apresenta borda no Card |
+
+---
+
+# Design System na prática
+
+Agora podemos observar o papel do Design System no exemplo completo.
+
+```text
+                   Ant Design
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+       Input         Button        Card
+          │            │            │
+          └────────────┼────────────┘
+                       │
+                       ▼
+                mesmo sistema
+                   visual
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+          ▼            ▼            ▼
+        cores      espaçamentos   tipografia
+          │            │            │
+          └────────────┼────────────┘
+                       ▼
+                consistência
+```
+
+Essa consistência é uma das principais razões para utilização de bibliotecas
+de componentes em projetos maiores.
+
+---
+
+# Exercício de Fixação
+
+Neste capítulo utilizamos uma **biblioteca externa de componentes** para
+construir a interface de Login.
+
+O objetivo deste exercício é **implementar, executar, testar e validar todos
+os códigos apresentados**.
+
+---
+
+## Preparando o projeto
+
+Instale as dependências:
+
+```bash
+npm install antd @ant-design/icons
+```
+
+Verifique se o `main.jsx` possui:
+
+```jsx
+import "antd/dist/reset.css";
+```
+
+Depois crie:
+
+```text
+src/
+└── componentes/
+    └── antd/
+        ├── Label.jsx
+        ├── LabelTitle.jsx
+        ├── InputText.jsx
+        ├── InputPassword.jsx
+        ├── Button.jsx
+        └── Login.jsx
+```
+
+Configure o `App.jsx`:
+
+```jsx
+import Login from "./componentes/antd/Login.jsx";
+```
+
+Implemente todos os códigos apresentados neste capítulo.
+
+Execute a aplicação:
+
+```bash
+npm run dev
+```
+
+---
+
+# Testando `Label`
+
+Verifique:
+
+```jsx
+<Label texto="Usuário:" />
+```
+
+Observe se o texto é apresentado corretamente.
+
+Identifique no componente:
+
+```text
+Typography.Text
+strong
+fontSize
+color
+```
+
+Altere temporariamente:
+
+```jsx
+strong
+```
+
+e observe a diferença.
+
+Depois retorne ao código original.
+
+---
+
+# Testando `LabelTitle`
+
+Verifique:
+
+```jsx
+<LabelTitle texto="Login" />
+```
+
+Observe:
+
+```text
+Typography.Title
+level={2}
+color
+textAlign
+marginBottom
+```
+
+Altere temporariamente:
+
+```jsx
+level={2}
+```
+
+para outro nível e observe o resultado.
+
+Depois retorne ao valor original.
+
+---
+
+# Testando `InputText`
+
+Digite um texto no campo.
+
+Verifique o fluxo:
+
+```text
+Input
+  │
+  ▼
+onChange
+  │
+  ▼
+handleChange
+  │
+  ▼
+setValor
+```
+
+Depois apague todo o conteúdo.
+
+Verifique se:
+
+```jsx
+status="error"
+```
+
+é aplicado ao campo.
+
+Observe também se:
+
+```jsx
+<Alert />
+```
+
+é apresentado.
+
+A mensagem deverá ser:
+
+```text
+O campo não pode ficar vazio.
+```
+
+Teste também inserir apenas espaços.
+
+A expressão:
+
+```jsx
+novoValor.trim() === ""
+```
+
+deverá identificar o campo como vazio.
+
+---
+
+# Testando `InputPassword`
+
+Digite uma senha.
+
+Verifique se:
+
+```text
+state senha
+```
+
+é atualizado.
+
+Teste também o recurso incorporado pelo:
+
+```jsx
+<Input.Password />
+```
+
+para mostrar e ocultar a senha.
+
+Observe que esse comportamento não precisou ser implementado manualmente no
+nosso componente.
+
+---
+
+# Testando `Button`
+
+Inicialmente, o botão deverá apresentar:
+
+```text
+Logar
+```
+
+Verifique visualmente:
+
+```text
+type="primary"
+block
+size="large"
+```
+
+Depois clique no botão.
+
+O texto deverá mudar para:
+
+```text
+Você clicou!
+```
+
+Também deverá ser apresentada a mensagem:
+
+```text
+Botão clicado com sucesso!
+```
+
+Assim, estaremos validando simultaneamente:
+
+```text
+useState
+    +
+onClick
+    +
+AntButton
+    +
+message.success()
+```
+
+---
+
+# Testando `Card`
+
+Observe o formulário completo.
+
+Identifique:
+
+```jsx
+<Card
+  style={{ width: 360 }}
+  bordered
+>
+```
+
+Teste temporariamente remover:
+
+```jsx
+bordered
+```
+
+e observe a diferença.
+
+Depois retorne ao código original.
+
+---
+
+# Testando `Space`
+
+Observe os espaços existentes entre os elementos.
+
+Identifique:
+
+```jsx
+<Space
+  direction="vertical"
+  style={{ width: "100%" }}
+  size="middle"
+>
+```
+
+Altere temporariamente:
+
+```jsx
+size="middle"
+```
+
+e observe a diferença no espaçamento.
+
+Depois retorne ao valor original.
+
+---
+
+# Validando a integração
+
+Ao final, verifique a árvore de componentes:
+
+```text
+App
+ │
+ ▼
+Login
+ │
+ ▼
+Card
+ │
+ ├── LabelTitle
+ │
+ │      └── Typography.Title
+ │
+ └── Space
+      │
+      ├── Label
+      │      └── Typography.Text
+      │
+      ├── InputText
+      │      ├── Input
+      │      └── Alert
+      │
+      ├── Label
+      │      └── Typography.Text
+      │
+      ├── InputPassword
+      │      └── Input.Password
+      │
+      └── Button
+             ├── AntButton
+             └── message
+```
+
+Todos os componentes devem funcionar de forma integrada.
+
+---
+
+# Comparando as versões
+
+Execute também as versões desenvolvidas nos capítulos anteriores.
+
+Compare:
+
+```text
+CSS
+ │
+ └── regras próprias
+
+Tailwind
+ │
+ └── classes utilitárias
+
+Ant Design
+ │
+ └── componentes prontos
+```
+
+Observe especificamente como cada abordagem resolve:
+
+```text
+campo de texto
+campo de senha
+botão
+layout
+espaçamento
+cores
+feedback
+validação visual
+```
+
+:::tip Objetivo do exercício
+
+O objetivo não é apenas verificar se a tela está visualmente correta.
+
+Procure identificar **qual responsabilidade pertence ao React e qual pertence
+à biblioteca de componentes**.
+
+Por exemplo:
+
+```text
+useState
+    │
+    └── React
+
+onChange
+    │
+    └── React
+
+renderização condicional
+    │
+    └── React
+
+Input
+    │
+    └── Ant Design
+
+Alert
+    │
+    └── Ant Design
+
+Card
+    │
+    └── Ant Design
+
+message
+    │
+    └── Ant Design
+```
+
+Compreender essa separação será importante para utilizar outras bibliotecas de
+componentes no futuro.
+
+:::
+
+---
+
+# Validação final
+
+Ao concluir os testes, certifique-se de que consegue identificar:
+
+```text
+Bibliotecas de componentes
+Design System
+Componentes prontos
+Typography
+Input
+Input.Password
+Alert
+Button
+message
+Card
+Space
+Props
+State
+Eventos
+Renderização condicional
+Composição de componentes
+```
+
+Também procure explicar a diferença entre:
+
+```text
+CSS tradicional
+        │
+        ▼
+criamos estilos
+
+
+Tailwind
+        │
+        ▼
+combinamos utilitários
+
+
+Ant Design
+        │
+        ▼
+utilizamos componentes
+de um Design System
+```
+
+---
+
+# Resumo
+
+Neste capítulo conhecemos uma nova estratégia para construção de interfaces
+React: a utilização de **bibliotecas de componentes externos**.
+
+Utilizamos o **Ant Design** para reconstruir a aplicação de Login desenvolvida
+nos capítulos anteriores.
+
+Nossa evolução agora pode ser representada como:
+
+```text
+Estrutura do React
+        │
+        ▼
+Componentes
+        │
+        ▼
+Props
+        │
+        ▼
+State
+        │
+        ▼
+Eventos
+        │
+        ▼
+CSS
+        │
+        ▼
+Tailwind
+        │
+        ▼
+Bibliotecas de Componentes
+        │
+        ▼
+Ant Design
+        │
+        ▼
+Design System
+```
+
+Com Ant Design utilizamos:
+
+```text
+Typography
+Input
+Input.Password
+Alert
+Button
+message
+Card
+Space
+```
+
+Esses recursos fornecem componentes visuais e comportamentos prontos,
+mantendo uma identidade visual consistente.
+
+Ao mesmo tempo, continuamos utilizando os conceitos fundamentais do React:
+
+```text
+Componentes
+     │
+     ├── Props
+     ├── State
+     ├── Eventos
+     ├── Renderização condicional
+     └── Composição
+```
+
+Assim, uma biblioteca de componentes não substitui o React.
+
+Ela fornece recursos de interface que podem ser **integrados aos componentes
+da nossa aplicação**, reduzindo a necessidade de construir manualmente
+elementos visuais recorrentes.

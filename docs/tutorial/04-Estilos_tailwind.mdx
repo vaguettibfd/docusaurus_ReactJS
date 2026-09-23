@@ -1,0 +1,2406 @@
+# 📘 Componentes e Estilos (Tailwind)
+
+No capítulo anterior, utilizamos **CSS** para definir a apresentação visual dos
+componentes React.
+
+Para cada componente, criamos uma folha de estilos correspondente:
+
+```text
+Label.jsx ─────────────► Label.css
+LabelTitle.jsx ────────► LabelTitle.css
+InputText.jsx ─────────► InputText.css
+InputPassword.jsx ─────► InputPassword.css
+Button.jsx ────────────► Button.css
+Login.jsx ─────────────► Login.css
+```
+
+Agora utilizaremos outra abordagem para estilizar a mesma aplicação:
+**Tailwind CSS**.
+
+Com Tailwind, grande parte da estilização pode ser realizada diretamente no
+JSX utilizando **classes utilitárias**.
+
+Por exemplo, anteriormente poderíamos ter:
+
+```jsx
+<button className="btn">
+  Logar
+</button>
+```
+
+e definir sua aparência em outro arquivo:
+
+```css
+.btn {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #0066cc;
+  color: white;
+}
+```
+
+Com Tailwind, essas características podem ser representadas diretamente no
+elemento:
+
+```jsx
+<button className="w-full px-4 py-2 bg-blue-600 text-white">
+  Logar
+</button>
+```
+
+:::info Tailwind CSS
+
+Tailwind utiliza uma abordagem conhecida como **Utility-First CSS**.
+
+Em vez de criarmos uma classe CSS personalizada para cada elemento, combinamos
+classes utilitárias que representam propriedades específicas de estilo.
+
+:::
+
+---
+
+# CSS tradicional x Tailwind
+
+Podemos representar as duas abordagens da seguinte maneira:
+
+```text
+CSS tradicional
+
+Componente JSX
+      │
+      │ className="btn"
+      ▼
+   Button.css
+      │
+      ▼
+ propriedades CSS
+```
+
+Com Tailwind:
+
+```text
+Tailwind
+
+Componente JSX
+      │
+      ▼
+className="
+  w-full
+  px-4
+  py-2
+  bg-blue-600
+  text-white
+"
+```
+
+As classes ficam próximas ao elemento que será estilizado.
+
+:::tip
+
+O objetivo deste capítulo não é substituir os conceitos de CSS estudados
+anteriormente.
+
+Conhecer propriedades como `padding`, `margin`, `display`, `color`,
+`background-color`, `border` e Flexbox ajuda a compreender o significado das
+classes utilitárias utilizadas pelo Tailwind.
+
+:::
+
+---
+
+# Estrutura do projeto
+
+Continuaremos utilizando a mesma aplicação de Login.
+
+A estrutura utilizada neste capítulo será:
+
+```text
+index.html
+│
+└── src/
+    ├── main.jsx
+    ├── App.jsx
+    │
+    └── componentes/
+        └── tailwind/
+            ├── Label.jsx
+            ├── LabelTitle.jsx
+            ├── InputText.jsx
+            ├── InputPassword.jsx
+            ├── Button.jsx
+            └── Login.jsx
+```
+
+Observe uma diferença importante em relação ao capítulo anterior.
+
+Não teremos:
+
+```text
+Label.css
+LabelTitle.css
+InputText.css
+InputPassword.css
+Button.css
+Login.css
+```
+
+As classes utilitárias serão aplicadas diretamente nos componentes JSX.
+
+O fluxo da aplicação continua:
+
+```text
+index.html
+    │
+    ▼
+main.jsx
+    │
+    ▼
+App.jsx
+    │
+    ▼
+Login.jsx
+    │
+    ├── LabelTitle.jsx
+    ├── Label.jsx
+    ├── InputText.jsx
+    ├── InputPassword.jsx
+    └── Button.jsx
+```
+
+---
+
+# Carregando o Tailwind
+
+Para os exemplos deste capítulo, utilizaremos a abordagem apresentada no
+projeto-base, carregando o Tailwind por meio de CDN.
+
+No arquivo `index.html`, temos:
+
+```html
+<!doctype html>
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>ReactJS - Bolsa Futuro Digital</title>
+</head>
+
+<body>
+
+  <div id="root"></div>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script
+    type="module"
+    src="/src/main.jsx">
+  </script>
+
+</body>
+
+</html>
+```
+
+A linha:
+
+```html
+<script src="https://cdn.tailwindcss.com"></script>
+```
+
+carrega o Tailwind para a página.
+
+A partir desse momento, podemos utilizar suas classes utilitárias nos elementos
+da aplicação.
+
+Por exemplo:
+
+```jsx
+<p className="text-blue-600">
+  ReactJS
+</p>
+```
+
+Nesse exemplo:
+
+```text
+text-blue-600
+      │
+      ▼
+cor do texto
+```
+
+:::info Neste capítulo
+
+A utilização do CDN permite concentrar o conteúdo nos conceitos de
+**componentes e estilização com classes utilitárias**, sem introduzir uma
+etapa adicional de configuração do Tailwind.
+
+:::
+
+---
+
+# Utilizando a versão Tailwind no `App.jsx`
+
+O componente principal deverá utilizar a versão do `Login` criada neste
+capítulo.
+
+## `App.jsx`
+
+```jsx
+import Login from "./componentes/tailwind/Login.jsx";
+
+function App() {
+
+  return (
+    <>
+      <Login />
+    </>
+  );
+}
+
+export default App;
+```
+
+O fluxo continua simples:
+
+```text
+App
+ │
+ ▼
+Login
+ │
+ ▼
+demais componentes
+```
+
+A principal diferença está na implementação visual dos componentes.
+
+---
+
+# Estilizando `Label.jsx`
+
+Começaremos pelo componente utilizado para apresentar os rótulos dos campos.
+
+## `Label.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function Label({ texto }) {
+
+  const [valor] = useState(texto);
+
+  return (
+    <label
+      className="block text-base font-medium text-gray-800 mb-1"
+    >
+      {valor}
+    </label>
+  );
+}
+```
+
+O funcionamento do componente continua semelhante ao estudado anteriormente.
+
+A novidade está em:
+
+```jsx
+className="block text-base font-medium text-gray-800 mb-1"
+```
+
+Em vez de criarmos uma classe personalizada em `Label.css`, combinamos
+diferentes utilitários.
+
+---
+
+## Entendendo as classes
+
+| Classe | Função |
+|---|---|
+| `block` | Faz o elemento ocupar a linha como bloco |
+| `text-base` | Define o tamanho padrão da fonte |
+| `font-medium` | Define peso intermediário para a fonte |
+| `text-gray-800` | Define uma tonalidade escura de cinza |
+| `mb-1` | Adiciona uma pequena margem inferior |
+
+Podemos decompor:
+
+```text
+className="
+  block
+  text-base
+  font-medium
+  text-gray-800
+  mb-1
+"
+```
+
+Cada classe possui uma responsabilidade.
+
+---
+
+# Comparando com CSS tradicional
+
+No capítulo anterior poderíamos escrever:
+
+```css
+.label {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 0.3rem;
+  color: #333;
+}
+```
+
+e:
+
+```jsx
+<label className="label">
+```
+
+Agora escrevemos:
+
+```jsx
+<label
+  className="block text-base font-medium text-gray-800 mb-1"
+>
+```
+
+Podemos visualizar:
+
+```text
+CSS tradicional              Tailwind
+
+display: block        →      block
+
+font-size             →      text-base
+
+font-weight           →      font-medium
+
+color                 →      text-gray-800
+
+margin-bottom         →      mb-1
+```
+
+:::info Utility-First
+
+Cada classe representa uma pequena característica visual.
+
+A aparência final do elemento surge da **combinação de vários utilitários**.
+
+:::
+
+---
+
+# Estilizando `LabelTitle.jsx`
+
+O título do formulário precisa possuir maior destaque visual.
+
+## `LabelTitle.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function LabelTitle({ texto }) {
+
+  const [valor] = useState(texto);
+
+  return (
+    <label
+      className="block text-2xl font-bold text-blue-800 mb-4 text-center"
+    >
+      {valor}
+    </label>
+  );
+}
+```
+
+Novamente, toda a estilização está em:
+
+```jsx
+className="block text-2xl font-bold text-blue-800 mb-4 text-center"
+```
+
+---
+
+## Classes utilizadas
+
+| Classe | Função |
+|---|---|
+| `block` | Exibe o elemento como bloco |
+| `text-2xl` | Aumenta o tamanho da fonte |
+| `font-bold` | Aplica maior peso à fonte |
+| `text-blue-800` | Define uma tonalidade escura de azul |
+| `mb-4` | Adiciona margem inferior |
+| `text-center` | Centraliza o texto |
+
+Podemos comparar visualmente:
+
+```text
+LabelTitle
+   │
+   ├── text-2xl
+   ├── font-bold
+   ├── text-blue-800
+   └── text-center
+        │
+        ▼
+     destaque
+```
+
+Enquanto:
+
+```text
+Label
+   │
+   ├── text-base
+   ├── font-medium
+   └── text-gray-800
+        │
+        ▼
+     rótulo
+```
+
+Assim, continuamos estabelecendo uma **hierarquia visual** entre título e
+rótulos.
+
+---
+
+# Espaçamento no Tailwind
+
+Nos exemplos anteriores já encontramos:
+
+```text
+mb-1
+mb-4
+```
+
+O prefixo:
+
+```text
+m
+```
+
+está relacionado a **margin**.
+
+A letra seguinte indica a direção.
+
+```text
+mt  → margin-top
+mr  → margin-right
+mb  → margin-bottom
+ml  → margin-left
+```
+
+Também encontraremos classes relacionadas a `padding`:
+
+```text
+p   → padding
+px  → padding horizontal
+py  → padding vertical
+```
+
+Por exemplo:
+
+```text
+px-3
+```
+
+adiciona espaçamento interno horizontal.
+
+Enquanto:
+
+```text
+py-2
+```
+
+adiciona espaçamento interno vertical.
+
+Podemos representar:
+
+```text
+          py
+           ↓
+    ┌──────────────┐
+px →│   conteúdo   │← px
+    └──────────────┘
+           ↑
+          py
+```
+
+---
+
+# Estilizando `InputText.jsx`
+
+Agora utilizaremos Tailwind no campo de texto.
+
+Continuaremos com os conceitos estudados anteriormente:
+
+```text
+useState
+onChange
+e.target.value
+validação
+renderização condicional
+```
+
+A novidade será a apresentação visual.
+
+## `InputText.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function InputText({ placeholder }) {
+
+  const [valor, setValor] = useState("");
+  const [erro, setErro] = useState(false);
+
+  function handleChange(e) {
+
+    const novoValor = e.target.value;
+
+    setValor(novoValor);
+
+    setErro(novoValor.trim() === "");
+  }
+
+  return (
+    <div className="flex flex-col mb-3">
+
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={valor}
+        onChange={handleChange}
+        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-blue-600 focus:ring-1 focus:ring-blue-400 outline-none"
+      />
+
+      {erro && (
+        <p className="text-sm text-red-600 mt-1">
+          O campo não pode ficar vazio. ⚠️
+        </p>
+      )}
+
+    </div>
+  );
+}
+```
+
+---
+
+# Organizando o componente
+
+O elemento externo utiliza:
+
+```jsx
+<div className="flex flex-col mb-3">
+```
+
+Temos:
+
+| Classe | Função |
+|---|---|
+| `flex` | Ativa Flexbox |
+| `flex-col` | Organiza os elementos em coluna |
+| `mb-3` | Adiciona margem inferior |
+
+Portanto:
+
+```text
+div
+ │
+ │ flex flex-col
+ ▼
+┌───────────────────────────┐
+│ Input                     │
+│                           │
+│ Mensagem de erro          │
+└───────────────────────────┘
+```
+
+---
+
+# Dimensionamento do Input
+
+O campo utiliza:
+
+```text
+w-full
+```
+
+Essa classe faz com que o elemento ocupe toda a largura disponível no
+contêiner.
+
+Podemos relacioná-la ao CSS:
+
+```css
+width: 100%;
+```
+
+Assim:
+
+```text
+w-full
+   │
+   ▼
+┌───────────────────────────┐
+│       largura total       │
+└───────────────────────────┘
+```
+
+---
+
+# Padding com `px` e `py`
+
+O campo também utiliza:
+
+```text
+px-3
+py-2
+```
+
+Temos:
+
+```text
+px-3
+ │
+ └── padding horizontal
+```
+
+e:
+
+```text
+py-2
+ │
+ └── padding vertical
+```
+
+Isso cria espaço interno entre o texto digitado e as bordas do campo.
+
+---
+
+# Tamanho do texto
+
+```text
+text-sm
+```
+
+define um tamanho menor de fonte.
+
+Observe que o prefixo:
+
+```text
+text-
+```
+
+pode aparecer em diferentes contextos.
+
+Por exemplo:
+
+```text
+text-sm
+```
+
+está relacionado ao tamanho.
+
+Enquanto:
+
+```text
+text-red-600
+```
+
+está relacionado à cor.
+
+O restante do nome da classe indica sua finalidade.
+
+---
+
+# Bordas
+
+O campo utiliza:
+
+```text
+border
+border-gray-300
+rounded-md
+```
+
+Podemos interpretar:
+
+```text
+border
+   │
+   └── adiciona borda
+
+border-gray-300
+   │
+   └── define a cor da borda
+
+rounded-md
+   │
+   └── arredonda os cantos
+```
+
+No CSS tradicional, teríamos propriedades como:
+
+```css
+border: 1px solid #ccc;
+border-radius: 4px;
+```
+
+---
+
+# Estados visuais com `focus:`
+
+Uma das características importantes do Tailwind é a utilização de variantes
+diretamente no nome das classes.
+
+Observe:
+
+```text
+focus:border-blue-600
+focus:ring-1
+focus:ring-blue-400
+```
+
+O prefixo:
+
+```text
+focus:
+```
+
+indica que a classe deverá ser aplicada quando o elemento estiver com foco.
+
+Assim:
+
+```text
+Campo normal
+     │
+     │ usuário seleciona o campo
+     ▼
+   :focus
+     │
+     ├── border-blue-600
+     ├── ring-1
+     └── ring-blue-400
+```
+
+:::info Variantes
+
+Tailwind permite combinar estados visuais com utilitários.
+
+Por exemplo:
+
+```text
+focus:border-blue-600
+```
+
+significa:
+
+> quando o elemento estiver com foco, utilize uma borda azul.
+
+:::
+
+---
+
+# `ring`
+
+No campo encontramos:
+
+```text
+focus:ring-1
+focus:ring-blue-400
+```
+
+O `ring` cria um destaque ao redor do elemento.
+
+Nesse caso:
+
+```text
+ring-1
+```
+
+define o destaque e:
+
+```text
+ring-blue-400
+```
+
+define sua tonalidade.
+
+O efeito ajuda a indicar qual campo está ativo.
+
+---
+
+# `outline-none`
+
+Também utilizamos:
+
+```text
+outline-none
+```
+
+Essa classe remove o `outline` padrão do elemento.
+
+No exemplo, o feedback visual do foco passa a ser fornecido pelas classes:
+
+```text
+focus:border-blue-600
+focus:ring-1
+focus:ring-blue-400
+```
+
+---
+
+# Estilizando a mensagem de erro
+
+A mensagem:
+
+```jsx
+<p className="text-sm text-red-600 mt-1">
+  O campo não pode ficar vazio. ⚠️
+</p>
+```
+
+utiliza:
+
+| Classe | Função |
+|---|---|
+| `text-sm` | Define texto menor |
+| `text-red-600` | Define a cor vermelha |
+| `mt-1` | Adiciona margem superior |
+
+Observe que a renderização condicional continua funcionando da mesma forma:
+
+```jsx
+{erro && (
+  ...
+)}
+```
+
+Portanto:
+
+```text
+Estado erro
+    │
+    ├── false → mensagem não aparece
+    │
+    └── true  → mensagem aparece
+                     │
+                     ▼
+                Tailwind define
+                sua aparência
+```
+
+Isso demonstra uma separação importante:
+
+```text
+React
+  │
+  └── controla quando o elemento aparece
+
+Tailwind
+  │
+  └── controla como o elemento aparece
+```
+
+---
+
+# Estilizando `InputPassword.jsx`
+
+Aplicaremos uma estrutura semelhante ao campo de senha.
+
+## `InputPassword.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function InputPassword({ placeholder }) {
+
+  const [senha, setSenha] = useState("");
+
+  return (
+    <div className="flex flex-col mb-3">
+
+      <input
+        type="password"
+        placeholder={placeholder}
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)}
+        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:border-green-600 focus:ring-1 focus:ring-green-400 outline-none"
+      />
+
+      {senha !== "" && (
+        <p className="text-sm text-gray-600 italic mt-1">
+          Senha digitada: {senha}
+        </p>
+      )}
+
+    </div>
+  );
+}
+```
+
+Grande parte das classes é semelhante ao `InputText`.
+
+Temos novamente:
+
+```text
+w-full
+px-3
+py-2
+text-sm
+border
+border-gray-300
+rounded-md
+outline-none
+```
+
+A diferença está principalmente no estado visual de foco:
+
+```text
+focus:border-green-600
+focus:ring-1
+focus:ring-green-400
+```
+
+Assim:
+
+```text
+InputText
+   │
+   └── foco azul
+
+InputPassword
+   │
+   └── foco verde
+```
+
+---
+
+# Texto em itálico
+
+A mensagem utiliza:
+
+```text
+italic
+```
+
+Essa classe aplica estilo itálico ao texto.
+
+Também temos:
+
+```text
+text-gray-600
+```
+
+para uma tonalidade de cinza.
+
+Assim:
+
+```jsx
+<p className="text-sm text-gray-600 italic mt-1">
+```
+
+combina:
+
+```text
+text-sm       → tamanho
+text-gray-600 → cor
+italic        → estilo
+mt-1          → espaçamento
+```
+
+:::warning Exemplo didático
+
+A apresentação do conteúdo digitado no campo de senha continua sendo utilizada
+apenas para demonstrar o funcionamento do estado e da renderização
+condicional.
+
+Não devemos exibir senhas dessa maneira em aplicações reais.
+
+:::
+
+---
+
+# Estilizando `Button.jsx`
+
+Agora aplicaremos classes utilitárias ao botão.
+
+## `Button.jsx`
+
+```jsx
+import React, { useState } from 'react';
+
+export default function Button({ valor }) {
+
+  const [texto, setTexto] = useState(valor);
+
+  function handleClick() {
+    setTexto("Você clicou!");
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      className="w-full px-4 py-2 bg-blue-600 text-white text-base rounded-md cursor-pointer hover:bg-blue-800 transition-colors"
+    >
+      {texto}
+    </button>
+  );
+}
+```
+
+O funcionamento continua igual:
+
+```text
+valor (prop)
+     │
+     ▼
+texto (state)
+     │
+     │ clique
+     ▼
+handleClick()
+     │
+     ▼
+setTexto("Você clicou!")
+```
+
+Tailwind será responsável apenas pela apresentação.
+
+---
+
+# Classes do botão
+
+| Classe | Função |
+|---|---|
+| `w-full` | Ocupa toda a largura |
+| `px-4` | Adiciona padding horizontal |
+| `py-2` | Adiciona padding vertical |
+| `bg-blue-600` | Define fundo azul |
+| `text-white` | Define texto branco |
+| `text-base` | Define tamanho padrão da fonte |
+| `rounded-md` | Arredonda os cantos |
+| `cursor-pointer` | Altera o cursor |
+| `hover:bg-blue-800` | Escurece o botão no hover |
+| `transition-colors` | Suaviza a mudança das cores |
+
+---
+
+# Cores de fundo
+
+Observe:
+
+```text
+bg-blue-600
+```
+
+O prefixo:
+
+```text
+bg-
+```
+
+indica **background**.
+
+Portanto:
+
+```text
+bg-blue-600
+ │   │    │
+ │   │    └── tonalidade
+ │   └─────── cor
+ └─────────── background
+```
+
+---
+
+# Cor do texto
+
+```text
+text-white
+```
+
+define a cor branca para o conteúdo textual.
+
+Assim:
+
+```text
+bg-blue-600
+      +
+text-white
+      ↓
+botão azul com texto branco
+```
+
+---
+
+# Estado `hover:`
+
+Observe:
+
+```text
+hover:bg-blue-800
+```
+
+O prefixo:
+
+```text
+hover:
+```
+
+indica que a classe será aplicada quando o ponteiro estiver sobre o elemento.
+
+Temos:
+
+```text
+Botão normal
+     │
+     └── bg-blue-600
+
+       mouse sobre o botão
+               │
+               ▼
+             hover
+               │
+               ▼
+          bg-blue-800
+```
+
+No CSS tradicional, teríamos algo semelhante a:
+
+```css
+.btn:hover {
+  background-color: ...;
+}
+```
+
+No Tailwind:
+
+```text
+hover:bg-blue-800
+```
+
+---
+
+# Transição de cores
+
+Também utilizamos:
+
+```text
+transition-colors
+```
+
+Essa classe adiciona uma transição às alterações de cores.
+
+Assim, a passagem:
+
+```text
+bg-blue-600
+     ↓
+bg-blue-800
+```
+
+ocorre de maneira mais suave.
+
+:::tip Estados visuais
+
+Até este momento já utilizamos duas variantes importantes:
+
+```text
+focus:
+hover:
+```
+
+Elas permitem definir comportamentos visuais diretamente no `className`.
+
+:::
+
+---
+
+# Integrando os componentes em `Login.jsx`
+
+Agora reuniremos todos os componentes.
+
+## `Login.jsx`
+
+```jsx
+import React from "react";
+
+import Label from "./Label.jsx";
+import LabelTitle from "./LabelTitle.jsx";
+import Button from "./Button.jsx";
+import InputText from "./InputText.jsx";
+import InputPassword from "./InputPassword.jsx";
+
+function Login() {
+
+  return (
+    <div
+      className="flex justify-center items-center h-screen w-screen bg-gray-100"
+    >
+
+      <form
+        className="bg-white p-8 rounded-lg shadow-md w-80"
+      >
+
+        <LabelTitle texto="Login" />
+
+        <div className="mb-4 flex flex-col">
+          <Label texto="Usuário:" />
+          <InputText placeholder="user..." />
+        </div>
+
+        <div className="mb-4 flex flex-col">
+          <Label texto="Senha:" />
+          <InputPassword placeholder="password..." />
+        </div>
+
+        <Button valor="Logar" />
+
+      </form>
+
+    </div>
+  );
+}
+
+export default Login;
+```
+
+Esse componente demonstra como diferentes classes Tailwind podem ser
+combinadas para construir o layout completo da página.
+
+---
+
+# Centralizando a interface
+
+O container principal utiliza:
+
+```text
+flex
+justify-center
+items-center
+h-screen
+w-screen
+bg-gray-100
+```
+
+Vamos analisar.
+
+---
+
+## `flex`
+
+```text
+flex
+```
+
+ativa o modelo Flexbox.
+
+Equivale conceitualmente ao CSS:
+
+```css
+display: flex;
+```
+
+---
+
+## `justify-center`
+
+```text
+justify-center
+```
+
+centraliza o conteúdo no eixo principal.
+
+---
+
+## `items-center`
+
+```text
+items-center
+```
+
+centraliza os elementos no outro eixo.
+
+Combinando:
+
+```text
+flex
+justify-center
+items-center
+```
+
+temos:
+
+```text
+┌─────────────────────────────────┐
+│                                 │
+│                                 │
+│          ┌───────────┐          │
+│          │   Login   │          │
+│          │           │          │
+│          └───────────┘          │
+│                                 │
+│                                 │
+└─────────────────────────────────┘
+```
+
+Essa é a mesma ideia de Flexbox estudada no capítulo de CSS.
+
+A diferença é a forma de escrevê-la.
+
+### CSS
+
+```css
+display: flex;
+justify-content: center;
+align-items: center;
+```
+
+### Tailwind
+
+```text
+flex justify-center items-center
+```
+
+---
+
+# Ocupando a tela
+
+Utilizamos:
+
+```text
+h-screen
+w-screen
+```
+
+Temos:
+
+```text
+h-screen
+   │
+   └── altura da tela
+```
+
+e:
+
+```text
+w-screen
+   │
+   └── largura da tela
+```
+
+Assim, o container ocupa a área visível da página.
+
+---
+
+# Cor de fundo
+
+```text
+bg-gray-100
+```
+
+define um fundo cinza claro para a página.
+
+Isso ajuda a criar contraste com o formulário branco.
+
+---
+
+# Criando o Card
+
+O formulário utiliza:
+
+```jsx
+<form
+  className="bg-white p-8 rounded-lg shadow-md w-80"
+>
+```
+
+As classes são:
+
+| Classe | Função |
+|---|---|
+| `bg-white` | Fundo branco |
+| `p-8` | Espaçamento interno |
+| `rounded-lg` | Bordas arredondadas |
+| `shadow-md` | Sombra |
+| `w-80` | Define a largura do formulário |
+
+Visualmente:
+
+```text
+fundo cinza
+┌──────────────────────────────────┐
+│                                  │
+│       ┌──────────────────┐       │
+│       │      Login       │       │
+│       │                  │       │
+│       │ Usuário          │       │
+│       │ [____________]   │       │
+│       │                  │       │
+│       │ Senha            │       │
+│       │ [____________]   │       │
+│       │                  │       │
+│       │ [    Logar    ]  │       │
+│       └──────────────────┘       │
+│                                  │
+└──────────────────────────────────┘
+```
+
+Esse formato mantém a ideia de **Card Layout** utilizada no capítulo anterior.
+
+---
+
+# Espaçamento interno com `p-8`
+
+A classe:
+
+```text
+p-8
+```
+
+adiciona padding em todas as direções.
+
+Podemos representar:
+
+```text
+┌───────────────────────────────┐
+│          padding              │
+│   ┌───────────────────────┐   │
+│   │                       │   │
+│   │      conteúdo         │   │
+│   │                       │   │
+│   └───────────────────────┘   │
+│          padding              │
+└───────────────────────────────┘
+```
+
+---
+
+# Bordas arredondadas
+
+```text
+rounded-lg
+```
+
+define um arredondamento maior para os cantos do formulário.
+
+Anteriormente utilizamos:
+
+```text
+rounded-md
+```
+
+nos inputs e no botão.
+
+Portanto:
+
+```text
+rounded-md
+     │
+     └── arredondamento médio
+
+rounded-lg
+     │
+     └── arredondamento maior
+```
+
+---
+
+# Sombra
+
+```text
+shadow-md
+```
+
+aplica uma sombra ao formulário.
+
+No CSS tradicional utilizamos:
+
+```css
+box-shadow: ...;
+```
+
+Com Tailwind utilizamos uma classe predefinida:
+
+```text
+shadow-md
+```
+
+---
+
+# Largura do formulário
+
+```text
+w-80
+```
+
+define a largura do card.
+
+No exemplo utilizado, essa classe produz um formulário com aproximadamente
+320 pixels de largura.
+
+---
+
+# Organizando os grupos
+
+Cada conjunto de Label e Input utiliza:
+
+```jsx
+<div className="mb-4 flex flex-col">
+```
+
+Temos:
+
+```text
+mb-4
+ │
+ └── espaço abaixo do grupo
+
+flex
+ │
+ └── ativa Flexbox
+
+flex-col
+ │
+ └── organiza em coluna
+```
+
+Portanto:
+
+```text
+form-group
+     │
+     ├── Label
+     │
+     └── Input
+```
+
+é apresentado como:
+
+```text
+Label
+  ↓
+Input
+```
+
+---
+
+# Comparando CSS e Tailwind
+
+Agora podemos comparar diretamente as duas versões da aplicação.
+
+## CSS tradicional
+
+```jsx
+<div className="login-container">
+
+  <form className="login-form">
+
+    ...
+
+  </form>
+
+</div>
+```
+
+Com um arquivo separado:
+
+```css
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.login-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 320px;
+}
+```
+
+## Tailwind
+
+```jsx
+<div
+  className="flex justify-center items-center h-screen w-screen bg-gray-100"
+>
+
+  <form
+    className="bg-white p-8 rounded-lg shadow-md w-80"
+  >
+
+    ...
+
+  </form>
+
+</div>
+```
+
+Podemos relacionar alguns conceitos:
+
+| CSS | Tailwind |
+|---|---|
+| `display: flex` | `flex` |
+| `justify-content: center` | `justify-center` |
+| `align-items: center` | `items-center` |
+| `height: 100vh` | `h-screen` |
+| largura da viewport | `w-screen` |
+| fundo cinza | `bg-gray-100` |
+| `background: white` | `bg-white` |
+| `padding` | `p-8` |
+| `border-radius` | `rounded-lg` |
+| `box-shadow` | `shadow-md` |
+| largura do card | `w-80` |
+
+:::info Duas formas de estilizar
+
+CSS tradicional e Tailwind não alteram os conceitos fundamentais do React.
+
+Continuamos utilizando:
+
+```text
+Componentes
+Props
+State
+Eventos
+Renderização condicional
+```
+
+O que muda é principalmente a forma utilizada para declarar os estilos.
+
+:::
+
+---
+
+# Padrões das classes Tailwind
+
+Ao observar os exemplos deste capítulo, podemos identificar alguns padrões.
+
+## Cores de texto
+
+```text
+text-gray-800
+text-blue-800
+text-red-600
+text-gray-600
+text-white
+```
+
+## Cores de fundo
+
+```text
+bg-gray-100
+bg-white
+bg-blue-600
+```
+
+## Espaçamento
+
+```text
+p-8
+
+px-3
+px-4
+
+py-2
+
+mt-1
+mb-1
+mb-3
+mb-4
+```
+
+## Dimensões
+
+```text
+w-full
+w-80
+w-screen
+h-screen
+```
+
+## Tipografia
+
+```text
+text-sm
+text-base
+text-2xl
+
+font-medium
+font-bold
+
+italic
+text-center
+```
+
+## Bordas e sombras
+
+```text
+border
+border-gray-300
+
+rounded-md
+rounded-lg
+
+shadow-md
+```
+
+## Layout
+
+```text
+flex
+flex-col
+justify-center
+items-center
+```
+
+## Estados
+
+```text
+hover:bg-blue-800
+
+focus:border-blue-600
+focus:ring-1
+focus:ring-blue-400
+
+focus:border-green-600
+focus:ring-green-400
+```
+
+## Transições
+
+```text
+transition-colors
+```
+
+Identificar esses padrões facilita a leitura das classes.
+
+---
+
+# Responsividade
+
+O Tailwind também possui recursos para aplicar estilos de acordo com diferentes
+tamanhos de tela.
+
+Alguns prefixos utilizados para isso são:
+
+```text
+sm:
+md:
+lg:
+```
+
+A estrutura geral é:
+
+```text
+prefixo:classe
+```
+
+Por exemplo:
+
+```text
+md:w-80
+```
+
+indica que determinada regra está associada ao breakpoint `md`.
+
+Outro exemplo seria:
+
+```text
+text-base md:text-lg
+```
+
+Temos:
+
+```text
+text-base
+    │
+    └── comportamento inicial
+
+md:text-lg
+    │
+    └── comportamento a partir do breakpoint md
+```
+
+:::info
+
+Neste capítulo, nosso foco principal está nas classes utilitárias utilizadas
+pela aplicação de Login.
+
+Os prefixos responsivos `sm:`, `md:` e `lg:` representam uma possibilidade de
+evolução da mesma abordagem para diferentes tamanhos de tela.
+
+:::
+
+---
+
+# Conceitos-chave do Tailwind
+
+Podemos consolidar os principais conceitos trabalhados:
+
+| Conceito | Descrição |
+|---|---|
+| Utility-First CSS | Estilos construídos pela combinação de classes utilitárias |
+| Escala de cores | Classes como `gray-100`, `blue-600` e `green-400` |
+| Espaçamento | Utilitários como `p-8`, `px-3`, `py-2` e `mb-4` |
+| Flexbox | Utilitários como `flex`, `flex-col`, `justify-center` e `items-center` |
+| Estados visuais | Variantes como `hover:` e `focus:` |
+| Ring | Destaque visual aplicado principalmente em elementos com foco |
+| Transições | Classes como `transition-colors` |
+| Responsividade | Prefixos como `sm:`, `md:` e `lg:` |
+| Consistência visual | Uso de escalas predefinidas de tamanho, cor e espaçamento |
+
+---
+
+# Visão geral da aplicação
+
+Ao final, temos:
+
+```text
+                        Login.jsx
+                            │
+          ┌─────────────────┼──────────────────┐
+          │                 │                  │
+          ▼                 ▼                  ▼
+      Componentes         React             Tailwind
+          │                 │                  │
+          │            ┌────┴─────┐            │
+          │            │          │            │
+          ▼            ▼          ▼            ▼
+      reutilização    props     state      apresentação
+                                  │
+                                  ▼
+                               eventos
+                                  │
+                                  ▼
+                          nova renderização
+```
+
+Tailwind não substitui a lógica React.
+
+Ele trabalha na camada visual:
+
+```text
+React
+  │
+  ├── estrutura
+  ├── componentes
+  ├── props
+  ├── state
+  └── eventos
+
+Tailwind
+  │
+  ├── layout
+  ├── cores
+  ├── espaçamento
+  ├── bordas
+  ├── tipografia
+  └── estados visuais
+```
+
+---
+
+# Exercício de Fixação
+
+Neste capítulo, utilizamos **Tailwind CSS** para estilizar os componentes
+desenvolvidos anteriormente.
+
+O objetivo do exercício é **implementar, executar, testar e validar todos os
+códigos apresentados**.
+
+## Atividade
+
+Crie a estrutura:
+
+```text
+src/
+└── componentes/
+    └── tailwind/
+        ├── Label.jsx
+        ├── LabelTitle.jsx
+        ├── InputText.jsx
+        ├── InputPassword.jsx
+        ├── Button.jsx
+        └── Login.jsx
+```
+
+Implemente todos os componentes apresentados neste capítulo.
+
+Configure também o carregamento do Tailwind no `index.html`, conforme utilizado
+nos exemplos:
+
+```html
+<script src="https://cdn.tailwindcss.com"></script>
+```
+
+Depois, ajuste o `App.jsx`:
+
+```jsx
+import Login from "./componentes/tailwind/Login.jsx";
+
+function App() {
+
+  return (
+    <>
+      <Login />
+    </>
+  );
+}
+
+export default App;
+```
+
+Execute a aplicação e valide o funcionamento dos componentes.
+
+---
+
+## Testando `Label`
+
+Verifique se:
+
+```jsx
+<Label texto="Usuário:" />
+```
+
+apresenta corretamente o conteúdo recebido pela prop.
+
+Observe visualmente os efeitos de:
+
+```text
+block
+text-base
+font-medium
+text-gray-800
+mb-1
+```
+
+Altere temporariamente algumas dessas classes e observe o resultado.
+
+Depois, retorne ao código original.
+
+---
+
+## Testando `LabelTitle`
+
+Verifique se:
+
+```jsx
+<LabelTitle texto="Login" />
+```
+
+possui destaque em relação aos demais rótulos.
+
+Observe principalmente:
+
+```text
+text-2xl
+font-bold
+text-blue-800
+text-center
+mb-4
+```
+
+Compare visualmente `LabelTitle` com `Label`.
+
+---
+
+## Testando `InputText`
+
+Digite diferentes valores no campo.
+
+Valide o comportamento do estado:
+
+```text
+digitação
+    │
+    ▼
+onChange
+    │
+    ▼
+handleChange
+    │
+    ▼
+setValor
+```
+
+Depois apague o conteúdo.
+
+Verifique se a mensagem:
+
+```text
+O campo não pode ficar vazio. ⚠️
+```
+
+é apresentada.
+
+Teste também inserir apenas espaços para validar:
+
+```jsx
+novoValor.trim() === ""
+```
+
+Clique no campo e observe os efeitos:
+
+```text
+focus:border-blue-600
+focus:ring-1
+focus:ring-blue-400
+```
+
+---
+
+## Testando `InputPassword`
+
+Digite uma senha.
+
+Verifique se:
+
+- os caracteres são ocultados pelo `type="password"`;
+- o estado `senha` é atualizado;
+- a renderização condicional funciona;
+- o campo recebe o destaque verde quando está com foco.
+
+Observe:
+
+```text
+focus:border-green-600
+focus:ring-1
+focus:ring-green-400
+```
+
+Compare o comportamento visual com o `InputText`.
+
+:::warning
+
+A exibição da senha é utilizada apenas para fins didáticos.
+
+Não utilize esse comportamento em aplicações reais.
+
+:::
+
+---
+
+## Testando `Button`
+
+Observe inicialmente:
+
+```text
+Logar
+```
+
+Passe o ponteiro sobre o botão.
+
+Verifique o comportamento de:
+
+```text
+hover:bg-blue-800
+```
+
+Observe também a suavização fornecida por:
+
+```text
+transition-colors
+```
+
+Depois clique no botão.
+
+O texto deverá mudar para:
+
+```text
+Você clicou!
+```
+
+Isso permite validar simultaneamente:
+
+```text
+Tailwind
+   │
+   └── aparência
+
+React
+   │
+   └── comportamento
+```
+
+---
+
+## Testando `Login`
+
+Valide a integração:
+
+```text
+Login
+ │
+ ├── LabelTitle
+ │
+ ├── Label
+ │    └── InputText
+ │
+ ├── Label
+ │    └── InputPassword
+ │
+ └── Button
+```
+
+Observe se a tela está centralizada horizontal e verticalmente.
+
+Identifique as classes responsáveis:
+
+```text
+flex
+justify-center
+items-center
+h-screen
+w-screen
+```
+
+Verifique também:
+
+```text
+bg-gray-100
+```
+
+no fundo da tela.
+
+---
+
+## Testando o Card
+
+Observe o formulário e identifique o efeito das classes:
+
+```text
+bg-white
+p-8
+rounded-lg
+shadow-md
+w-80
+```
+
+Altere temporariamente:
+
+```text
+shadow-md
+```
+
+e observe o efeito.
+
+Faça o mesmo com:
+
+```text
+rounded-lg
+```
+
+Depois retorne aos valores originais.
+
+---
+
+## Comparando CSS e Tailwind
+
+Abra também a versão desenvolvida no capítulo anterior.
+
+Compare:
+
+```text
+componentes/CSS/Login.jsx
+```
+
+com:
+
+```text
+componentes/tailwind/Login.jsx
+```
+
+Identifique como propriedades que anteriormente estavam em arquivos `.css`
+agora aparecem como classes utilitárias no JSX.
+
+Por exemplo:
+
+```text
+CSS                          Tailwind
+
+display: flex          →     flex
+
+justify-content        →     justify-center
+
+align-items            →     items-center
+
+padding                →     p-8 / px-3 / py-2
+
+border-radius          →     rounded-md / rounded-lg
+
+background-color       →     bg-blue-600
+
+color                  →     text-white
+
+box-shadow             →     shadow-md
+```
+
+---
+
+# Validação final
+
+Ao concluir os testes, certifique-se de que consegue identificar:
+
+- o conceito de **Utility-First CSS**;
+- a utilização de classes Tailwind no `className`;
+- classes de cores;
+- classes de espaçamento;
+- classes de tamanho;
+- classes de tipografia;
+- classes de borda;
+- classes de sombra;
+- utilização de Flexbox;
+- `flex-col`;
+- `justify-center`;
+- `items-center`;
+- variantes `hover:`;
+- variantes `focus:`;
+- utilização de `ring`;
+- utilização de `transition-colors`;
+- integração do Tailwind com componentes React;
+- manutenção do funcionamento de props, states e eventos;
+- diferença entre a implementação com CSS tradicional e a implementação com Tailwind.
+
+:::tip Objetivo do exercício
+
+Não se limite a verificar se a interface ficou visualmente correta.
+
+Durante os testes, procure relacionar cada classe Tailwind com a propriedade ou
+o comportamento visual correspondente.
+
+Por exemplo:
+
+```text
+rounded-md
+     │
+     ▼
+bordas arredondadas
+
+bg-blue-600
+     │
+     ▼
+cor de fundo
+
+hover:bg-blue-800
+     │
+     ▼
+mudança da cor durante o hover
+
+focus:ring-blue-400
+     │
+     ▼
+destaque durante o foco
+```
+
+O objetivo é compreender **como a combinação de pequenas classes utilitárias
+constrói a interface completa**.
+
+:::
+
+---
+
+# Resumo
+
+Neste capítulo, mantivemos a aplicação React desenvolvida anteriormente, mas
+alteramos a estratégia utilizada para sua estilização.
+
+Anteriormente:
+
+```text
+Componente.jsx
+      │
+      ▼
+className
+      │
+      ▼
+arquivo.css
+```
+
+Agora:
+
+```text
+Componente.jsx
+      │
+      ▼
+className
+      │
+      ▼
+classes utilitárias Tailwind
+```
+
+Trabalhamos com:
+
+```text
+Utility-First CSS
+        │
+        ├── cores
+        ├── tipografia
+        ├── espaçamento
+        ├── dimensões
+        ├── bordas
+        ├── sombras
+        ├── Flexbox
+        ├── hover
+        ├── focus
+        └── transições
+```
+
+Ao mesmo tempo, todos os conceitos React estudados anteriormente continuam
+presentes:
+
+```text
+Componentes
+     │
+     ├── Props
+     ├── State
+     ├── Eventos
+     ├── Inputs controlados
+     └── Renderização condicional
+```
+
+Assim, podemos visualizar a evolução dos conteúdos:
+
+```text
+Estrutura do React
+        │
+        ▼
+Componentes
+        │
+        ▼
+Props
+        │
+        ▼
+State
+        │
+        ▼
+Eventos
+        │
+        ▼
+CSS
+        │
+        ▼
+Tailwind
+        │
+        ▼
+Interface React estilizada
+```
+
+O Tailwind oferece uma forma diferente de organizar a camada visual da
+aplicação, utilizando classes utilitárias diretamente nos elementos JSX.
