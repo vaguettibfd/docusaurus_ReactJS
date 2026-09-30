@@ -1,0 +1,2821 @@
+#  📘 Cadastro de Pessoas com Ant Design
+
+No capítulo anterior, conhecemos o **Ant Design (AntD)** e utilizamos alguns de
+seus componentes para construir uma interface de Login.
+
+Agora avançaremos para uma aplicação mais completa: um **cadastro de pessoas**.
+
+A aplicação permitirá cadastrar dois tipos de pessoa:
+
+```text
+Pessoa
+  │
+  ├── Pessoa Física (PF)
+  │
+  └── Pessoa Jurídica (PJ)
+```
+
+Além dos dados principais, o cadastro será organizado em diferentes partes:
+
+```text
+Cadastro de Pessoa
+       │
+       ├── Dados principais
+       │
+       ├── Endereço
+       │
+       └── Telefones
+```
+
+Neste capítulo utilizaremos recursos importantes do Ant Design, como
+`Form`, `Form.Item`, `Row`, `Col`, `Input`, `DatePicker`, `Select`, `Button`,
+`Space`, `List` e `message`.
+
+O principal avanço será a utilização do **sistema de formulários e validação
+do Ant Design**.
+
+:::info Objetivos do capítulo
+
+Ao final deste capítulo, você deverá ser capaz de:
+
+- construir formulários utilizando `Form` e `Form.Item`;
+- criar regras de validação declarativas;
+- organizar formulários em componentes menores;
+- utilizar campos diferentes para Pessoa Física e Pessoa Jurídica;
+- construir layouts utilizando `Row` e `Col`;
+- utilizar campos aninhados em formulários;
+- adicionar elementos dinamicamente a uma lista;
+- apresentar feedback utilizando `message`;
+- complementar o Ant Design utilizando CSS.
+
+:::
+
+---
+
+# Estrutura da aplicação
+
+Para evitar a criação de um componente muito grande, dividiremos o cadastro
+em diferentes componentes.
+
+A estrutura principal será:
+
+```text
+src/
+│
+├── App.jsx
+│
+└── components/
+    └── cadastrapessoa/
+        ├── PessoaForm.jsx
+        ├── EnderecoForm.jsx
+        ├── TelefoneList.jsx
+        └── pessoaform.css
+```
+
+Cada arquivo possuirá uma responsabilidade:
+
+```text
+PessoaForm.jsx
+     │
+     ├── formulário principal
+     ├── dados da pessoa
+     ├── seleção PF/PJ
+     └── integração dos demais componentes
+
+EnderecoForm.jsx
+     │
+     └── dados de endereço
+
+TelefoneList.jsx
+     │
+     └── gerenciamento dos telefones
+
+pessoaform.css
+     │
+     └── ajustes visuais complementares
+```
+
+Essa organização aplica um conceito que já estudamos anteriormente:
+**componentização**.
+
+Em vez de concentrarmos toda a aplicação em um único arquivo, distribuímos
+responsabilidades entre componentes menores.
+
+---
+
+# Configurando o `App.jsx`
+
+O componente `App` será responsável por carregar o formulário principal.
+
+## `App.jsx`
+
+```jsx
+import PessoaForm from "./components/cadastrapessoa/PessoaForm.jsx";
+
+function App() {
+
+  return (
+    <>
+      <PessoaForm />
+    </>
+  );
+}
+
+export default App;
+```
+
+O fluxo inicial da aplicação será:
+
+```text
+main.jsx
+    │
+    ▼
+App.jsx
+    │
+    ▼
+PessoaForm.jsx
+```
+
+`PessoaForm` será o componente principal do cadastro e concentrará a
+integração dos demais componentes.
+
+---
+
+# Formulários com Ant Design
+
+No capítulo anterior utilizamos campos isolados do Ant Design.
+
+Agora utilizaremos:
+
+```jsx
+<Form>
+```
+
+O componente `Form` permite organizar e controlar diferentes campos de um
+formulário.
+
+Dentro dele utilizaremos:
+
+```jsx
+<Form.Item>
+```
+
+Podemos visualizar:
+
+```text
+Form
+ │
+ ├── Form.Item
+ │      └── Input
+ │
+ ├── Form.Item
+ │      └── DatePicker
+ │
+ ├── Form.Item
+ │      └── Select
+ │
+ └── Form.Item
+        └── Button
+```
+
+:::info `Form.Item`
+
+`Form.Item` funciona como um container para um campo do formulário.
+
+Ele pode definir informações como:
+
+```text
+label
+name
+rules
+```
+
+Isso permite associar o campo a um nome e definir regras de validação.
+
+:::
+
+---
+
+# Criando uma instância do formulário
+
+Dentro de `PessoaForm`, utilizaremos:
+
+```jsx
+const [form] = Form.useForm();
+```
+
+Essa instrução cria uma instância do formulário.
+
+Podemos pensar da seguinte forma:
+
+```text
+Form.useForm()
+      │
+      ▼
+    form
+      │
+      ▼
+controle do formulário
+```
+
+Depois associamos essa instância ao componente:
+
+```jsx
+<Form form={form}>
+```
+
+Isso permite acessar e manipular os dados do formulário programaticamente.
+
+---
+
+# Pessoa Física e Pessoa Jurídica
+
+Nosso cadastro trabalhará com dois tipos de pessoa.
+
+Para controlar a opção selecionada utilizaremos:
+
+```jsx
+const [tipoPessoa, setTipoPessoa] = useState("PF");
+```
+
+Inicialmente:
+
+```text
+tipoPessoa = "PF"
+```
+
+Quando o usuário selecionar outra opção:
+
+```text
+PF
+ │
+ │ usuário seleciona PJ
+ ▼
+onChangeTipo()
+ │
+ ▼
+setTipoPessoa("PJ")
+ │
+ ▼
+tipoPessoa = "PJ"
+```
+
+Assim, a interface poderá apresentar campos diferentes de acordo com o tipo
+selecionado.
+
+---
+
+# Selecionando o tipo de pessoa
+
+Utilizaremos:
+
+```jsx
+<Form.Item
+  label="Tipo de Pessoa"
+  name="tipo"
+  initialValue="PF"
+  style={{ marginBottom: 10 }}
+>
+
+  <Radio.Group onChange={onChangeTipo}>
+
+    <Radio value="PF">
+      Pessoa Física
+    </Radio>
+
+    <Radio value="PJ">
+      Pessoa Jurídica
+    </Radio>
+
+  </Radio.Group>
+
+</Form.Item>
+```
+
+Temos dois componentes importantes:
+
+```text
+Radio.Group
+    │
+    ├── Radio PF
+    └── Radio PJ
+```
+
+A propriedade:
+
+```jsx
+value="PF"
+```
+
+representa Pessoa Física.
+
+Enquanto:
+
+```jsx
+value="PJ"
+```
+
+representa Pessoa Jurídica.
+
+---
+
+# Evento `onChangeTipo`
+
+Podemos utilizar:
+
+```jsx
+const onChangeTipo = (e) => {
+
+  const novoTipo = e.target.value;
+
+  setTipoPessoa(novoTipo);
+
+  form.setFieldValue(
+    "tipo",
+    novoTipo
+  );
+};
+```
+
+O evento recebido contém a opção selecionada:
+
+```text
+e.target.value
+       │
+       ├── "PF"
+       │
+       └── "PJ"
+```
+
+O estado é atualizado por:
+
+```jsx
+setTipoPessoa(novoTipo);
+```
+
+E o formulário também recebe o valor:
+
+```jsx
+form.setFieldValue(
+  "tipo",
+  novoTipo
+);
+```
+
+---
+
+# Criando campos com `Form.Item`
+
+Vamos observar um campo simples:
+
+```jsx
+<Form.Item
+  label="Nome"
+  name="nome"
+  rules={[
+    {
+      required: true,
+      message: "Informe o nome!"
+    }
+  ]}
+>
+
+  <Input
+    placeholder="Nome completo ou razão social"
+  />
+
+</Form.Item>
+```
+
+Temos:
+
+```text
+Form.Item
+   │
+   ├── label
+   ├── name
+   ├── rules
+   │
+   └── Input
+```
+
+---
+
+# `label`
+
+A propriedade:
+
+```jsx
+label="Nome"
+```
+
+define o rótulo apresentado para o campo.
+
+Quando utilizamos:
+
+```jsx
+<Form layout="vertical">
+```
+
+o rótulo aparece acima do campo.
+
+Visualmente:
+
+```text
+Nome
+┌────────────────────────────┐
+│ Nome completo...           │
+└────────────────────────────┘
+```
+
+---
+
+# `name`
+
+A propriedade:
+
+```jsx
+name="nome"
+```
+
+identifica o campo dentro do formulário.
+
+Assim, quando o formulário for enviado, poderemos obter uma estrutura
+semelhante a:
+
+```text
+values
+  │
+  ├── tipo
+  ├── nome
+  ├── email
+  └── ...
+```
+
+Por exemplo:
+
+```jsx
+values.nome
+```
+
+permite acessar o valor associado ao campo `nome`.
+
+---
+
+# Validação com `rules`
+
+Uma das principais vantagens de `Form.Item` é a possibilidade de declarar
+regras de validação.
+
+Observe:
+
+```jsx
+rules={[
+  {
+    required: true,
+    message: "Informe o nome!"
+  }
+]}
+```
+
+A propriedade:
+
+```text
+required: true
+```
+
+indica que o campo é obrigatório.
+
+Enquanto:
+
+```text
+message
+```
+
+define a mensagem apresentada caso a regra não seja atendida.
+
+O fluxo será:
+
+```text
+Usuário envia formulário
+          │
+          ▼
+AntD verifica rules
+          │
+          ├── campo válido
+          │       │
+          │       ▼
+          │    continua
+          │
+          └── campo inválido
+                  │
+                  ▼
+            exibe mensagem
+```
+
+:::tip Validação declarativa
+
+Observe que não precisamos criar manualmente uma condição como:
+
+```jsx
+if (nome === "") {
+  ...
+}
+```
+
+A regra é declarada diretamente no `Form.Item`.
+
+Essa abordagem é chamada de **validação declarativa**.
+
+:::
+
+---
+
+# Validando o e-mail
+
+Podemos combinar diferentes regras:
+
+```jsx
+<Form.Item
+  label="Email"
+  name="email"
+  rules={[
+    {
+      required: true,
+      message: "Informe o e-mail!"
+    },
+    {
+      type: "email",
+      message: "Formato de e-mail inválido!"
+    }
+  ]}
+>
+
+  <Input
+    placeholder="exemplo@email.com"
+  />
+
+</Form.Item>
+```
+
+Nesse exemplo temos duas validações:
+
+```text
+Regra 1
+  │
+  └── campo obrigatório
+
+Regra 2
+  │
+  └── formato de e-mail
+```
+
+Assim:
+
+```text
+email vazio
+    │
+    ▼
+"Informe o e-mail!"
+
+email com formato inválido
+    │
+    ▼
+"Formato de e-mail inválido!"
+```
+
+---
+
+# Layout vertical
+
+O formulário utilizará:
+
+```jsx
+<Form
+  layout="vertical"
+  form={form}
+  onFinish={onFinish}
+>
+```
+
+A propriedade:
+
+```jsx
+layout="vertical"
+```
+
+organiza os campos desta forma:
+
+```text
+Nome
+[________________________]
+
+Email
+[________________________]
+
+Data
+[________________________]
+```
+
+Em vez de posicionar o rótulo ao lado do campo.
+
+---
+
+# Enviando o formulário com `onFinish`
+
+O Ant Design utiliza:
+
+```jsx
+onFinish={onFinish}
+```
+
+Quando as validações forem atendidas, a função será executada.
+
+Podemos criar:
+
+```jsx
+const onFinish = (values) => {
+
+  console.log(
+    "Dados cadastrados:",
+    values
+  );
+
+  message.success(
+    "Cadastro realizado com sucesso!"
+  );
+};
+```
+
+A variável:
+
+```text
+values
+```
+
+conterá os dados preenchidos no formulário.
+
+O fluxo será:
+
+```text
+Usuário
+   │
+   ▼
+preenche formulário
+   │
+   ▼
+clica em cadastrar
+   │
+   ▼
+AntD executa validações
+   │
+   ├── erro
+   │    └── apresenta mensagens
+   │
+   └── válido
+        │
+        ▼
+     onFinish(values)
+        │
+        ├── console.log()
+        └── message.success()
+```
+
+---
+
+# Campos específicos para PF e PJ
+
+Como o formulário possui dois tipos de pessoa, podemos utilizar renderização
+condicional.
+
+Por exemplo:
+
+```jsx
+{tipoPessoa === "PF" ? (
+  <>
+    {/* campos de Pessoa Física */}
+  </>
+) : (
+  <>
+    {/* campos de Pessoa Jurídica */}
+  </>
+)}
+```
+
+Temos:
+
+```text
+tipoPessoa
+     │
+     ├── PF
+     │    └── campos de Pessoa Física
+     │
+     └── PJ
+          └── campos de Pessoa Jurídica
+```
+
+Assim, o formulário pode se adaptar à opção selecionada pelo usuário.
+
+---
+
+# Campo de data
+
+Para dados relacionados a datas podemos utilizar:
+
+```jsx
+<DatePicker />
+```
+
+Por exemplo:
+
+```jsx
+<Form.Item
+  label={
+    tipoPessoa === "PF"
+      ? "Data de Nascimento"
+      : "Data de Fundação"
+  }
+  name="data"
+  rules={[
+    {
+      required: true,
+      message: "Informe a data!"
+    }
+  ]}
+>
+
+  <DatePicker
+    style={{ width: "100%" }}
+    format="DD/MM/YYYY"
+  />
+
+</Form.Item>
+```
+
+Observe que até o `label` pode ser dinâmico:
+
+```text
+PF
+ │
+ └── Data de Nascimento
+
+PJ
+ │
+ └── Data de Fundação
+```
+
+---
+
+# Componente `EnderecoForm`
+
+Um formulário de cadastro pode possuir muitos campos.
+
+Para evitar que `PessoaForm.jsx` concentre toda a implementação, criaremos um
+componente específico para endereço.
+
+```text
+PessoaForm
+    │
+    ├── Dados principais
+    │
+    ├── EnderecoForm
+    │
+    └── TelefoneList
+```
+
+`EnderecoForm` será um **subformulário**.
+
+---
+
+# Estrutura do endereço
+
+Os dados podem ser organizados como:
+
+```text
+endereco
+   │
+   ├── cidade
+   ├── uf
+   └── regiao
+```
+
+Para isso utilizaremos nomes aninhados no `Form.Item`.
+
+Exemplo:
+
+```jsx
+name={["endereco", "cidade"]}
+```
+
+Isso associa o campo a:
+
+```text
+endereco.cidade
+```
+
+Da mesma forma:
+
+```jsx
+name={["endereco", "uf"]}
+```
+
+representa:
+
+```text
+endereco.uf
+```
+
+---
+
+# Criando `EnderecoForm.jsx`
+
+## `EnderecoForm.jsx`
+
+```jsx
+import React from "react";
+
+import {
+  Form,
+  Input,
+  Row,
+  Col,
+  Select
+} from "antd";
+
+const { Option } = Select;
+
+export default function EnderecoForm() {
+
+  return (
+    <>
+      <h3>Endereço</h3>
+
+      <Row gutter={8}>
+
+        <Col span={12}>
+
+          <Form.Item
+            label="Cidade"
+            name={["endereco", "cidade"]}
+            rules={[
+              {
+                required: true,
+                message: "Informe a cidade!"
+              }
+            ]}
+          >
+
+            <Input
+              placeholder="Cidade"
+            />
+
+          </Form.Item>
+
+        </Col>
+
+        <Col span={6}>
+
+          <Form.Item
+            label="UF"
+            name={["endereco", "uf"]}
+            rules={[
+              {
+                required: true,
+                message: "Informe a UF!"
+              }
+            ]}
+          >
+
+            <Input
+              placeholder="UF"
+              maxLength={2}
+            />
+
+          </Form.Item>
+
+        </Col>
+
+        <Col span={6}>
+
+          <Form.Item
+            label="Região"
+            name={["endereco", "regiao"]}
+            rules={[
+              {
+                required: true,
+                message: "Selecione a região!"
+              }
+            ]}
+          >
+
+            <Select
+              placeholder="Selecione"
+            >
+
+              <Option value="Norte">
+                Norte
+              </Option>
+
+              <Option value="Nordeste">
+                Nordeste
+              </Option>
+
+              <Option value="Centro-Oeste">
+                Centro-Oeste
+              </Option>
+
+              <Option value="Sudeste">
+                Sudeste
+              </Option>
+
+              <Option value="Sul">
+                Sul
+              </Option>
+
+            </Select>
+
+          </Form.Item>
+
+        </Col>
+
+      </Row>
+    </>
+  );
+}
+```
+
+---
+
+# Layout com `Row` e `Col`
+
+Uma novidade importante é:
+
+```jsx
+<Row>
+```
+
+e:
+
+```jsx
+<Col>
+```
+
+Esses componentes permitem organizar a interface em uma grade.
+
+Temos:
+
+```text
+Row
+ │
+ ├── Col
+ ├── Col
+ └── Col
+```
+
+No exemplo:
+
+```jsx
+<Row gutter={8}>
+```
+
+a propriedade:
+
+```text
+gutter
+```
+
+define o espaçamento entre as colunas.
+
+---
+
+# Utilizando `span`
+
+Observe:
+
+```jsx
+<Col span={12}>
+```
+
+e:
+
+```jsx
+<Col span={6}>
+```
+
+Podemos visualizar:
+
+```text
+┌──────────────────────────────────────────────┐
+│                  Row                         │
+├───────────────────────┬───────────┬──────────┤
+│       Cidade          │    UF     │ Região   │
+│       span=12         │  span=6   │ span=6   │
+└───────────────────────┴───────────┴──────────┘
+```
+
+A soma é:
+
+```text
+12 + 6 + 6 = 24
+```
+
+Assim, os campos ocupam a mesma linha.
+
+:::info Grid do Ant Design
+
+O sistema de Grid do Ant Design utiliza uma divisão em **24 partes**.
+
+Portanto:
+
+```text
+span={24} → linha inteira
+
+span={12} → metade da linha
+
+span={8}  → aproximadamente 1/3
+
+span={6}  → 1/4 da linha
+```
+
+:::
+
+---
+
+# Utilizando `Select`
+
+Para a região utilizamos:
+
+```jsx
+<Select>
+```
+
+com diferentes opções:
+
+```jsx
+<Option value="Norte">
+  Norte
+</Option>
+```
+
+A estrutura é:
+
+```text
+Select
+  │
+  ├── Norte
+  ├── Nordeste
+  ├── Centro-Oeste
+  ├── Sudeste
+  └── Sul
+```
+
+O usuário não precisa digitar a região.
+
+Ele seleciona uma das opções disponíveis.
+
+---
+
+# Componente `TelefoneList`
+
+Agora criaremos uma funcionalidade diferente.
+
+O usuário poderá adicionar vários telefones.
+
+Isso significa que não teremos apenas um valor:
+
+```text
+telefone
+```
+
+Teremos uma coleção:
+
+```text
+telefones
+   │
+   ├── telefone 1
+   ├── telefone 2
+   ├── telefone 3
+   └── ...
+```
+
+Para controlar essa funcionalidade utilizaremos `useState`.
+
+---
+
+# Estados de `TelefoneList`
+
+Precisaremos controlar:
+
+```text
+DDD
+Número
+Lista de telefones
+```
+
+Assim:
+
+```jsx
+const [ddd, setDdd] = useState("");
+const [numero, setNumero] = useState("");
+const [telefones, setTelefones] = useState([]);
+```
+
+Inicialmente:
+
+```text
+ddd = ""
+
+numero = ""
+
+telefones = []
+```
+
+---
+
+# Adicionando um telefone
+
+Podemos criar:
+
+```jsx
+function adicionarTelefone() {
+
+  if (!ddd || !numero) {
+    return;
+  }
+
+  const novoTelefone = {
+    ddd,
+    numero
+  };
+
+  setTelefones([
+    ...telefones,
+    novoTelefone
+  ]);
+
+  setDdd("");
+  setNumero("");
+}
+```
+
+O fluxo será:
+
+```text
+DDD + Número
+      │
+      ▼
+adicionarTelefone()
+      │
+      ▼
+novoTelefone
+      │
+      ▼
+setTelefones()
+      │
+      ▼
+nova lista
+```
+
+Observe:
+
+```jsx
+[
+  ...telefones,
+  novoTelefone
+]
+```
+
+O operador:
+
+```text
+...
+```
+
+mantém os elementos existentes e acrescenta o novo telefone.
+
+---
+
+# Criando `TelefoneList.jsx`
+
+## `TelefoneList.jsx`
+
+```jsx
+import React, { useState } from "react";
+
+import {
+  Form,
+  Input,
+  Button,
+  Space,
+  List
+} from "antd";
+
+export default function TelefoneList() {
+
+  const [ddd, setDdd] = useState("");
+  const [numero, setNumero] = useState("");
+  const [telefones, setTelefones] = useState([]);
+
+  function adicionarTelefone() {
+
+    if (!ddd || !numero) {
+      return;
+    }
+
+    const novoTelefone = {
+      ddd,
+      numero
+    };
+
+    setTelefones([
+      ...telefones,
+      novoTelefone
+    ]);
+
+    setDdd("");
+    setNumero("");
+  }
+
+  return (
+    <>
+      <h3>Telefones</h3>
+
+      <Space align="baseline">
+
+        <Form.Item label="DDD">
+
+          <Input
+            value={ddd}
+            onChange={(e) =>
+              setDdd(e.target.value)
+            }
+            maxLength={2}
+          />
+
+        </Form.Item>
+
+        <Form.Item label="Número">
+
+          <Input
+            value={numero}
+            onChange={(e) =>
+              setNumero(e.target.value)
+            }
+            maxLength={9}
+          />
+
+        </Form.Item>
+
+        <Button
+          onClick={adicionarTelefone}
+          type="primary"
+        >
+          Adicionar
+        </Button>
+
+      </Space>
+
+      <List
+        size="small"
+        bordered
+        dataSource={telefones}
+        renderItem={(telefone, index) => (
+
+          <List.Item key={index}>
+
+            ({telefone.ddd}) {telefone.numero}
+
+          </List.Item>
+
+        )}
+        style={{
+          marginTop: 10
+        }}
+      />
+
+    </>
+  );
+}
+```
+
+---
+
+# Componente `Space`
+
+Já utilizamos `Space` anteriormente.
+
+Agora ele organiza:
+
+```text
+DDD
+Número
+Botão
+```
+
+horizontalmente.
+
+```jsx
+<Space align="baseline">
+```
+
+Visualmente:
+
+```text
+DDD          Número                Botão
+[ 61 ]       [ 999999999 ]       [ Adicionar ]
+```
+
+A propriedade:
+
+```text
+align="baseline"
+```
+
+ajuda a alinhar os elementos considerando sua linha de base.
+
+---
+
+# Componente `List`
+
+Para apresentar os telefones utilizamos:
+
+```jsx
+<List />
+```
+
+Observe:
+
+```jsx
+dataSource={telefones}
+```
+
+Essa propriedade fornece os dados que serão apresentados.
+
+Depois:
+
+```jsx
+renderItem={(telefone, index) => (
+```
+
+define como cada elemento será renderizado.
+
+Podemos representar:
+
+```text
+telefones
+   │
+   ├── { ddd: "61", numero: "999999999" }
+   ├── { ddd: "62", numero: "888888888" }
+   └── { ddd: "11", numero: "777777777" }
+                │
+                ▼
+              List
+                │
+                ▼
+       (61) 999999999
+       (62) 888888888
+       (11) 777777777
+```
+
+---
+
+# `dataSource`
+
+A propriedade:
+
+```jsx
+dataSource={telefones}
+```
+
+informa ao componente qual coleção deverá ser utilizada.
+
+Neste caso:
+
+```text
+state telefones
+      │
+      ▼
+dataSource
+      │
+      ▼
+List
+```
+
+Quando o estado é atualizado:
+
+```jsx
+setTelefones(...)
+```
+
+o React renderiza novamente o componente e a lista é atualizada.
+
+---
+
+# `renderItem`
+
+A propriedade:
+
+```jsx
+renderItem={(telefone, index) => (
+  ...
+)}
+```
+
+determina como cada telefone será apresentado.
+
+No nosso caso:
+
+```jsx
+<List.Item key={index}>
+
+  ({telefone.ddd}) {telefone.numero}
+
+</List.Item>
+```
+
+Assim:
+
+```text
+ddd = 61
+numero = 999999999
+```
+
+será apresentado como:
+
+```text
+(61) 999999999
+```
+
+---
+
+# Integrando os componentes
+
+Agora podemos visualizar a aplicação completa:
+
+```text
+App
+ │
+ ▼
+PessoaForm
+ │
+ ├── Tipo de Pessoa
+ │      ├── PF
+ │      └── PJ
+ │
+ ├── Dados principais
+ │
+ ├── EnderecoForm
+ │      ├── Cidade
+ │      ├── UF
+ │      └── Região
+ │
+ ├── TelefoneList
+ │      ├── DDD
+ │      ├── Número
+ │      └── List
+ │
+ └── Botão Cadastrar
+```
+
+Essa estrutura demonstra uma característica importante do React:
+
+```text
+Componente maior
+      │
+      ▼
+composto por
+componentes menores
+```
+
+---
+
+# Estrutura básica de `PessoaForm.jsx`
+
+Agora podemos reunir os conceitos principais.
+
+## `PessoaForm.jsx`
+
+```jsx
+import React, {
+  useEffect,
+  useState
+} from "react";
+
+import {
+  Form,
+  Input,
+  Button,
+  Radio,
+  DatePicker,
+  message
+} from "antd";
+
+import {
+  ArrowUpOutlined
+} from "@ant-design/icons";
+
+import EnderecoForm from "./EnderecoForm.jsx";
+import TelefoneList from "./TelefoneList.jsx";
+
+import "./pessoaform.css";
+
+export default function PessoaForm() {
+
+  const [form] = Form.useForm();
+
+  const [tipoPessoa, setTipoPessoa] =
+    useState("PF");
+
+  const [mostrarTopo, setMostrarTopo] =
+    useState(false);
+
+  const onChangeTipo = (e) => {
+
+    const novoTipo = e.target.value;
+
+    setTipoPessoa(novoTipo);
+
+    form.setFieldValue(
+      "tipo",
+      novoTipo
+    );
+  };
+
+  const onFinish = (values) => {
+
+    console.log(
+      "Dados cadastrados:",
+      values
+    );
+
+    message.success(
+      "Cadastro realizado com sucesso!"
+    );
+  };
+
+  useEffect(() => {
+
+    function verificarRolagem() {
+
+      setMostrarTopo(
+        window.scrollY > 200
+      );
+    }
+
+    window.addEventListener(
+      "scroll",
+      verificarRolagem
+    );
+
+    return () => {
+
+      window.removeEventListener(
+        "scroll",
+        verificarRolagem
+      );
+    };
+
+  }, []);
+
+  function voltarAoTopo() {
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  return (
+    <main className="main-scroll">
+
+      <div className="form-container">
+
+        <h2>Cadastro de Pessoas</h2>
+
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={onFinish}
+        >
+
+          <Form.Item
+            label="Tipo de Pessoa"
+            name="tipo"
+            initialValue="PF"
+            style={{
+              marginBottom: 10
+            }}
+          >
+
+            <Radio.Group
+              onChange={onChangeTipo}
+            >
+
+              <Radio value="PF">
+                Pessoa Física
+              </Radio>
+
+              <Radio value="PJ">
+                Pessoa Jurídica
+              </Radio>
+
+            </Radio.Group>
+
+          </Form.Item>
+
+          <Form.Item
+            label={
+              tipoPessoa === "PF"
+                ? "Nome"
+                : "Razão Social"
+            }
+            name="nome"
+            rules={[
+              {
+                required: true,
+                message:
+                  "Informe o nome!"
+              }
+            ]}
+          >
+
+            <Input
+              placeholder={
+                tipoPessoa === "PF"
+                  ? "Nome completo"
+                  : "Razão social"
+              }
+            />
+
+          </Form.Item>
+
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                message:
+                  "Informe o e-mail!"
+              },
+              {
+                type: "email",
+                message:
+                  "Formato de e-mail inválido!"
+              }
+            ]}
+          >
+
+            <Input
+              placeholder="exemplo@email.com"
+            />
+
+          </Form.Item>
+
+          {tipoPessoa === "PF" ? (
+
+            <Form.Item
+              label="CPF"
+              name="cpf"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "Informe o CPF!"
+                }
+              ]}
+            >
+
+              <Input
+                placeholder="CPF"
+                maxLength={14}
+              />
+
+            </Form.Item>
+
+          ) : (
+
+            <Form.Item
+              label="CNPJ"
+              name="cnpj"
+              rules={[
+                {
+                  required: true,
+                  message:
+                    "Informe o CNPJ!"
+                }
+              ]}
+            >
+
+              <Input
+                placeholder="CNPJ"
+                maxLength={18}
+              />
+
+            </Form.Item>
+
+          )}
+
+          <Form.Item
+            label={
+              tipoPessoa === "PF"
+                ? "Data de Nascimento"
+                : "Data de Fundação"
+            }
+            name="data"
+            rules={[
+              {
+                required: true,
+                message:
+                  "Informe a data!"
+              }
+            ]}
+          >
+
+            <DatePicker
+              style={{
+                width: "100%"
+              }}
+              format="DD/MM/YYYY"
+            />
+
+          </Form.Item>
+
+          <EnderecoForm />
+
+          <TelefoneList />
+
+          <Form.Item>
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              size="large"
+            >
+              Cadastrar
+            </Button>
+
+          </Form.Item>
+
+        </Form>
+
+      </div>
+
+      {mostrarTopo && (
+
+        <button
+          className="scroll-top-button"
+          onClick={voltarAoTopo}
+          aria-label="Voltar ao topo"
+        >
+
+          <ArrowUpOutlined />
+
+        </button>
+
+      )}
+
+    </main>
+  );
+}
+```
+
+:::info Sobre o exemplo
+
+`PessoaForm` é responsável pela estrutura principal e delega partes específicas
+do cadastro para:
+
+```text
+EnderecoForm
+TelefoneList
+```
+
+Essa divisão reduz a quantidade de responsabilidades concentradas em um único
+componente.
+
+:::
+
+---
+
+# Botão de envio
+
+Observe:
+
+```jsx
+<Button
+  type="primary"
+  htmlType="submit"
+  block
+  size="large"
+>
+  Cadastrar
+</Button>
+```
+
+Uma propriedade especialmente importante é:
+
+```text
+htmlType="submit"
+```
+
+Ela faz com que o botão envie o formulário.
+
+Assim:
+
+```text
+Button
+   │
+   ▼
+htmlType="submit"
+   │
+   ▼
+Form
+   │
+   ▼
+validação
+   │
+   ▼
+onFinish()
+```
+
+Se existirem erros de validação, `onFinish` não será executado.
+
+---
+
+# Feedback com `message`
+
+Após o cadastro utilizamos:
+
+```jsx
+message.success(
+  "Cadastro realizado com sucesso!"
+);
+```
+
+Isso fornece um feedback visual integrado ao Ant Design.
+
+Podemos comparar:
+
+```text
+alert()
+   │
+   └── recurso do navegador
+
+message.success()
+   │
+   └── componente visual integrado ao AntD
+```
+
+---
+
+# Utilizando `useEffect`
+
+O exemplo também utiliza:
+
+```jsx
+useEffect()
+```
+
+para acompanhar a rolagem da página.
+
+```jsx
+useEffect(() => {
+
+  function verificarRolagem() {
+
+    setMostrarTopo(
+      window.scrollY > 200
+    );
+  }
+
+  window.addEventListener(
+    "scroll",
+    verificarRolagem
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "scroll",
+      verificarRolagem
+    );
+  };
+
+}, []);
+```
+
+Quando a página é rolada:
+
+```text
+scroll
+  │
+  ▼
+verificarRolagem()
+  │
+  ▼
+window.scrollY
+  │
+  ├── <= 200
+  │      └── mostrarTopo = false
+  │
+  └── > 200
+         └── mostrarTopo = true
+```
+
+---
+
+# Limpeza do evento
+
+Observe que o `useEffect` retorna:
+
+```jsx
+return () => {
+
+  window.removeEventListener(
+    "scroll",
+    verificarRolagem
+  );
+};
+```
+
+Isso remove o evento quando o componente deixa de ser utilizado.
+
+Podemos representar:
+
+```text
+Componente montado
+      │
+      ▼
+addEventListener()
+      │
+      ▼
+evento ativo
+      │
+      ▼
+componente desmontado
+      │
+      ▼
+removeEventListener()
+```
+
+:::tip
+
+Ao registrar eventos externos ao React, é importante remover esses eventos
+quando eles não forem mais necessários.
+
+:::
+
+---
+
+# Botão para voltar ao topo
+
+Quando:
+
+```text
+mostrarTopo = true
+```
+
+renderizamos:
+
+```jsx
+<button
+  className="scroll-top-button"
+  onClick={voltarAoTopo}
+  aria-label="Voltar ao topo"
+>
+
+  <ArrowUpOutlined />
+
+</button>
+```
+
+O ícone:
+
+```jsx
+<ArrowUpOutlined />
+```
+
+é fornecido por:
+
+```jsx
+@ant-design/icons
+```
+
+---
+
+# Rolagem suave
+
+A função:
+
+```jsx
+function voltarAoTopo() {
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+}
+```
+
+faz a página retornar ao topo.
+
+Temos:
+
+```text
+top: 0
+   │
+   └── início da página
+
+behavior: "smooth"
+   │
+   └── rolagem suave
+```
+
+---
+
+# CSS complementar
+
+Mesmo utilizando uma biblioteca de componentes, podemos utilizar CSS para
+complementar a interface.
+
+Criaremos:
+
+```text
+pessoaform.css
+```
+
+## `pessoaform.css`
+
+```css
+.main-scroll {
+  min-height: 100vh;
+  width: 100%;
+  padding: 32px 20px;
+  box-sizing: border-box;
+  background: #f5f5f5;
+}
+
+.form-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 32px 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.form-container h2 {
+  text-align: center;
+  color: #1677ff;
+  margin-bottom: 24px;
+}
+
+.form-container h3 {
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.scroll-top-button {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 50%;
+
+  background-color: #1677ff;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.25);
+
+  transition:
+    background-color 0.3s,
+    transform 0.3s;
+}
+
+.scroll-top-button:hover {
+  background-color: #0958d9;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+
+  .main-scroll {
+    padding: 16px 10px;
+  }
+
+  .form-container {
+    padding: 24px 16px;
+  }
+}
+```
+
+---
+
+# Ant Design e CSS
+
+Observe que não estamos substituindo o Ant Design pelo CSS.
+
+Temos duas responsabilidades:
+
+```text
+Ant Design
+    │
+    ├── Form
+    ├── Input
+    ├── Select
+    ├── DatePicker
+    ├── Button
+    ├── List
+    └── validação
+
+
+CSS
+    │
+    ├── container
+    ├── largura máxima
+    ├── fundo
+    ├── sombra
+    ├── botão flutuante
+    └── ajustes responsivos
+```
+
+Portanto, as duas abordagens podem ser utilizadas em conjunto.
+
+---
+
+# Container do formulário
+
+A classe:
+
+```css
+.form-container
+```
+
+define:
+
+```text
+max-width: 900px
+      │
+      └── limita a largura
+
+margin: 0 auto
+      │
+      └── centraliza
+
+background: #ffffff
+      │
+      └── fundo branco
+
+border-radius: 12px
+      │
+      └── cantos arredondados
+
+padding
+      │
+      └── espaçamento interno
+
+box-shadow
+      │
+      └── sombra
+```
+
+Visualmente:
+
+```text
+Página
+┌──────────────────────────────────────────────┐
+│                                              │
+│       ┌──────────────────────────────┐       │
+│       │                              │       │
+│       │    Cadastro de Pessoas       │       │
+│       │                              │       │
+│       │    Tipo de Pessoa            │       │
+│       │    ( ) PF  ( ) PJ            │       │
+│       │                              │       │
+│       │    Nome                      │       │
+│       │    [__________________]      │       │
+│       │                              │       │
+│       │          ...                 │       │
+│       │                              │       │
+│       └──────────────────────────────┘       │
+│                                              │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+# Responsividade
+
+O CSS também utiliza:
+
+```css
+@media (max-width: 768px)
+```
+
+Isso permite modificar algumas características quando a tela possui uma
+largura menor.
+
+Por exemplo:
+
+```css
+.form-container {
+  padding: 24px 16px;
+}
+```
+
+Assim, o formulário utiliza menos espaço interno em telas menores.
+
+Temos:
+
+```text
+Tela grande
+    │
+    └── padding maior
+
+Tela pequena
+    │
+    └── padding menor
+```
+
+---
+
+# Visão geral da arquitetura
+
+Agora podemos observar a arquitetura completa:
+
+```text
+                         App.jsx
+                            │
+                            ▼
+                     PessoaForm.jsx
+                            │
+            ┌───────────────┼────────────────┐
+            │               │                │
+            ▼               ▼                ▼
+       Dados Pessoa    EnderecoForm    TelefoneList
+            │               │                │
+            │          ┌────┼────┐      ┌────┼────┐
+            │          │    │    │      │    │    │
+            ▼          ▼    ▼    ▼      ▼    ▼    ▼
+       Form.Item     Cidade UF Região   DDD Número List
+            │
+            ▼
+      Validação AntD
+```
+
+Essa estrutura demonstra:
+
+```text
+Componentização
+      +
+Composição
+      +
+Estado
+      +
+Eventos
+      +
+Formulários
+      +
+Validação
+      +
+Design System
+```
+
+---
+
+# Estrutura dos dados
+
+Quando o formulário é enviado, os campos controlados pelo `Form` podem ser
+organizados em uma estrutura semelhante a:
+
+```text
+values
+│
+├── tipo
+├── nome
+├── email
+├── cpf ou cnpj
+├── data
+│
+└── endereco
+    ├── cidade
+    ├── uf
+    └── regiao
+```
+
+Os campos:
+
+```jsx
+name={["endereco", "cidade"]}
+name={["endereco", "uf"]}
+name={["endereco", "regiao"]}
+```
+
+são responsáveis por criar a estrutura aninhada de endereço.
+
+:::info
+
+Essa organização é especialmente útil quando o formulário representa uma
+entidade que possui outros conjuntos de informações relacionados.
+
+:::
+
+---
+
+# Conceitos-chave utilizados
+
+Neste projeto utilizamos vários recursos do Ant Design:
+
+| Recurso | Aplicação |
+|---|---|
+| `Form` | Estrutura principal do formulário |
+| `Form.Item` | Campos e validações |
+| `rules` | Regras declarativas |
+| `Input` | Entrada de texto |
+| `Radio.Group` | Seleção PF/PJ |
+| `DatePicker` | Seleção de data |
+| `Select` | Seleção da região |
+| `Row` | Linha do Grid |
+| `Col` | Coluna do Grid |
+| `Space` | Espaçamento entre elementos |
+| `List` | Apresentação da lista de telefones |
+| `Button` | Ações do formulário |
+| `message` | Feedback ao usuário |
+
+Também utilizamos conceitos React:
+
+```text
+useState
+useEffect
+eventos
+renderização condicional
+componentização
+composição
+listas
+```
+
+---
+
+# Exercício de Fixação
+
+O objetivo deste exercício é **implementar, executar, testar e validar todos
+os códigos apresentados neste capítulo**.
+
+Crie a estrutura:
+
+```text
+src/
+│
+├── App.jsx
+│
+└── components/
+    └── cadastrapessoa/
+        ├── PessoaForm.jsx
+        ├── EnderecoForm.jsx
+        ├── TelefoneList.jsx
+        └── pessoaform.css
+```
+
+Implemente todos os arquivos apresentados.
+
+Depois execute:
+
+```bash
+npm run dev
+```
+
+---
+
+# Testando o tipo de pessoa
+
+Inicialmente, verifique se:
+
+```text
+Pessoa Física
+```
+
+está selecionada.
+
+Depois selecione:
+
+```text
+Pessoa Jurídica
+```
+
+Observe se os campos específicos são alterados.
+
+Valide o fluxo:
+
+```text
+Radio.Group
+      │
+      ▼
+onChangeTipo()
+      │
+      ▼
+setTipoPessoa()
+      │
+      ▼
+nova renderização
+```
+
+---
+
+# Testando campos obrigatórios
+
+Sem preencher os campos obrigatórios, clique em:
+
+```text
+Cadastrar
+```
+
+Observe as mensagens de validação.
+
+Identifique no código:
+
+```jsx
+rules={[
+  {
+    required: true,
+    message: "..."
+  }
+]}
+```
+
+Preencha os campos e observe o desaparecimento das mensagens.
+
+---
+
+# Testando o e-mail
+
+Digite um valor inválido:
+
+```text
+aluno
+```
+
+Tente enviar o formulário.
+
+Depois teste:
+
+```text
+aluno@email.com
+```
+
+Compare o resultado.
+
+Identifique a regra:
+
+```jsx
+{
+  type: "email",
+  message:
+    "Formato de e-mail inválido!"
+}
+```
+
+---
+
+# Testando o endereço
+
+Preencha:
+
+```text
+Cidade
+UF
+Região
+```
+
+Observe a organização dos campos na mesma linha.
+
+Identifique:
+
+```text
+Row
+ │
+ ├── Col span={12}
+ ├── Col span={6}
+ └── Col span={6}
+```
+
+Verifique também os nomes:
+
+```jsx
+name={["endereco", "cidade"]}
+name={["endereco", "uf"]}
+name={["endereco", "regiao"]}
+```
+
+---
+
+# Testando a lista de telefones
+
+Informe:
+
+```text
+DDD: 61
+Número: 999999999
+```
+
+Clique em:
+
+```text
+Adicionar
+```
+
+Verifique se aparece:
+
+```text
+(61) 999999999
+```
+
+Depois adicione outros telefones.
+
+Observe se os registros anteriores permanecem na lista.
+
+Valide:
+
+```text
+telefones
+    │
+    ▼
+setTelefones()
+    │
+    ▼
+List
+```
+
+---
+
+# Testando o formulário completo
+
+Preencha todos os campos corretamente.
+
+Clique em:
+
+```text
+Cadastrar
+```
+
+Verifique se:
+
+```text
+Cadastro realizado com sucesso!
+```
+
+é apresentado.
+
+Abra também o console do navegador e observe os dados enviados por:
+
+```jsx
+console.log(
+  "Dados cadastrados:",
+  values
+);
+```
+
+Analise a estrutura do objeto.
+
+---
+
+# Testando o botão de voltar ao topo
+
+Role a página.
+
+Observe se o botão aparece depois de determinada quantidade de rolagem.
+
+Identifique:
+
+```jsx
+window.scrollY > 200
+```
+
+Clique no botão.
+
+Verifique a rolagem suave para o início da página.
+
+Analise:
+
+```jsx
+window.scrollTo({
+  top: 0,
+  behavior: "smooth"
+});
+```
+
+---
+
+# Testando o CSS
+
+Observe:
+
+```text
+form-container
+main-scroll
+scroll-top-button
+```
+
+Altere temporariamente:
+
+```css
+max-width: 900px;
+```
+
+e observe o efeito.
+
+Faça o mesmo com:
+
+```css
+border-radius: 12px;
+```
+
+e:
+
+```css
+box-shadow:
+  0 4px 12px rgba(0, 0, 0, 0.08);
+```
+
+Depois retorne aos valores originais.
+
+---
+
+# Validação final
+
+Ao concluir os testes, certifique-se de que consegue identificar:
+
+```text
+Form
+Form.Item
+Form.useForm()
+rules
+required
+type="email"
+onFinish
+Radio.Group
+DatePicker
+Row
+Col
+span
+Select
+Space
+List
+dataSource
+renderItem
+message.success()
+useState
+useEffect
+renderização condicional
+campos aninhados
+componentização
+CSS complementar
+```
+
+Procure também explicar o fluxo completo:
+
+```text
+Usuário
+   │
+   ▼
+preenche formulário
+   │
+   ▼
+Form.Item
+   │
+   ▼
+rules
+   │
+   ├── inválido
+   │      └── mensagem de erro
+   │
+   └── válido
+          │
+          ▼
+      onFinish()
+          │
+          ▼
+       values
+          │
+          ▼
+   processamento dos dados
+```
+
+:::tip Objetivo do exercício
+
+O objetivo não é apenas reproduzir visualmente o formulário.
+
+Durante os testes, procure compreender a responsabilidade de cada parte:
+
+```text
+React
+  │
+  ├── estados
+  ├── eventos
+  ├── efeitos
+  ├── renderização condicional
+  └── composição
+
+Ant Design
+  │
+  ├── formulário
+  ├── campos
+  ├── validação
+  ├── Grid
+  ├── lista
+  └── feedback
+
+CSS
+  │
+  ├── layout complementar
+  ├── container
+  ├── botão flutuante
+  └── responsividade
+```
+
+:::
+
+---
+
+# Resumo
+
+Neste capítulo evoluímos de uma interface simples construída com Ant Design
+para um **formulário de cadastro composto por diferentes componentes**.
+
+A evolução pode ser representada por:
+
+```text
+Componentes React
+        │
+        ▼
+Ant Design
+        │
+        ▼
+Form
+        │
+        ▼
+Form.Item
+        │
+        ▼
+Validação declarativa
+        │
+        ▼
+Formulário dinâmico PF/PJ
+        │
+        ▼
+Subcomponentes
+        │
+        ├── EnderecoForm
+        └── TelefoneList
+        │
+        ▼
+Grid responsivo
+        │
+        ├── Row
+        └── Col
+        │
+        ▼
+Aplicação de cadastro
+```
+
+O `PessoaForm` atua como componente principal, enquanto `EnderecoForm` e
+`TelefoneList` separam responsabilidades específicas da aplicação.
+
+Também avançamos no uso do Ant Design com:
+
+```text
+Form + Form.Item
+       │
+       └── validação declarativa
+
+Row + Col
+       │
+       └── organização em Grid
+
+Input + Select + DatePicker
+       │
+       └── entrada de dados
+
+Space + List
+       │
+       └── organização e apresentação
+
+Button + message
+       │
+       └── ação e feedback
+```
+
+Essa estrutura permite construir formulários maiores sem abandonar os
+princípios estudados desde os primeiros capítulos: **componentização,
+reutilização, estado, eventos e separação de responsabilidades**.
