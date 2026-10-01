@@ -1,0 +1,3012 @@
+# 📘 Cadastro de Pessoas com Orientação a Objetos e Persistência Local
+
+Nos capítulos anteriores estudamos diferentes recursos utilizados na
+construção de interfaces com ReactJS:
+
+```text
+Componentes
+    ↓
+Props
+    ↓
+State
+    ↓
+Eventos
+    ↓
+Renderização condicional
+    ↓
+CSS
+    ↓
+Tailwind
+    ↓
+Ant Design
+```
+
+Agora utilizaremos esses conhecimentos na construção de uma aplicação mais
+completa.
+
+Desenvolveremos um cadastro de:
+
+```text
+Pessoa Física (PF)
+        e
+Pessoa Jurídica (PJ)
+```
+
+integrando diferentes tecnologias e conceitos:
+
+```text
+ReactJS
+   +
+Ant Design
+   +
+Orientação a Objetos
+   +
+ViaCEP
+   +
+DAO
+   +
+localStorage
+```
+
+---
+
+# Objetivos
+
+Ao final deste capítulo você deverá ser capaz de:
+
+- construir um formulário composto por diferentes componentes;
+- trabalhar com campos específicos para Pessoa Física e Pessoa Jurídica;
+- utilizar formulários dinâmicos do Ant Design;
+- consultar um serviço externo utilizando `fetch`;
+- transformar dados do formulário em objetos;
+- utilizar classes JavaScript na aplicação React;
+- aplicar composição e herança;
+- compreender o padrão DAO;
+- persistir dados utilizando `localStorage`.
+
+---
+
+# Evolução da aplicação
+
+Até agora nossos exemplos estavam concentrados principalmente na camada
+visual.
+
+Neste capítulo teremos:
+
+```text
+INTERFACE
+   │
+   ▼
+OBJETOS
+   │
+   ▼
+PERSISTÊNCIA
+```
+
+Isso significa que não teremos apenas componentes React.
+
+Nossa aplicação também possuirá classes responsáveis pela representação do
+domínio e classes responsáveis pela persistência.
+
+---
+
+# Separação de responsabilidades
+
+Organizaremos a aplicação em três grupos principais.
+
+## Interface
+
+Os componentes React ficarão em:
+
+```text
+src/components/cadastrapessoa/
+```
+
+Por exemplo:
+
+```text
+PessoaFormOO.jsx
+EnderecoFormEX.jsx
+PFForm.jsx
+PJForm.jsx
+TelefoneListOO.jsx
+...
+```
+
+:::info
+
+A pasta `cadastrapessoa` poderá conter outros componentes e exemplos
+relacionados ao cadastro ao longo da evolução do projeto.
+
+:::
+
+---
+
+## Domínio
+
+As classes que representam nossos objetos ficarão em:
+
+```text
+src/objetos/pessoas/
+```
+
+Teremos:
+
+```text
+Pessoa.mjs
+PF.mjs
+PJ.mjs
+Endereco.mjs
+Telefone.mjs
+Titulo.mjs
+IE.mjs
+```
+
+Essas classes representam conceitos do problema que estamos modelando.
+
+---
+
+## Persistência
+
+Os objetos responsáveis pelo armazenamento ficarão em:
+
+```text
+src/objetos/dao/
+```
+
+Neste capítulo utilizaremos:
+
+```text
+PFDAOLocal.mjs
+PJDAOLocal.mjs
+```
+
+---
+
+# Modelo de objetos
+
+Podemos representar o domínio de forma simplificada:
+
+```text
+                   Pessoa
+                     │
+             ┌───────┴───────┐
+             │               │
+             ▼               ▼
+            PF               PJ
+             │               │
+             ▼               ▼
+          Titulo             IE
+
+
+Pessoa
+  │
+  ├── Endereco
+  │
+  └── Telefone[]
+```
+
+Temos alguns conceitos importantes de Orientação a Objetos.
+
+### Herança
+
+```text
+Pessoa
+  ▲
+  │
+ ┌┴─┐
+ PF PJ
+```
+
+`PF` e `PJ` especializam `Pessoa`.
+
+### Composição/associação
+
+Uma pessoa possui:
+
+```text
+Endereco
+```
+
+e pode possuir:
+
+```text
+Telefone[]
+```
+
+Além disso:
+
+```text
+PF → Titulo
+PJ → IE
+```
+
+---
+
+# Reutilizando as classes já estudadas
+
+Neste capítulo não reconstruiremos todas as classes de domínio.
+
+Utilizaremos as classes já desenvolvidas anteriormente:
+
+```text
+Pessoa
+PF
+PJ
+Endereco
+Telefone
+Titulo
+IE
+```
+
+Elas devem estar disponíveis em:
+
+```text
+src/objetos/pessoas/
+```
+
+Assim conseguimos concentrar o estudo na integração entre:
+
+```text
+React
++
+Orientação a Objetos
++
+Persistência
+```
+
+---
+
+# O que é `localStorage`?
+
+O navegador disponibiliza um mecanismo de armazenamento denominado:
+
+```text
+localStorage
+```
+
+Ele permite armazenar dados localmente no navegador.
+
+Entretanto, o `localStorage` trabalha com:
+
+```text
+chave → texto
+```
+
+Por isso utilizaremos:
+
+```js
+JSON.stringify()
+```
+
+para transformar estruturas JavaScript em texto e:
+
+```js
+JSON.parse()
+```
+
+para realizar o processo inverso.
+
+---
+
+# Por que utilizar DAO?
+
+Poderíamos fazer diretamente:
+
+```text
+PessoaFormOO
+      │
+      ▼
+localStorage
+```
+
+Entretanto, isso faria o componente conhecer detalhes da persistência.
+
+Utilizaremos:
+
+```text
+PessoaFormOO
+      │
+      ▼
+     DAO
+      │
+      ▼
+localStorage
+```
+
+DAO significa:
+
+```text
+Data Access Object
+```
+
+Sua responsabilidade será concentrar as operações relacionadas ao
+armazenamento.
+
+---
+
+# Integração com ViaCEP
+
+Para facilitar o preenchimento do endereço utilizaremos o serviço ViaCEP.
+
+O processo será:
+
+```text
+Usuário informa CEP
+        │
+        ▼
+     fetch()
+        │
+        ▼
+      ViaCEP
+        │
+        ▼
+Dados do endereço
+        │
+        ▼
+Formulário
+```
+
+---
+
+# Arquitetura final
+
+Nossa organização será semelhante a:
+
+```text
+src/
+│
+├── components/
+│   └── cadastrapessoa/
+│       ├── PessoaFormOO.jsx
+│       ├── EnderecoFormEX.jsx
+│       ├── PFForm.jsx
+│       ├── PJForm.jsx
+│       ├── TelefoneListOO.jsx
+│       └── ...
+│
+└── objetos/
+    ├── pessoas/
+    │   ├── Pessoa.mjs
+    │   ├── PF.mjs
+    │   ├── PJ.mjs
+    │   ├── Endereco.mjs
+    │   ├── Telefone.mjs
+    │   ├── Titulo.mjs
+    │   └── IE.mjs
+    │
+    └── dao/
+        ├── PFDAOLocal.mjs
+        └── PJDAOLocal.mjs
+```
+
+Nos próximos tópicos construiremos a interface progressivamente e, depois,
+integraremos os componentes às classes de domínio e aos DAOs.
+
+# Construindo o formulário principal
+
+O componente central da aplicação será:
+
+```text
+PessoaFormOO.jsx
+```
+
+localizado em:
+
+```text
+src/components/cadastrapessoa/
+```
+
+Ele será responsável por coordenar os demais componentes do cadastro.
+
+---
+
+# Importações iniciais
+
+Começaremos com:
+
+```jsx
+import React, { useState } from "react";
+import {
+  Form,
+  Input,
+  Button,
+  Radio,
+  message
+} from "antd";
+
+import EnderecoForm from "./EnderecoFormEX.jsx";
+import TelefoneList from "./TelefoneListOO.jsx";
+import PFForm from "./PFForm.jsx";
+import PJForm from "./PJForm.jsx";
+```
+
+:::info Construção progressiva
+
+O `PessoaFormOO` utiliza componentes que construiremos nas próximas partes:
+
+```text
+EnderecoFormEX.jsx
+TelefoneListOO.jsx
+PFForm.jsx
+PJForm.jsx
+```
+
+Portanto, acompanhe a construção na sequência apresentada no capítulo.
+
+:::
+
+---
+
+# Instância do formulário
+
+Dentro do componente:
+
+```jsx
+export default function PessoaFormOO() {
+
+  const [form] = Form.useForm();
+
+  const [tipo, setTipo] = useState("PF");
+
+  // ...
+}
+```
+
+Temos dois elementos importantes:
+
+```text
+form
+```
+
+representa o formulário do Ant Design.
+
+Já:
+
+```text
+tipo
+```
+
+indica se estamos cadastrando:
+
+```text
+PF
+```
+
+ou:
+
+```text
+PJ
+```
+
+---
+
+# Alterando o tipo
+
+Utilizamos:
+
+```jsx
+function onChangeTipo(e) {
+  setTipo(e.target.value);
+}
+```
+
+O fluxo será:
+
+```text
+Radio
+ │
+ ▼
+onChangeTipo
+ │
+ ▼
+setTipo
+ │
+ ▼
+PF ou PJ
+```
+
+---
+
+# Estrutura inicial do formulário
+
+Utilizamos:
+
+```jsx
+<Form
+  layout="vertical"
+  form={form}
+>
+```
+
+A propriedade:
+
+```jsx
+layout="vertical"
+```
+
+faz com que os rótulos sejam apresentados acima dos campos.
+
+---
+
+# Escolhendo PF ou PJ
+
+Adicionamos:
+
+```jsx
+<Form.Item
+  label="Tipo de Pessoa"
+  name="tipo"
+  initialValue="PF"
+>
+  <Radio.Group onChange={onChangeTipo}>
+    <Radio value="PF">
+      Pessoa Física
+    </Radio>
+
+    <Radio value="PJ">
+      Pessoa Jurídica
+    </Radio>
+  </Radio.Group>
+</Form.Item>
+```
+
+---
+
+# Nome
+
+O campo nome será comum aos dois tipos:
+
+```jsx
+<Form.Item
+  label="Nome"
+  name="nome"
+  rules={[
+    {
+      required: true,
+      message: "Informe o nome!"
+    }
+  ]}
+>
+  <Input
+    placeholder="Nome completo ou razão social"
+  />
+</Form.Item>
+```
+
+---
+
+# E-mail
+
+Também teremos:
+
+```jsx
+<Form.Item
+  label="Email"
+  name="email"
+  rules={[
+    {
+      required: true,
+      message: "Informe o e-mail!"
+    },
+    {
+      type: "email",
+      message: "Formato de e-mail inválido!"
+    }
+  ]}
+>
+  <Input placeholder="exemplo@email.com" />
+</Form.Item>
+```
+
+Aqui utilizamos duas validações:
+
+```text
+campo obrigatório
++
+formato de e-mail
+```
+
+---
+
+# CPF ou CNPJ
+
+Agora utilizaremos renderização condicional:
+
+```jsx
+{tipo === "PF" ? (
+
+  <Form.Item
+    label="CPF"
+    name="cpf"
+    rules={[
+      {
+        required: true,
+        message: "Informe o CPF!"
+      }
+    ]}
+  >
+    <Input
+      placeholder="Somente números"
+      maxLength={11}
+    />
+  </Form.Item>
+
+) : (
+
+  <Form.Item
+    label="CNPJ"
+    name="cnpj"
+    rules={[
+      {
+        required: true,
+        message: "Informe o CNPJ!"
+      }
+    ]}
+  >
+    <Input
+      placeholder="Somente números"
+      maxLength={18}
+    />
+  </Form.Item>
+
+)}
+```
+
+Portanto:
+
+```text
+tipo
+ │
+ ├── PF → CPF
+ │
+ └── PJ → CNPJ
+```
+
+Isso também explica por que CPF não precisa estar novamente dentro do
+`PFForm`.
+
+---
+
+# Adicionando os subcomponentes
+
+Depois utilizaremos:
+
+```jsx
+<EnderecoForm />
+
+<TelefoneList form={form} />
+
+{tipo === "PF"
+  ? <PFForm />
+  : <PJForm />
+}
+```
+
+Nossa estrutura começa a ficar:
+
+```text
+PessoaFormOO
+│
+├── Nome
+├── Email
+├── CPF/CNPJ
+├── EnderecoForm
+├── TelefoneList
+└── PFForm/PJForm
+```
+
+---
+
+# Botão Salvar
+
+Finalmente:
+
+```jsx
+<Form.Item>
+  <Button
+    type="primary"
+    htmlType="submit"
+    block
+  >
+    Salvar
+  </Button>
+</Form.Item>
+```
+
+Ainda não adicionaremos toda a lógica de persistência.
+
+Primeiro compreenderemos os componentes utilizados pelo formulário.
+
+Na Parte 6 retornaremos ao `PessoaFormOO` para implementar:
+
+```jsx
+onFinish(values)
+```
+
+# Construindo o formulário de endereço
+
+O próximo componente será:
+
+```text
+EnderecoFormEX.jsx
+```
+
+localizado em:
+
+```text
+src/components/cadastrapessoa/
+```
+
+Sua responsabilidade será:
+
+```text
+CEP
+ │
+ ▼
+ViaCEP
+ │
+ ▼
+Endereço
+ │
+ ▼
+Formulário
+```
+
+---
+
+# Importações
+
+```jsx
+import React, { useState } from "react";
+import {
+  Form,
+  Input,
+  Select,
+  message,
+  Spin
+} from "antd";
+```
+
+Também definiremos as UFs:
+
+```jsx
+const UFS = [
+  "AC","AL","AP","AM","BA","CE","DF",
+  "ES","GO","MA","MT","MS","MG","PA",
+  "PB","PR","PE","PI","RJ","RN","RS",
+  "RO","RR","SC","SP","SE","TO"
+];
+```
+
+---
+
+# Obtendo o formulário pai
+
+O componente está dentro de um `Form` do Ant Design.
+
+Por isso podemos utilizar:
+
+```jsx
+const form = Form.useFormInstance();
+```
+
+Assim, não precisamos receber a instância do formulário por `props`.
+
+Temos:
+
+```text
+PessoaFormOO
+    │
+    └── Form
+         │
+         └── EnderecoForm
+                 │
+                 ▼
+         useFormInstance()
+```
+
+---
+
+# Estado da consulta
+
+Utilizamos:
+
+```jsx
+const [buscandoCEP, setBuscandoCEP] =
+  useState(false);
+```
+
+Esse estado será utilizado pelo `Spin`.
+
+---
+
+# Descobrindo a região
+
+Criamos:
+
+```jsx
+function obterRegiao(uf) {
+
+  const mapa = {
+
+    Norte:
+      ["AC","AP","AM","PA","RO","RR","TO"],
+
+    Nordeste:
+      ["AL","BA","CE","MA","PB","PE","PI","RN","SE"],
+
+    "Centro-Oeste":
+      ["DF","GO","MT","MS"],
+
+    Sudeste:
+      ["ES","MG","RJ","SP"],
+
+    Sul:
+      ["PR","RS","SC"]
+  };
+
+  for (const [regiao, estados]
+    of Object.entries(mapa)) {
+
+    if (estados.includes(uf)) {
+      return regiao;
+    }
+  }
+
+  return "";
+}
+```
+
+Por exemplo:
+
+```text
+DF
+ │
+ ▼
+Centro-Oeste
+```
+
+---
+
+# Consultando o CEP
+
+```jsx
+async function handleCepChange(e) {
+
+  const cep =
+    (e.target.value || "")
+      .replace(/\D/g, "");
+
+  if (cep.length === 8) {
+
+    setBuscandoCEP(true);
+
+    try {
+
+      const resp = await fetch(
+        `https://viacep.com.br/ws/${cep}/json/`
+      );
+
+      const dados = await resp.json();
+
+      if (dados?.erro) {
+
+        message.warning(
+          "CEP não encontrado!"
+        );
+
+        setBuscandoCEP(false);
+
+        return;
+      }
+
+      const uf = dados.uf || "";
+      const regiao = obterRegiao(uf);
+
+      const atual =
+        form.getFieldValue("endereco") || {};
+
+      form.setFieldsValue({
+
+        endereco: {
+
+          ...atual,
+
+          cep,
+
+          logradouro:
+            dados.logradouro || "",
+
+          bairro:
+            dados.bairro || "",
+
+          cidade:
+            dados.localidade || "",
+
+          uf,
+
+          regiao
+        }
+      });
+
+    } catch (err) {
+
+      message.error(
+        "Erro ao buscar CEP."
+      );
+
+    } finally {
+
+      setBuscandoCEP(false);
+
+    }
+  }
+}
+```
+
+---
+
+# Preservando os dados anteriores
+
+Observe:
+
+```jsx
+const atual =
+  form.getFieldValue("endereco") || {};
+```
+
+e:
+
+```jsx
+endereco: {
+  ...atual,
+  // novos valores
+}
+```
+
+O operador:
+
+```text
+...
+```
+
+preserva os dados existentes e acrescenta/atualiza os valores obtidos.
+
+---
+
+# Utilizando `Spin`
+
+Podemos envolver os campos em:
+
+```jsx
+<Spin
+  spinning={buscandoCEP}
+  tip="Buscando CEP..."
+  size="small"
+>
+```
+
+Quando:
+
+```text
+buscandoCEP = true
+```
+
+o usuário recebe uma indicação visual de que a consulta está sendo
+realizada.
+
+---
+
+# Código completo
+
+```jsx
+import React, { useState } from "react";
+import {
+  Form,
+  Input,
+  Select,
+  message,
+  Spin
+} from "antd";
+
+const UFS = [
+  "AC","AL","AP","AM","BA","CE","DF",
+  "ES","GO","MA","MT","MS","MG","PA",
+  "PB","PR","PE","PI","RJ","RN","RS",
+  "RO","RR","SC","SP","SE","TO"
+];
+
+export default function EnderecoFormEX() {
+
+  const form = Form.useFormInstance();
+
+  const [buscandoCEP, setBuscandoCEP] =
+    useState(false);
+
+  function obterRegiao(uf) {
+
+    const mapa = {
+
+      Norte:
+        ["AC","AP","AM","PA","RO","RR","TO"],
+
+      Nordeste:
+        ["AL","BA","CE","MA","PB","PE","PI","RN","SE"],
+
+      "Centro-Oeste":
+        ["DF","GO","MT","MS"],
+
+      Sudeste:
+        ["ES","MG","RJ","SP"],
+
+      Sul:
+        ["PR","RS","SC"]
+    };
+
+    for (const [regiao, estados]
+      of Object.entries(mapa)) {
+
+      if (estados.includes(uf)) {
+        return regiao;
+      }
+    }
+
+    return "";
+  }
+
+  async function handleCepChange(e) {
+
+    const cep =
+      (e.target.value || "")
+        .replace(/\D/g, "");
+
+    if (cep.length === 8) {
+
+      setBuscandoCEP(true);
+
+      try {
+
+        const resp = await fetch(
+          `https://viacep.com.br/ws/${cep}/json/`
+        );
+
+        const dados = await resp.json();
+
+        if (dados?.erro) {
+
+          message.warning(
+            "CEP não encontrado!"
+          );
+
+          setBuscandoCEP(false);
+
+          return;
+        }
+
+        const uf = dados.uf || "";
+        const regiao = obterRegiao(uf);
+
+        const atual =
+          form.getFieldValue("endereco") || {};
+
+        form.setFieldsValue({
+
+          endereco: {
+
+            ...atual,
+
+            cep,
+
+            logradouro:
+              dados.logradouro || "",
+
+            bairro:
+              dados.bairro || "",
+
+            cidade:
+              dados.localidade || "",
+
+            uf,
+
+            regiao
+          }
+        });
+
+      } catch (err) {
+
+        message.error(
+          "Erro ao buscar CEP."
+        );
+
+      } finally {
+
+        setBuscandoCEP(false);
+
+      }
+    }
+  }
+
+  return (
+
+    <div style={{ position: "relative" }}>
+
+      <h4 style={{ marginTop: 8 }}>
+        Endereço
+      </h4>
+
+      <Spin
+        spinning={buscandoCEP}
+        tip="Buscando CEP..."
+        size="small"
+      >
+
+        <Form.Item
+          name={["endereco", "cep"]}
+          label="CEP"
+          rules={[
+            {
+              required: true,
+              message: "Informe o CEP!"
+            }
+          ]}
+        >
+          <Input
+            placeholder="Somente números"
+            maxLength={8}
+            onChange={handleCepChange}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={["endereco", "logradouro"]}
+          label="Logradouro"
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name={["endereco", "bairro"]}
+          label="Bairro"
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name={["endereco", "cidade"]}
+          label="Cidade"
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name={["endereco", "uf"]}
+          label="UF"
+        >
+          <Select
+            showSearch
+            placeholder="Selecione"
+            options={
+              UFS.map((uf) => ({
+                value: uf,
+                label: uf
+              }))
+            }
+            onChange={(uf) => {
+
+              const atual =
+                form.getFieldValue("endereco")
+                || {};
+
+              form.setFieldsValue({
+
+                endereco: {
+                  ...atual,
+                  uf,
+                  regiao:
+                    obterRegiao(uf)
+                }
+              });
+            }}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name={["endereco", "regiao"]}
+          label="Região"
+        >
+          <Input disabled />
+        </Form.Item>
+
+      </Spin>
+
+    </div>
+  );
+}
+```
+
+O componente agora permite tanto preencher o endereço pelo CEP quanto
+selecionar manualmente uma UF, atualizando automaticamente a região.
+
+# Dados específicos de PF e PJ
+
+Já possuímos no formulário principal:
+
+```text
+Nome
+Email
+CPF/CNPJ
+```
+
+Agora criaremos os dados específicos.
+
+---
+
+# Pessoa Física
+
+O arquivo:
+
+```text
+PFForm.jsx
+```
+
+trabalhará com:
+
+```text
+Data de nascimento
+Título eleitoral
+```
+
+O título possui:
+
+```text
+Titulo
+│
+├── numero
+├── zona
+└── secao
+```
+
+## Código
+
+```jsx
+import React from "react";
+import {
+  Form,
+  Input,
+  DatePicker
+} from "antd";
+
+function PFForm() {
+
+  return (
+    <>
+
+      <Form.Item
+        label="Data de Nascimento"
+        name="dataNascimento"
+      >
+        <DatePicker
+          format="DD/MM/YYYY"
+          style={{ width: "100%" }}
+          placeholder="Selecione data de nascimento"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Título Eleitoral - Número"
+        name={["titulo", "numero"]}
+      >
+        <Input
+          placeholder="Número do título"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Zona"
+        name={["titulo", "zona"]}
+      >
+        <Input
+          placeholder="Zona eleitoral"
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Seção"
+        name={["titulo", "secao"]}
+      >
+        <Input
+          placeholder="Seção eleitoral"
+        />
+      </Form.Item>
+
+    </>
+  );
+}
+
+export default PFForm;
+```
+
+A estrutura produzida será:
+
+```js
+{
+  dataNascimento: ...,
+
+  titulo: {
+    numero: "...",
+    zona: "...",
+    secao: "..."
+  }
+}
+```
+
+:::info
+
+O CPF é coletado pelo `PessoaFormOO`.
+
+Por isso não precisamos duplicá-lo dentro do `PFForm`.
+
+:::
+
+---
+
+# Pessoa Jurídica
+
+O arquivo:
+
+```text
+PJForm.jsx
+```
+
+será responsável pelos dados da:
+
+```text
+Inscrição Estadual
+```
+
+Sua estrutura será:
+
+```text
+IE
+│
+├── numero
+├── estado
+└── dataRegistro
+```
+
+---
+
+# Código
+
+```jsx
+import React from "react";
+import {
+  Form,
+  Input,
+  Select,
+  DatePicker
+} from "antd";
+
+export default function PJForm() {
+
+  const estados = [
+    "AC","AL","AP","AM","BA","CE","DF",
+    "ES","GO","MA","MT","MS","MG","PA",
+    "PB","PR","PE","PI","RJ","RN","RS",
+    "RO","RR","SC","SP","SE","TO"
+  ];
+
+  return (
+    <>
+
+      <h3 style={{ marginTop: 20 }}>
+        Dados da Inscrição Estadual (IE)
+      </h3>
+
+      <Form.Item
+        label="Número da IE"
+        name={["ie", "numero"]}
+        rules={[{ required: false }]}
+      >
+        <Input
+          placeholder={
+            "Informe o número da IE (se aplicável)"
+          }
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Estado da IE"
+        name={["ie", "estado"]}
+      >
+        <Select
+          placeholder="Selecione o estado"
+          allowClear
+          options={
+            estados.map((uf) => ({
+              label: uf,
+              value: uf
+            }))
+          }
+        />
+      </Form.Item>
+
+      <Form.Item
+        label="Data de Registro da IE"
+        name={["ie", "dataRegistro"]}
+      >
+        <DatePicker
+          style={{ width: "100%" }}
+          format="YYYY-MM-DD"
+          allowClear
+          placeholder={
+            "Selecione a data de registro"
+          }
+        />
+      </Form.Item>
+
+    </>
+  );
+}
+```
+
+O resultado será:
+
+```js
+{
+  ie: {
+    numero: "...",
+    estado: "DF",
+    dataRegistro: ...
+  }
+}
+```
+
+---
+
+# Organização resultante
+
+Agora temos:
+
+```text
+PessoaFormOO
+│
+├── CPF
+│   └── PFForm
+│       ├── dataNascimento
+│       └── titulo
+│
+└── CNPJ
+    └── PJForm
+        └── ie
+```
+
+Os componentes específicos complementam os dados coletados pelo formulário
+principal.
+
+# Criando uma lista dinâmica de telefones
+
+Uma pessoa poderá possuir:
+
+```text
+0, 1 ou vários telefones
+```
+
+Portanto, precisamos trabalhar com uma coleção:
+
+```text
+telefones[]
+```
+
+Para isso utilizaremos um recurso específico do Ant Design:
+
+```text
+Form.List
+```
+
+---
+
+# Importações
+
+```jsx
+import React from "react";
+
+import {
+  Form,
+  Input,
+  Button,
+  Space
+} from "antd";
+
+import {
+  MinusCircleOutlined,
+  PlusOutlined
+} from "@ant-design/icons";
+```
+
+---
+
+# `Form.List`
+
+A estrutura principal será:
+
+```jsx
+<Form.List name="telefones">
+
+  {(fields, { add, remove }) => (
+    // ...
+  )}
+
+</Form.List>
+```
+
+O Ant Design fornece automaticamente:
+
+```text
+fields
+add()
+remove()
+```
+
+Assim não precisamos criar um `useState` separado para manter a lista.
+
+---
+
+# Percorrendo os telefones
+
+Utilizamos:
+
+```jsx
+fields.map(
+  ({ key, name, ...rest }) => (
+    // campos
+  )
+)
+```
+
+Para cada telefone teremos:
+
+```text
+DDD
+Número
+Remover
+```
+
+---
+
+# DDD
+
+```jsx
+<Form.Item
+  {...rest}
+  name={[name, "ddd"]}
+  rules={[
+    {
+      required: true,
+      message: "DDD obrigatório"
+    }
+  ]}
+>
+  <Input
+    placeholder="DDD"
+    style={{ width: 90 }}
+    maxLength={2}
+  />
+</Form.Item>
+```
+
+---
+
+# Número
+
+```jsx
+<Form.Item
+  {...rest}
+  name={[name, "numero"]}
+  rules={[
+    {
+      required: true,
+      message: "Número obrigatório"
+    }
+  ]}
+>
+  <Input
+    placeholder="Número"
+    style={{ width: 200 }}
+    maxLength={9}
+  />
+</Form.Item>
+```
+
+---
+
+# Removendo
+
+Utilizamos:
+
+```jsx
+<MinusCircleOutlined
+  onClick={() => remove(name)}
+/>
+```
+
+---
+
+# Adicionando
+
+Para criar um novo conjunto de campos:
+
+```jsx
+<Button
+  type="dashed"
+  onClick={() => add()}
+  icon={<PlusOutlined />}
+  block
+>
+  Adicionar Telefone
+</Button>
+```
+
+---
+
+# Código completo
+
+```jsx
+import React from "react";
+
+import {
+  Form,
+  Input,
+  Button,
+  Space
+} from "antd";
+
+import {
+  MinusCircleOutlined,
+  PlusOutlined
+} from "@ant-design/icons";
+
+export default function TelefoneListOO() {
+
+  return (
+    <>
+
+      <h4 style={{ marginTop: 8 }}>
+        Telefones
+      </h4>
+
+      <Form.List name="telefones">
+
+        {(fields, { add, remove }) => (
+          <>
+
+            {fields.map(
+              ({ key, name, ...rest }) => (
+
+                <Space
+                  key={key}
+                  style={{
+                    display: "flex",
+                    marginBottom: 8
+                  }}
+                  align="baseline"
+                >
+
+                  <Form.Item
+                    {...rest}
+                    name={[name, "ddd"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "DDD obrigatório"
+                      }
+                    ]}
+                  >
+                    <Input
+                      placeholder="DDD"
+                      style={{ width: 90 }}
+                      maxLength={2}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    {...rest}
+                    name={[name, "numero"]}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Número obrigatório"
+                      }
+                    ]}
+                  >
+                    <Input
+                      placeholder="Número"
+                      style={{ width: 200 }}
+                      maxLength={9}
+                    />
+                  </Form.Item>
+
+                  <MinusCircleOutlined
+                    onClick={() => remove(name)}
+                  />
+
+                </Space>
+              )
+            )}
+
+            <Form.Item>
+
+              <Button
+                type="dashed"
+                onClick={() => add()}
+                icon={<PlusOutlined />}
+                block
+              >
+                Adicionar Telefone
+              </Button>
+
+            </Form.Item>
+
+          </>
+        )}
+
+      </Form.List>
+
+    </>
+  );
+}
+```
+
+---
+
+# Estrutura produzida
+
+Depois da inclusão de dois telefones, o formulário poderá produzir:
+
+```js
+{
+  telefones: [
+    {
+      ddd: "61",
+      numero: "999998888"
+    },
+    {
+      ddd: "61",
+      numero: "33334444"
+    }
+  ]
+}
+```
+
+Observe que esses ainda são:
+
+```text
+dados do formulário
+```
+
+Na próxima etapa eles serão transformados em:
+
+```text
+objetos Telefone
+```
+# Transformando os dados do formulário em objetos
+
+Agora retornaremos ao:
+
+```text
+PessoaFormOO.jsx
+```
+
+Precisamos implementar:
+
+```jsx
+onFinish(values)
+```
+
+O objetivo será transformar:
+
+```text
+dados do Form
+```
+
+em:
+
+```text
+objetos de domínio
+```
+
+---
+
+# Importações
+
+Adicione:
+
+```jsx
+import PF from "../../objetos/pessoas/PF.mjs";
+import PJ from "../../objetos/pessoas/PJ.mjs";
+import Endereco from "../../objetos/pessoas/Endereco.mjs";
+import Telefone from "../../objetos/pessoas/Telefone.mjs";
+import Titulo from "../../objetos/pessoas/Titulo.mjs";
+import IE from "../../objetos/pessoas/IE.mjs";
+
+import PFDAO from "../../objetos/dao/PFDAOLocal.mjs";
+import PJDAO from "../../objetos/dao/PJDAOLocal.mjs";
+```
+
+---
+
+# Construindo o endereço
+
+```jsx
+const endVals =
+  values.endereco || {};
+
+const end = new Endereco();
+
+end.setCep(endVals.cep);
+end.setLogradouro(endVals.logradouro);
+end.setBairro(endVals.bairro);
+end.setCidade(endVals.cidade);
+end.setUf(endVals.uf);
+end.setRegiao(endVals.regiao);
+```
+
+Temos:
+
+```text
+values.endereco
+      │
+      ▼
+new Endereco()
+      │
+      ▼
+     end
+```
+
+---
+
+# Construindo uma Pessoa Física
+
+```jsx
+const pf = new PF();
+
+pf.setNome(values.nome);
+pf.setEmail(values.email);
+pf.setCPF(values.cpf);
+pf.setEndereco(end);
+```
+
+Observe que o método real da classe é:
+
+```text
+setCPF()
+```
+
+---
+
+# Criando o título
+
+Os dados:
+
+```js
+values.titulo
+```
+
+ainda não representam uma instância de `Titulo`.
+
+Precisamos fazer:
+
+```jsx
+if (values.titulo) {
+
+  const titulo = new Titulo();
+
+  titulo.setNumero(
+    values.titulo.numero
+  );
+
+  titulo.setZona(
+    values.titulo.zona
+  );
+
+  titulo.setSecao(
+    values.titulo.secao
+  );
+
+  pf.setTitulo(titulo);
+}
+```
+
+O fluxo será:
+
+```text
+values.titulo
+      │
+      ▼
+ new Titulo
+      │
+      ▼
+pf.setTitulo()
+```
+
+---
+
+# Pessoa Jurídica
+
+Para PJ:
+
+```jsx
+const pj = new PJ();
+
+pj.setNome(values.nome);
+pj.setEmail(values.email);
+pj.setCNPJ(values.cnpj);
+pj.setEndereco(end);
+```
+
+---
+
+# Criando a IE
+
+```jsx
+if (values.ie) {
+
+  const ie = new IE();
+
+  ie.setNumero(
+    values.ie.numero
+  );
+
+  ie.setEstado(
+    values.ie.estado
+  );
+
+  // tratamento da data
+
+  pj.setIE(ie);
+}
+```
+
+---
+
+# Atenção ao `DatePicker`
+
+O valor produzido pelo `DatePicker` não deve ser tratado simplesmente como
+uma string.
+
+Antes da persistência, podemos convertê-lo:
+
+```jsx
+const dr =
+  values.ie.dataRegistro;
+
+const dataRegistro =
+  dr &&
+  typeof dr === "object" &&
+  typeof dr.format === "function"
+    ? dr.format("YYYY-MM-DD")
+    : dr || "";
+
+ie.setDataRegistro(dataRegistro);
+```
+
+Assim:
+
+```text
+DatePicker
+    │
+    ▼
+ objeto de data
+    │
+    ▼
+format("YYYY-MM-DD")
+    │
+    ▼
+"2026-10-01"
+```
+
+---
+
+# Telefones
+
+Os telefones também precisam ser transformados:
+
+```jsx
+if (values.telefones?.length > 0) {
+
+  values.telefones.forEach((tel) => {
+
+    const fone = new Telefone();
+
+    fone.setDdd(tel.ddd);
+    fone.setNumero(tel.numero);
+
+    pessoa.addTelefone(fone);
+
+  });
+}
+```
+
+---
+
+# Função `onFinish`
+
+Podemos agora construir:
+
+```jsx
+function onFinish(values) {
+
+  try {
+
+    let pessoa;
+
+    const endVals =
+      values.endereco || {};
+
+    const end = new Endereco();
+
+    end.setCep(endVals.cep);
+    end.setLogradouro(endVals.logradouro);
+    end.setBairro(endVals.bairro);
+    end.setCidade(endVals.cidade);
+    end.setUf(endVals.uf);
+    end.setRegiao(endVals.regiao);
+
+    if (values.tipo === "PF") {
+
+      const pf = new PF();
+
+      pf.setNome(values.nome);
+      pf.setEmail(values.email);
+      pf.setCPF(values.cpf);
+      pf.setEndereco(end);
+
+      if (values.titulo) {
+
+        const titulo = new Titulo();
+
+        titulo.setNumero(
+          values.titulo.numero
+        );
+
+        titulo.setZona(
+          values.titulo.zona
+        );
+
+        titulo.setSecao(
+          values.titulo.secao
+        );
+
+        pf.setTitulo(titulo);
+      }
+
+      if (values.telefones?.length > 0) {
+
+        values.telefones.forEach((tel) => {
+
+          const fone = new Telefone();
+
+          fone.setDdd(tel.ddd);
+          fone.setNumero(tel.numero);
+
+          pf.addTelefone(fone);
+
+        });
+      }
+
+      pessoa = pf;
+
+    } else {
+
+      const pj = new PJ();
+
+      pj.setNome(values.nome);
+      pj.setEmail(values.email);
+      pj.setCNPJ(values.cnpj);
+      pj.setEndereco(end);
+
+      if (values.ie) {
+
+        const ie = new IE();
+
+        ie.setNumero(values.ie.numero);
+        ie.setEstado(values.ie.estado);
+
+        const dr =
+          values.ie.dataRegistro;
+
+        const dataRegistro =
+          dr &&
+          typeof dr === "object" &&
+          typeof dr.format === "function"
+            ? dr.format("YYYY-MM-DD")
+            : dr || "";
+
+        ie.setDataRegistro(dataRegistro);
+
+        pj.setIE(ie);
+      }
+
+      if (values.telefones?.length > 0) {
+
+        values.telefones.forEach((tel) => {
+
+          const fone = new Telefone();
+
+          fone.setDdd(tel.ddd);
+          fone.setNumero(tel.numero);
+
+          pj.addTelefone(fone);
+
+        });
+      }
+
+      pessoa = pj;
+    }
+
+    const dao =
+      values.tipo === "PF"
+        ? new PFDAO()
+        : new PJDAO();
+
+    dao.salvar(pessoa);
+
+    message.success(
+      "Pessoa cadastrada com sucesso!"
+    );
+
+    form.resetFields();
+
+  } catch (erro) {
+
+    console.error(
+      "Erro ao salvar:",
+      erro
+    );
+
+    message.error(
+      "Erro ao salvar registro: "
+      + erro.message
+    );
+  }
+}
+```
+
+Agora associe a função ao formulário:
+
+```jsx
+<Form
+  layout="vertical"
+  form={form}
+  onFinish={onFinish}
+  scrollToFirstError
+>
+```
+
+---
+
+# Fluxo completo
+
+```text
+values
+  │
+  ├── endereco ───────► Endereco
+  │
+  ├── telefones[] ────► Telefone[]
+  │
+  └── tipo
+       │
+       ├── PF ────────► PF + Titulo
+       │
+       └── PJ ────────► PJ + IE
+                            │
+                            ▼
+                          pessoa
+                            │
+                            ▼
+                           DAO
+```
+
+Agora os dados do formulário foram transformados em uma estrutura de
+objetos compatível com nosso domínio.
+
+# Persistindo os objetos com DAO
+
+Depois da transformação temos:
+
+```text
+Objeto PF/PJ
+     │
+     ▼
+    DAO
+     │
+     ▼
+localStorage
+```
+
+Os arquivos estarão em:
+
+```text
+src/objetos/dao/
+```
+
+---
+
+# `PFDAOLocal.mjs`
+
+```js
+export default class PFDAO {
+
+  constructor(storageKey = "pessoasPF") {
+    this.storageKey = storageKey;
+  }
+
+  salvar(pf) {
+
+    const lista = this.listar();
+
+    const end = pf.getEndereco();
+
+    const objEndereco = end ? {
+
+      cep: end.getCep(),
+      logradouro: end.getLogradouro(),
+      bairro: end.getBairro(),
+      cidade: end.getCidade(),
+      uf: end.getUf(),
+      regiao: end.getRegiao()
+
+    } : null;
+
+    const telefones =
+      (pf.getTelefones() || []).map(
+        f => ({
+
+          ddd: f.getDdd(),
+          numero: f.getNumero()
+
+        })
+      );
+
+    const titulo =
+      pf.getTitulo() ? {
+
+        numero:
+          pf.getTitulo().getNumero(),
+
+        zona:
+          pf.getTitulo().getZona(),
+
+        secao:
+          pf.getTitulo().getSecao()
+
+      } : null;
+
+    const obj = {
+
+      nome: pf.getNome(),
+      email: pf.getEmail(),
+      cpf: pf.getCPF(),
+      endereco: objEndereco,
+      telefones,
+      titulo
+
+    };
+
+    lista.push(obj);
+
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(lista)
+    );
+
+    return obj;
+  }
+
+  listar() {
+
+    const dados =
+      localStorage.getItem(
+        this.storageKey
+      );
+
+    return dados
+      ? JSON.parse(dados)
+      : [];
+  }
+
+  excluir(cpf) {
+
+    const lista =
+      this.listar().filter(
+        p => p.cpf !== cpf
+      );
+
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(lista)
+    );
+  }
+
+  limpar() {
+
+    localStorage.removeItem(
+      this.storageKey
+    );
+  }
+}
+```
+
+---
+
+# `PJDAOLocal.mjs`
+
+```js
+export default class PJDAO {
+
+  constructor(storageKey = "pessoasPJ") {
+    this.storageKey = storageKey;
+  }
+
+  salvar(pj) {
+
+    const lista = this.listar();
+
+    const end = pj.getEndereco();
+
+    const objEndereco = end
+      ? {
+
+          cep: end.getCep(),
+          logradouro: end.getLogradouro(),
+          bairro: end.getBairro(),
+          cidade: end.getCidade(),
+          uf: end.getUf(),
+          regiao: end.getRegiao()
+
+        }
+      : null;
+
+    const telefones =
+      (pj.getTelefones() || []).map(
+        f => ({
+
+          ddd: f.getDdd(),
+          numero: f.getNumero()
+
+        })
+      );
+
+    const ie =
+      pj.getIE() ? {
+
+        numero:
+          pj.getIE().getNumero(),
+
+        estado:
+          pj.getIE().getEstado(),
+
+        dataRegistro:
+          pj.getIE().getDataRegistro()
+
+      } : null;
+
+    const obj = {
+
+      nome: pj.getNome(),
+      email: pj.getEmail(),
+      cnpj: pj.getCNPJ(),
+      endereco: objEndereco,
+      telefones,
+      ie
+
+    };
+
+    lista.push(obj);
+
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(lista)
+    );
+
+    return obj;
+  }
+
+  listar() {
+
+    const dados =
+      localStorage.getItem(
+        this.storageKey
+      );
+
+    return dados
+      ? JSON.parse(dados)
+      : [];
+  }
+
+  excluir(cnpj) {
+
+    const lista =
+      this.listar().filter(
+        p => p.cnpj !== cnpj
+      );
+
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(lista)
+    );
+  }
+
+  limpar() {
+
+    localStorage.removeItem(
+      this.storageKey
+    );
+  }
+}
+```
+
+---
+
+# Serialização
+
+Os DAOs realizam uma transformação importante:
+
+```text
+Objetos de domínio
+       │
+       ▼
+     getters
+       │
+       ▼
+Objetos simples
+       │
+       ▼
+JSON.stringify()
+       │
+       ▼
+localStorage
+```
+
+Por exemplo:
+
+```text
+Titulo
+  │
+  ├── getNumero()
+  ├── getZona()
+  └── getSecao()
+       │
+       ▼
+{
+  numero: "...",
+  zona: "...",
+  secao: "..."
+}
+```
+
+---
+
+# Operações disponíveis
+
+Os dois DAOs disponibilizam:
+
+```text
+salvar()
+listar()
+excluir()
+limpar()
+```
+
+A diferença principal é:
+
+| | PF | PJ |
+|---|---|---|
+| Chave | `pessoasPF` | `pessoasPJ` |
+| Identificador | CPF | CNPJ |
+| Objeto específico | Título | IE |
+
+---
+
+# Formato armazenado
+
+Para PF:
+
+```json
+{
+  "nome": "Maria Silva",
+  "email": "maria@email.com",
+  "cpf": "12345678901",
+  "endereco": {
+    "cep": "72300000",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "999998888"
+    }
+  ],
+  "titulo": {
+    "numero": "1234567",
+    "zona": "12",
+    "secao": "345"
+  }
+}
+```
+
+---
+
+# Recuperação dos dados
+
+O método:
+
+```js
+listar()
+```
+
+utiliza:
+
+```js
+JSON.parse(dados)
+```
+
+Porém, existe uma diferença importante:
+
+```text
+JSON
+ │
+ ▼
+JSON.parse()
+ │
+ ▼
+Objeto simples
+```
+
+O resultado não será automaticamente:
+
+```text
+new PF()
+new Endereco()
+new Telefone()
+```
+
+Caso seja necessário recuperar também os métodos das classes, será preciso
+realizar um processo de:
+
+```text
+reidratação
+```
+
+Para simples listagem, entretanto, o JSON recuperado pode ser suficiente.
+
+# Integrando a aplicação
+
+Agora podemos visualizar o resultado completo:
+
+```text
+                       USUÁRIO
+                          │
+                          ▼
+                    PessoaFormOO
+                          │
+       ┌──────────────────┼──────────────────┐
+       │                  │                  │
+       ▼                  ▼                  ▼
+EnderecoFormEX    TelefoneListOO       PFForm/PJForm
+       │                  │                  │
+       ▼                  ▼                  ▼
+   endereço          telefones[]      Titulo / IE
+       │                  │                  │
+       └──────────────────┼──────────────────┘
+                          │
+                          ▼
+                        values
+                          │
+                          ▼
+                       onFinish
+                          │
+       ┌──────────────────┼──────────────────┐
+       │                  │                  │
+       ▼                  ▼                  ▼
+   Endereco          Telefone[]          PF / PJ
+                                           │
+                                      ┌────┴────┐
+                                      ▼         ▼
+                                   Titulo      IE
+                                      │         │
+                                      └────┬────┘
+                                           │
+                                           ▼
+                                         pessoa
+                                           │
+                                           ▼
+                                      PFDAO/PJDAO
+                                           │
+                                           ▼
+                                      localStorage
+```
+
+---
+
+# Executando a aplicação
+
+Inicie o projeto:
+
+```bash
+npm run dev
+```
+
+Depois acesse a aplicação pelo navegador.
+
+---
+
+# Teste 1 — PF/PJ
+
+Alterne entre:
+
+```text
+Pessoa Física
+```
+
+e:
+
+```text
+Pessoa Jurídica
+```
+
+Verifique:
+
+```text
+PF → CPF + PFForm
+PJ → CNPJ + PJForm
+```
+
+---
+
+# Teste 2 — Validação
+
+Tente enviar o formulário sem preencher os campos obrigatórios.
+
+Observe as mensagens do Ant Design.
+
+Teste também um e-mail inválido.
+
+---
+
+# Teste 3 — ViaCEP
+
+Informe um CEP válido.
+
+Observe:
+
+```text
+CEP
+ │
+ ▼
+ViaCEP
+ │
+ ▼
+Logradouro
+Bairro
+Cidade
+UF
+Região
+```
+
+Observe também o `Spin` durante a consulta.
+
+---
+
+# Teste 4 — UF e região
+
+Selecione manualmente uma UF.
+
+Verifique se o campo:
+
+```text
+Região
+```
+
+é atualizado automaticamente.
+
+---
+
+# Teste 5 — Telefones
+
+Clique em:
+
+```text
+Adicionar Telefone
+```
+
+Adicione dois ou mais telefones.
+
+Depois remova um deles.
+
+Verifique também as validações de:
+
+```text
+DDD
+Número
+```
+
+---
+
+# Teste 6 — Cadastro de PF
+
+Cadastre uma Pessoa Física preenchendo:
+
+```text
+Nome
+Email
+CPF
+Endereço
+Telefones
+Título
+```
+
+Depois salve.
+
+---
+
+# Teste 7 — Cadastro de PJ
+
+Cadastre uma Pessoa Jurídica preenchendo:
+
+```text
+Nome
+Email
+CNPJ
+Endereço
+Telefones
+IE
+```
+
+Salve novamente.
+
+---
+
+# Inspecionando o `localStorage`
+
+Abra as ferramentas de desenvolvimento do navegador.
+
+Procure pelas chaves:
+
+```text
+pessoasPF
+```
+
+e:
+
+```text
+pessoasPJ
+```
+
+Analise os valores armazenados.
+
+---
+
+# O que aprendemos?
+
+Neste capítulo integramos:
+
+```text
+ReactJS
+├── Componentes
+├── Props
+├── State
+└── Renderização condicional
+
+Ant Design
+├── Form
+├── Form.Item
+├── Form.List
+├── Input
+├── Select
+├── DatePicker
+├── Radio
+├── Button
+├── Spin
+└── message
+
+JavaScript
+├── Objetos
+├── Arrays
+├── map
+├── forEach
+├── async/await
+├── fetch
+├── JSON.stringify
+└── JSON.parse
+
+Orientação a Objetos
+├── Classes
+├── Objetos
+├── Encapsulamento
+├── Herança
+└── Composição
+
+Persistência
+├── DAO
+└── localStorage
+```
+
+---
+
+# Arquitetura resultante
+
+```text
+┌──────────────────────────────┐
+│          INTERFACE           │
+│                              │
+│        React + AntD          │
+│                              │
+│ components/cadastrapessoa/   │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│           DOMÍNIO            │
+│                              │
+│      Classes JavaScript      │
+│                              │
+│       objetos/pessoas/       │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│        PERSISTÊNCIA          │
+│                              │
+│             DAO              │
+│                              │
+│         objetos/dao/         │
+└──────────────┬───────────────┘
+               │
+               ▼
+┌──────────────────────────────┐
+│         localStorage         │
+└──────────────────────────────┘
+```
+
+---
+
+# Exercício de Fixação
+
+Reproduza e execute todos os códigos apresentados neste capítulo.
+
+O objetivo não é apenas copiar o código, mas compreender o caminho percorrido
+pelos dados desde a interface até o armazenamento.
+
+## 1. Estrutura do projeto
+
+Verifique se estão disponíveis:
+
+```text
+src/components/cadastrapessoa/
+src/objetos/pessoas/
+src/objetos/dao/
+```
+
+Confirme a existência dos componentes, classes e DAOs utilizados.
+
+---
+
+## 2. Interface
+
+Execute e teste:
+
+```text
+PessoaFormOO
+EnderecoFormEX
+TelefoneListOO
+PFForm
+PJForm
+```
+
+Verifique:
+
+- seleção PF/PJ;
+- CPF/CNPJ;
+- validações;
+- consulta ViaCEP;
+- identificação da região;
+- inclusão e remoção de telefones;
+- campos específicos de PF e PJ.
+
+---
+
+## 3. Objetos
+
+Utilizando o código de `onFinish`, identifique em que momento são criadas
+instâncias de:
+
+```text
+PF
+PJ
+Endereco
+Telefone
+Titulo
+IE
+```
+
+Explique de quais campos do formulário vêm os dados utilizados para
+construir cada objeto.
+
+---
+
+## 4. Persistência
+
+Realize pelo menos:
+
+```text
+1 cadastro de PF
+1 cadastro de PJ
+```
+
+Depois localize no navegador:
+
+```text
+pessoasPF
+pessoasPJ
+```
+
+Compare os dados armazenados com os objetos construídos pela aplicação.
+
+---
+
+## 5. Análise
+
+Localize no projeto exemplos de:
+
+```text
+useState
+Form.useForm
+Form.useFormInstance
+Form.List
+renderização condicional
+async/await
+fetch
+map
+forEach
+JSON.stringify
+JSON.parse
+```
+
+Explique a responsabilidade de cada recurso no contexto da aplicação.
+
+---
+
+## 6. Fluxo final
+
+Certifique-se de compreender todo o processo:
+
+```text
+Usuário
+   │
+   ▼
+Formulário
+   │
+   ▼
+values
+   │
+   ▼
+Objetos de domínio
+   │
+   ▼
+DAO
+   │
+   ▼
+JSON
+   │
+   ▼
+localStorage
+```
+
+Ao concluir a atividade, você deverá ser capaz de explicar não apenas
+**como cadastrar uma pessoa**, mas também **como os diferentes componentes,
+objetos e camadas da aplicação colaboram durante o processo**.
+
