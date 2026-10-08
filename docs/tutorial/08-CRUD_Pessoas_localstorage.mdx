@@ -1,0 +1,6419 @@
+
+# 📘 CRUD de Pessoas Físicas e Jurídicas com Armazenamento Local
+
+## Parte 1 — Evolução da aplicação, navegação e organização das rotas
+
+No capítulo anterior, desenvolvemos uma aplicação React para o cadastro de **Pessoas Físicas (PF)** e **Pessoas Jurídicas (PJ)**, utilizando conceitos de Programação Orientada a Objetos, componentes React, Ant Design e persistência de dados por meio do `localStorage`.
+
+Até esse momento, nossa aplicação permite cadastrar pessoas e armazenar suas informações localmente no navegador.
+
+Entretanto, um sistema de cadastro normalmente precisa oferecer outras funcionalidades, como consultar registros existentes, visualizar informações, atualizar dados e excluir cadastros.
+
+Neste capítulo, ampliaremos a aplicação para implementar as operações de um **CRUD completo**.
+
+A sigla CRUD representa quatro operações fundamentais:
+
+| Operação | Significado | Funcionalidade |
+|---|---|---|
+| **Create** | Criar | Cadastrar uma nova pessoa |
+| **Read** | Ler | Listar e consultar pessoas cadastradas |
+| **Update** | Atualizar | Modificar informações de um cadastro |
+| **Delete** | Excluir | Remover um registro existente |
+
+Nosso objetivo é construir essas funcionalidades reutilizando os componentes e as classes desenvolvidos anteriormente.
+
+Ao final do capítulo, teremos uma aplicação que permitirá:
+
+- Cadastrar pessoas físicas e jurídicas;
+- Listar os registros armazenados;
+- Filtrar pessoas pelo nome;
+- Visualizar os detalhes de um cadastro;
+- Editar informações existentes;
+- Excluir registros mediante confirmação;
+- Navegar entre as funcionalidades sem recarregar a página.
+
+:::info Continuidade do projeto
+
+Este capítulo é uma evolução direta do projeto desenvolvido anteriormente.
+
+Não será necessário criar uma nova aplicação React. Trabalharemos sobre a estrutura existente, reaproveitando as classes de domínio e os componentes já implementados.
+
+:::
+
+---
+
+# 1. Evolução da estrutura do projeto
+
+Antes de iniciar a implementação, precisamos identificar quais arquivos serão reaproveitados, quais serão modificados e quais deverão ser criados.
+
+Para facilitar a organização, utilizaremos três classificações:
+
+- **REAPROVEITADO:** arquivo desenvolvido anteriormente, que continuará sendo utilizado sem alterações.
+- **MODIFICADO:** arquivo existente que receberá novas funcionalidades.
+- **NOVO:** arquivo que ainda não existe e deverá ser criado.
+
+## 1.1. Arquivos reaproveitados
+
+Os componentes abaixo já foram desenvolvidos no capítulo anterior e continuarão sendo utilizados:
+
+```text
+src/components/cadastrapessoa/
+├── EnderecoFormEX.jsx
+├── TelefoneListOO.jsx
+├── PFForm.jsx
+└── PJForm.jsx
+```
+
+Esses componentes são responsáveis por funcionalidades que já conhecemos:
+
+| Componente | Responsabilidade |
+|---|---|
+| `EnderecoFormEX.jsx` | Cadastro de endereço e consulta à API ViaCEP |
+| `TelefoneListOO.jsx` | Inclusão e remoção dinâmica de telefones |
+| `PFForm.jsx` | Campos específicos de Pessoa Física |
+| `PJForm.jsx` | Campos específicos de Pessoa Jurídica |
+
+Também continuaremos utilizando as classes de domínio estudadas anteriormente:
+
+```text
+src/objetos/pessoas/
+├── Pessoa.mjs
+├── PF.mjs
+├── PJ.mjs
+├── Endereco.mjs
+├── Telefone.mjs
+├── Titulo.mjs
+└── IE.mjs
+```
+
+Os códigos dessas classes estão disponíveis no repositório do projeto:
+
+[Consultar classes de domínio no GitHub](https://github.com/vaguettibfd/ReactJSBFD/tree/main/src/objetos/pessoas)
+
+:::tip Reutilização de código
+
+Um dos benefícios da componentização é permitir que funcionalidades desenvolvidas anteriormente sejam utilizadas em novas situações.
+
+Neste capítulo, os componentes de endereço, telefone e dados específicos de PF e PJ continuarão sendo utilizados, inclusive durante a edição de cadastros.
+
+:::
+
+## 1.2. Arquivos que serão modificados
+
+Alguns arquivos existentes precisarão ser ampliados para incorporar as novas funcionalidades.
+
+```text
+src/
+├── App.jsx
+├── components/
+│   └── cadastrapessoa/
+│       └── PessoaFormOO.jsx
+└── objetos/
+    └── dao/
+        ├── PFDAOLocal.mjs
+        └── PJDAOLocal.mjs
+```
+
+As modificações previstas são:
+
+| Arquivo | Modificação |
+|---|---|
+| `PessoaFormOO.jsx` | Permitir cadastro e edição de registros |
+| `PFDAOLocal.mjs` | Incorporar operações necessárias ao CRUD de pessoas físicas |
+| `PJDAOLocal.mjs` | Incorporar operações necessárias ao CRUD de pessoas jurídicas |
+| `App.jsx` | Integrar o sistema de navegação por rotas |
+
+:::warning Atenção
+
+O arquivo `App.jsx` será modificado **somente ao final do capítulo**, quando todos os novos componentes estiverem implementados.
+
+Até esse momento, manteremos o `App.jsx` do capítulo anterior, evitando erros de importação de componentes que ainda não foram criados.
+
+:::
+
+## 1.3. Arquivos novos
+
+Para implementar as novas funcionalidades, criaremos os seguintes arquivos:
+
+```text
+src/
+├── routes/
+│   └── AppRoutes.jsx
+├── layout/
+│   └── MainLayout.jsx
+└── components/
+    ├── listapessoas/
+    │   └── ListaPessoas.jsx
+    └── visualizapessoa/
+        └── VisualizaPessoa.jsx
+```
+
+Cada arquivo terá uma responsabilidade específica:
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `AppRoutes.jsx` | Definir as rotas da aplicação |
+| `MainLayout.jsx` | Organizar o cabeçalho, menu, conteúdo e rodapé |
+| `ListaPessoas.jsx` | Listar, filtrar e excluir registros |
+| `VisualizaPessoa.jsx` | Apresentar os detalhes de uma pessoa cadastrada |
+
+## 1.4. Estrutura final do projeto
+
+Ao término do capítulo, nossa aplicação terá a seguinte organização:
+
+```text
+src/
+│
+├── App.jsx                         [MODIFICADO]
+│
+├── routes/
+│   └── AppRoutes.jsx               [NOVO]
+│
+├── layout/
+│   └── MainLayout.jsx              [NOVO]
+│
+├── components/
+│   ├── cadastrapessoa/
+│   │   ├── PessoaFormOO.jsx         [MODIFICADO]
+│   │   ├── EnderecoFormEX.jsx       [REAPROVEITADO]
+│   │   ├── TelefoneListOO.jsx       [REAPROVEITADO]
+│   │   ├── PFForm.jsx               [REAPROVEITADO]
+│   │   └── PJForm.jsx               [REAPROVEITADO]
+│   │
+│   ├── listapessoas/
+│   │   └── ListaPessoas.jsx         [NOVO]
+│   │
+│   └── visualizapessoa/
+│       └── VisualizaPessoa.jsx      [NOVO]
+│
+└── objetos/
+    ├── pessoas/
+    │   ├── Pessoa.mjs              [REAPROVEITADO]
+    │   ├── PF.mjs                  [REAPROVEITADO]
+    │   ├── PJ.mjs                  [REAPROVEITADO]
+    │   ├── Endereco.mjs            [REAPROVEITADO]
+    │   ├── Telefone.mjs            [REAPROVEITADO]
+    │   ├── Titulo.mjs              [REAPROVEITADO]
+    │   └── IE.mjs                  [REAPROVEITADO]
+    │
+    └── dao/
+        ├── PFDAOLocal.mjs           [MODIFICADO]
+        └── PJDAOLocal.mjs           [MODIFICADO]
+```
+
+Os identificadores entre colchetes são apenas explicativos e não fazem parte dos nomes dos arquivos.
+
+---
+
+# 2. Introdução à navegação em aplicações React
+
+Até o momento, nossa aplicação apresenta diretamente o formulário de cadastro.
+
+Essa abordagem funciona bem quando existe apenas uma tela.
+
+Entretanto, com a implementação do CRUD, precisaremos navegar entre diferentes funcionalidades.
+
+Por exemplo:
+
+```text
+Cadastro de Pessoas
+       │
+       ▼
+Listagem de Pessoas
+       │
+       ├── Visualizar Pessoa
+       │
+       ├── Editar Pessoa
+       │
+       └── Excluir Pessoa
+```
+
+Para organizar essa navegação, utilizaremos o **React Router DOM**.
+
+## 2.1. O que é React Router DOM?
+
+O React Router DOM é uma biblioteca que permite implementar navegação entre diferentes componentes React utilizando URLs.
+
+Com essa biblioteca, podemos associar cada endereço da aplicação a um componente específico.
+
+Por exemplo:
+
+| URL | Funcionalidade |
+|---|---|
+| `/cadastrar` | Formulário de cadastro |
+| `/listar` | Listagem de pessoas |
+| `/visualizar/PF/123` | Visualização de uma Pessoa Física |
+| `/editar/PJ/456` | Edição de uma Pessoa Jurídica |
+
+Quando o usuário acessa uma dessas URLs, o React Router identifica qual componente deve ser apresentado.
+
+Essa abordagem é muito utilizada em aplicações do tipo **SPA (Single Page Application)**.
+
+## 2.2. O conceito de SPA
+
+Uma SPA é uma aplicação web que atualiza o conteúdo apresentado ao usuário sem precisar recarregar completamente a página a cada navegação.
+
+Em uma aplicação tradicional, a mudança de página normalmente envolve uma nova requisição para carregar outro documento HTML.
+
+Em uma SPA, o JavaScript controla a interface e substitui os componentes apresentados conforme a navegação.
+
+Podemos representar esse funcionamento da seguinte maneira:
+
+```text
+Navegador
+    │
+    ▼
+Aplicação React
+    │
+    ▼
+React Router
+    │
+    ├── /cadastrar
+    │      └── PessoaFormOO
+    │
+    ├── /listar
+    │      └── ListaPessoas
+    │
+    ├── /visualizar/:tipo/:id
+    │      └── VisualizaPessoa
+    │
+    └── /editar/:tipo/:id
+           └── PessoaFormOO
+```
+
+Observe que utilizaremos o mesmo componente `PessoaFormOO` para duas funcionalidades diferentes: cadastro e edição.
+
+Essa reutilização será possível porque o componente poderá identificar, por meio da URL, se está criando um novo registro ou editando um cadastro existente.
+
+## 2.3. Instalando o React Router DOM
+
+Para utilizar a biblioteca, execute no terminal do projeto:
+
+```bash
+npm install react-router-dom
+```
+
+Após a instalação, poderemos importar os recursos necessários:
+
+```jsx
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams
+} from "react-router-dom";
+```
+
+Os principais recursos são:
+
+| Recurso | Finalidade |
+|---|---|
+| `BrowserRouter` | Gerenciar o histórico de navegação |
+| `Routes` | Agrupar as rotas da aplicação |
+| `Route` | Associar uma URL a um componente |
+| `Navigate` | Redirecionar para outra rota |
+| `Link` | Criar links de navegação |
+| `Outlet` | Indicar onde as rotas filhas serão apresentadas |
+| `useLocation` | Identificar a URL atual |
+| `useNavigate` | Navegar programaticamente |
+| `useParams` | Recuperar parâmetros presentes na URL |
+
+---
+
+# 3. Construindo o layout da aplicação
+
+Com a introdução de diferentes telas, precisamos organizar a interface de maneira que o usuário consiga navegar entre as funcionalidades.
+
+Para isso, construiremos um componente chamado `MainLayout`.
+
+Esse componente será responsável por apresentar:
+
+- Cabeçalho da aplicação;
+- Menu de navegação;
+- Área principal de conteúdo;
+- Rodapé;
+- Menu adaptado para dispositivos móveis.
+
+A estrutura visual será:
+
+```text
++--------------------------------------+
+|           CABEÇALHO                  |
+|       Sistema de Cadastro            |
+|                                      |
+|       Cadastrar       Listar         |
++--------------------------------------+
+|                                      |
+|                                      |
+|         CONTEÚDO DA ROTA             |
+|                                      |
+|                                      |
++--------------------------------------+
+|               RODAPÉ                 |
++--------------------------------------+
+```
+
+O conteúdo central será alterado conforme a rota selecionada, enquanto o cabeçalho e o rodapé permanecerão disponíveis.
+
+## 3.1. Arquivo `MainLayout.jsx` — NOVO
+
+Crie o diretório:
+
+```text
+src/layout/
+```
+
+Dentro dele, crie o arquivo:
+
+```text
+MainLayout.jsx
+```
+
+A seguir, apresentamos o código completo.
+
+```jsx title="src/layout/MainLayout.jsx"
+import React, { useState, useEffect } from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { Layout, Menu, Drawer, Button } from "antd";
+
+import {
+  UserAddOutlined,
+  UnorderedListOutlined,
+  MenuOutlined,
+} from "@ant-design/icons";
+
+const { Header, Content, Footer } = Layout;
+
+function MainLayout() {
+
+  const location = useLocation();
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  // Detecta tamanho da tela
+  useEffect(() => {
+
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    return () =>
+      window.removeEventListener("resize", handleResize);
+
+  }, []);
+
+  const currentKey =
+    location.pathname.startsWith("/listar") ||
+    location.pathname.startsWith("/visualizar")
+      ? "/listar"
+      : "/cadastrar";
+
+  const menuItems = [
+    {
+      key: "/cadastrar",
+      icon: <UserAddOutlined />,
+      label: <Link to="/cadastrar">Cadastrar</Link>,
+    },
+    {
+      key: "/listar",
+      icon: <UnorderedListOutlined />,
+      label: <Link to="/listar">Listar</Link>,
+    },
+  ];
+
+  return (
+    <Layout
+      style={{
+        minHeight: "100vh",
+        background: "#f7f7f7"
+      }}
+    >
+
+      {/* ===== Cabeçalho ===== */}
+
+      <Header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1000,
+          width: "100%",
+          background: "#fff",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingInline: 16,
+        }}
+      >
+
+        {/* Logo / Título */}
+
+        <div
+          style={{
+            fontSize: "1.2rem",
+            fontWeight: "600",
+            color: "#333",
+          }}
+        >
+          Sistema de Cadastro
+        </div>
+
+        {/* Menu Desktop */}
+
+        {!isMobile && (
+          <Menu
+            mode="horizontal"
+            selectedKeys={[currentKey]}
+            items={menuItems}
+            style={{
+              background: "transparent",
+              borderBottom: "none",
+              fontWeight: 500,
+              flex: 1,
+              justifyContent: "flex-end",
+            }}
+          />
+        )}
+
+        {/* Botão Mobile */}
+
+        {isMobile && (
+          <Button
+            type="text"
+            icon={
+              <MenuOutlined
+                style={{ fontSize: 22 }}
+              />
+            }
+            onClick={() => setDrawerVisible(true)}
+          />
+        )}
+
+      </Header>
+
+      {/* ===== Menu lateral mobile ===== */}
+
+      <Drawer
+        title="Menu"
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        bodyStyle={{ padding: 0 }}
+      >
+
+        <Menu
+          mode="inline"
+          selectedKeys={[currentKey]}
+          items={menuItems}
+          onClick={() => setDrawerVisible(false)}
+        />
+
+      </Drawer>
+
+      {/* ===== Conteúdo principal ===== */}
+
+      <Content
+        style={{
+          padding: "24px",
+          background: "#ffffff",
+          margin: "24px",
+          borderRadius: "8px",
+          boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+        }}
+      >
+
+        <Outlet />
+
+      </Content>
+
+      {/* ===== Rodapé ===== */}
+
+      <Footer
+        style={{
+          textAlign: "center",
+          background: "#f7f7f7",
+          color: "#555",
+        }}
+      >
+        Sistema de Cadastro de Pessoas ©2025
+      </Footer>
+
+    </Layout>
+  );
+}
+
+export default MainLayout;
+```
+
+## 3.2. Entendendo o componente MainLayout
+
+O componente utiliza recursos que já estudamos anteriormente, como `useState`, `useEffect` e composição de componentes.
+
+Entretanto, introduz alguns elementos específicos da navegação.
+
+### O componente Outlet
+
+Observe o trecho:
+
+```jsx
+<Outlet />
+```
+
+O `Outlet` representa a área em que o React Router apresentará o componente associado à rota selecionada.
+
+Por exemplo, quando o usuário acessar `/listar`, o componente `ListaPessoas` será renderizado no local ocupado pelo `Outlet`.
+
+Dessa forma, não precisamos repetir o cabeçalho e o rodapé em todas as páginas.
+
+### O hook useLocation
+
+O hook `useLocation()` permite identificar a URL atual.
+
+```jsx
+const location = useLocation();
+```
+
+Essa informação é utilizada para destacar o item correspondente no menu de navegação.
+
+Por exemplo:
+
+```jsx
+const currentKey =
+  location.pathname.startsWith("/listar") ||
+  location.pathname.startsWith("/visualizar")
+    ? "/listar"
+    : "/cadastrar";
+```
+
+Quando o usuário estiver na listagem ou na visualização de um cadastro, o menu destacará a opção **Listar**.
+
+Nas demais situações, será destacada a opção **Cadastrar**.
+
+### Layout responsivo
+
+O componente também utiliza o hook `useEffect()` para identificar alterações no tamanho da janela.
+
+```jsx
+useEffect(() => {
+
+  function handleResize() {
+    setIsMobile(window.innerWidth < 768);
+  }
+
+  handleResize();
+
+  window.addEventListener("resize", handleResize);
+
+  return () =>
+    window.removeEventListener("resize", handleResize);
+
+}, []);
+```
+
+Quando a largura da janela for inferior a 768 pixels, o menu horizontal será substituído por um botão que permite abrir um menu lateral.
+
+Esse menu utiliza o componente `Drawer`, disponibilizado pelo Ant Design.
+
+:::tip Reutilização de componentes
+
+O `MainLayout` será compartilhado por todas as telas da aplicação.
+
+Essa abordagem evita duplicação de código e facilita futuras alterações na aparência do sistema.
+
+:::
+
+---
+
+# 4. Organizando as rotas da aplicação
+
+Agora que temos um componente responsável pela estrutura visual, precisamos definir quais URLs estarão disponíveis.
+
+Para isso, criaremos o arquivo `AppRoutes.jsx`.
+
+Esse arquivo concentrará a definição das rotas, separando a responsabilidade de navegação da apresentação visual.
+
+## 4.1. Arquivo `AppRoutes.jsx` — NOVO
+
+Crie o diretório:
+
+```text
+src/routes/
+```
+
+Dentro dele, crie o arquivo:
+
+```text
+AppRoutes.jsx
+```
+
+O código completo será:
+
+```jsx title="src/routes/AppRoutes.jsx"
+import React from "react";
+
+import {
+  Routes,
+  Route,
+  Navigate
+} from "react-router-dom";
+
+import MainLayout from "../layout/MainLayout.jsx";
+
+import PessoaForm from "../components/cadastrapessoa/PessoaFormOO.jsx";
+
+import ListaPessoas from "../components/listapessoas/ListaPessoas.jsx";
+
+import VisualizaPessoa from "../components/visualizapessoa/VisualizaPessoa.jsx";
+
+function AppRoutes() {
+
+  return (
+    <Routes>
+
+      {/* Todas as rotas dentro do layout principal */}
+
+      <Route
+        path="/"
+        element={<MainLayout />}
+      >
+
+        <Route
+          index
+          element={
+            <Navigate to="cadastrar" replace />
+          }
+        />
+
+        <Route
+          path="cadastrar"
+          element={<PessoaForm />}
+        />
+
+        <Route
+          path="listar"
+          element={<ListaPessoas />}
+        />
+
+        <Route
+          path="visualizar/:tipo/:id"
+          element={<VisualizaPessoa />}
+        />
+
+        <Route
+          path="editar/:tipo/:id"
+          element={<PessoaForm />}
+        />
+
+      </Route>
+
+    </Routes>
+  );
+}
+
+export default AppRoutes;
+```
+
+:::warning Importante
+
+Neste momento, os componentes `ListaPessoas.jsx` e `VisualizaPessoa.jsx` ainda não foram criados.
+
+Por isso, o arquivo `AppRoutes.jsx` deverá ser preparado, mas **não deverá ser importado pelo `App.jsx` nesta etapa**.
+
+A integração definitiva será realizada ao final do capítulo, quando todos os componentes necessários estiverem disponíveis.
+
+:::
+
+## 4.2. Entendendo a definição das rotas
+
+O componente `Routes` agrupa as rotas da aplicação:
+
+```jsx
+<Routes>
+  ...
+</Routes>
+```
+
+Cada componente `Route` associa um caminho a um componente React.
+
+Por exemplo:
+
+```jsx
+<Route
+  path="listar"
+  element={<ListaPessoas />}
+/>
+```
+
+Essa declaração indica que, ao acessar `/listar`, o React Router deverá apresentar o componente `ListaPessoas`.
+
+### Rotas aninhadas
+
+Observe a declaração:
+
+```jsx
+<Route
+  path="/"
+  element={<MainLayout />}
+>
+```
+
+As demais rotas foram declaradas dentro dessa rota principal.
+
+Isso significa que os componentes associados às rotas filhas serão apresentados dentro do `MainLayout`.
+
+O conteúdo de cada rota será renderizado no local definido pelo componente `Outlet`.
+
+### Redirecionamento
+
+A declaração:
+
+```jsx
+<Route
+  index
+  element={
+    <Navigate to="cadastrar" replace />
+  }
+/>
+```
+
+indica que, ao acessar a URL inicial `/`, o usuário será redirecionado automaticamente para `/cadastrar`.
+
+### Rotas com parâmetros
+
+Observe a rota:
+
+```jsx
+<Route
+  path="editar/:tipo/:id"
+  element={<PessoaForm />}
+/>
+```
+
+Os segmentos `:tipo` e `:id` representam parâmetros dinâmicos.
+
+Por exemplo:
+
+```text
+/editar/PF/123
+```
+
+Nesse endereço:
+
+- `PF` identifica o tipo de pessoa;
+- `123` representa o identificador do cadastro.
+
+Posteriormente, utilizaremos o hook `useParams()` para recuperar essas informações e carregar os dados correspondentes.
+
+:::info Cadastro e edição com o mesmo componente
+
+Observe que as rotas `/cadastrar` e `/editar/:tipo/:id` utilizam o mesmo componente:
+
+```jsx
+<PessoaForm />
+```
+
+Isso será possível porque o formulário identificará se existe um registro a ser editado.
+
+Caso não existam parâmetros de edição, o formulário será utilizado para cadastrar uma nova pessoa.
+
+Caso os parâmetros estejam presentes, o componente poderá recuperar os dados existentes e permitir sua atualização.
+
+Essa funcionalidade será implementada em uma das próximas partes.
+
+:::
+
+---
+
+# 5. Como os componentes trabalharão em conjunto
+
+Após a conclusão do capítulo, a navegação seguirá a seguinte estrutura:
+
+```text
+App.jsx
+   │
+   ▼
+BrowserRouter
+   │
+   ▼
+AppRoutes.jsx
+   │
+   ▼
+MainLayout.jsx
+   │
+   ├── Header
+   │
+   ├── Menu
+   │
+   ├── Outlet
+   │     │
+   │     ├── PessoaFormOO
+   │     │      ├── Cadastro
+   │     │      └── Edição
+   │     │
+   │     ├── ListaPessoas
+   │     │      ├── Listagem
+   │     │      └── Exclusão
+   │     │
+   │     └── VisualizaPessoa
+   │
+   └── Footer
+```
+
+Essa organização permite separar as responsabilidades:
+
+- O `App.jsx` inicializa a navegação.
+- O `AppRoutes.jsx` define as rotas disponíveis.
+- O `MainLayout.jsx` organiza a interface visual.
+- Os componentes de cadastro, listagem e visualização implementam as funcionalidades específicas.
+- Os DAOs realizam as operações de persistência no `localStorage`.
+
+Essa separação facilita a manutenção e a evolução do projeto.
+
+---
+
+# 6. Conferindo o desenvolvimento desta etapa
+
+Antes de prosseguir, confira se os seguintes arquivos foram criados:
+
+```text
+src/
+├── routes/
+│   └── AppRoutes.jsx
+└── layout/
+    └── MainLayout.jsx
+```
+
+Os arquivos devem conter integralmente os códigos apresentados neste capítulo.
+
+Entretanto, **não modifique ainda o arquivo `App.jsx`**.
+
+O cadastro desenvolvido anteriormente deverá continuar sendo apresentado normalmente pela aplicação.
+
+Também não será necessário modificar os componentes de endereço, telefones, pessoa física ou pessoa jurídica.
+
+:::tip Preparação para a próxima etapa
+
+Neste momento, estamos preparando a estrutura de navegação, mas ainda não ativamos as novas rotas.
+
+Nas próximas partes, implementaremos as funcionalidades de persistência, listagem, visualização e edição.
+
+Somente depois de concluir esses componentes modificaremos o `App.jsx`, ativando a navegação completa.
+
+:::
+
+---
+
+# 7. Síntese da Parte 1
+
+Nesta etapa, compreendemos como uma aplicação React pode evoluir de uma única tela para um sistema com diferentes funcionalidades.
+
+Estudamos:
+
+- O conceito de CRUD;
+- A organização de uma aplicação SPA;
+- A utilização do React Router DOM;
+- A definição de rotas estáticas e dinâmicas;
+- A criação de um layout compartilhado;
+- O funcionamento do `Outlet`;
+- A utilização do hook `useLocation`;
+- A preparação de componentes para navegação.
+
+Também criamos dois arquivos novos:
+
+```text
+src/layout/MainLayout.jsx
+src/routes/AppRoutes.jsx
+```
+
+Esses arquivos serão utilizados posteriormente, quando a aplicação estiver preparada para executar todas as operações do CRUD.
+
+Na próxima parte, ampliaremos a camada de persistência para permitir a identificação, atualização e exclusão de registros armazenados no `localStorage`.
+
+
+# Parte 2 — Evolução da camada de persistência: implementando o CRUD nos DAOs
+
+No capítulo anterior, desenvolvemos uma camada de persistência utilizando o padrão **DAO (Data Access Object)**.
+
+Essa camada é responsável por estabelecer a comunicação entre os objetos de domínio da aplicação e o mecanismo utilizado para armazenar os dados.
+
+Em nosso projeto, utilizamos o `localStorage`, recurso disponibilizado pelos navegadores para armazenar informações localmente.
+
+Até o momento, nossa principal preocupação foi permitir o cadastro de pessoas físicas e jurídicas.
+
+Agora, ampliaremos os DAOs para oferecer as operações necessárias ao CRUD completo.
+
+Ao final desta etapa, teremos métodos capazes de:
+
+- Armazenar novos registros;
+- Recuperar pessoas cadastradas;
+- Identificar individualmente cada registro;
+- Atualizar informações existentes;
+- Excluir registros armazenados.
+
+:::info Continuidade do projeto
+
+Nesta etapa, modificaremos somente dois arquivos:
+
+- `src/objetos/dao/PFDAOLocal.mjs`
+- `src/objetos/dao/PJDAOLocal.mjs`
+
+Os componentes React e as classes de domínio permanecerão inalterados.
+
+O arquivo `App.jsx` continuará utilizando o formulário desenvolvido no capítulo anterior. A navegação entre as telas será ativada somente na última parte deste capítulo.
+
+:::
+
+---
+
+## 1. Evolução das operações de persistência
+
+No capítulo anterior, estudamos a utilização do `localStorage` para armazenar objetos.
+
+Entretanto, para implementar um CRUD completo, precisamos estabelecer uma maneira de identificar cada registro armazenado.
+
+Considere a seguinte situação:
+
+Uma aplicação possui três pessoas físicas cadastradas.
+
+```json
+[
+  {
+    "nome": "Ana Silva",
+    "cpf": "11111111111"
+  },
+  {
+    "nome": "Carlos Souza",
+    "cpf": "22222222222"
+  },
+  {
+    "nome": "Mariana Costa",
+    "cpf": "33333333333"
+  }
+]
+```
+
+Se precisarmos alterar o cadastro de Carlos, como identificaremos exatamente qual objeto deverá ser atualizado?
+
+Uma possibilidade seria utilizar o CPF.
+
+Entretanto, em sistemas de informação, é comum utilizar um **identificador próprio para cada registro**, independente dos demais atributos.
+
+Assim, nossos objetos passarão a possuir uma propriedade chamada `id`.
+
+```json
+[
+  {
+    "id": "abc123",
+    "nome": "Ana Silva",
+    "cpf": "11111111111"
+  },
+  {
+    "id": "def456",
+    "nome": "Carlos Souza",
+    "cpf": "22222222222"
+  },
+  {
+    "id": "ghi789",
+    "nome": "Mariana Costa",
+    "cpf": "33333333333"
+  }
+]
+```
+
+Agora, para atualizar Carlos, basta localizar o objeto cujo `id` seja igual a `"def456"`.
+
+Essa mesma identificação será utilizada posteriormente nas rotas da aplicação.
+
+Por exemplo:
+
+```text
+/visualizar/PF/def456
+/editar/PF/def456
+```
+
+:::tip Identificadores e persistência
+
+O identificador `id` representa a identidade de um registro dentro do sistema.
+
+Ele não substitui documentos como CPF e CNPJ, que continuam sendo atributos específicos das pessoas cadastradas.
+
+:::
+
+## 2. Organização das operações CRUD
+
+Os dois DAOs oferecerão a mesma interface de operações.
+
+| Método | Operação CRUD | Responsabilidade |
+|---|---|---|
+| `salvar(pessoa)` | Create | Armazenar um novo registro |
+| `listar()` | Read | Recuperar todos os registros |
+| `atualizar(id, pessoa)` | Update | Atualizar um registro identificado |
+| `excluir(id)` | Delete | Remover um registro identificado |
+
+Também utilizaremos dois métodos auxiliares:
+
+| Método | Responsabilidade |
+|---|---|
+| `gerarId()` | Produzir um identificador para um novo registro |
+| `toPlain(pessoa)` | Converter uma instância de classe em objeto simples |
+
+A utilização dos mesmos nomes de métodos nos dois DAOs facilita a integração com os componentes React.
+
+Por exemplo:
+
+```javascript
+const dao = tipo === "PF" ? pfDAO : pjDAO;
+
+const pessoas = dao.listar();
+```
+
+Observe que o componente não precisa conhecer os detalhes internos da persistência de pessoas físicas e jurídicas.
+
+Ele apenas seleciona o DAO correspondente e executa a operação desejada.
+
+---
+
+## 3. Evoluindo o DAO de Pessoa Física
+
+**Arquivo: `src/objetos/dao/PFDAOLocal.mjs` — MODIFICADO**
+
+O DAO de Pessoa Física continuará utilizando a chave `pessoasFisicas` no `localStorage`.
+
+Essa chave é importante porque permite que os dados permaneçam armazenados no mesmo local utilizado anteriormente.
+
+A principal evolução consiste em incorporar um identificador para cada novo registro e disponibilizar métodos para atualização e exclusão.
+
+### 3.1. Código completo do arquivo
+
+Substitua integralmente o conteúdo do arquivo `PFDAOLocal.mjs` pelo código abaixo.
+
+```javascript title="src/objetos/dao/PFDAOLocal.mjs"
+export default class PFDAO {
+
+  constructor() {
+    this.chave = "pessoasFisicas";
+  }
+
+  // Recupera os registros armazenados
+  listar() {
+    try {
+      const dados = localStorage.getItem(this.chave);
+
+      return dados ? JSON.parse(dados) : [];
+
+    } catch (e) {
+      console.error("Erro ao ler PF:", e);
+      return [];
+    }
+  }
+
+  // Gera um identificador para o registro
+  gerarId() {
+    return (
+      Date.now().toString(36) +
+      Math.random().toString(36).substring(2, 9)
+    );
+  }
+
+  // Converte a instância de PF em objeto simples
+  toPlain(pf) {
+
+    if (!pf) return {};
+
+    const end = pf.getEndereco?.();
+    const titulo = pf.getTitulo?.();
+    const telefones = pf.getTelefones?.() || [];
+
+    return {
+      id: pf.id ?? this.gerarId(),
+
+      nome: pf.getNome?.(),
+      email: pf.getEmail?.(),
+      cpf: pf.getCPF?.(),
+
+      endereco: end
+        ? {
+            cep: end.getCep?.(),
+            logradouro: end.getLogradouro?.(),
+            bairro: end.getBairro?.(),
+            cidade: end.getCidade?.(),
+            uf: end.getUf?.(),
+            regiao: end.getRegiao?.(),
+          }
+        : {},
+
+      telefones: telefones.map((t) => ({
+        ddd: t.getDdd?.(),
+        numero: t.getNumero?.(),
+      })),
+
+      titulo: titulo
+        ? {
+            numero: titulo.getNumero?.(),
+            zona: titulo.getZona?.(),
+            secao: titulo.getSecao?.(),
+          }
+        : {},
+    };
+  }
+
+  // CREATE: cadastra uma pessoa física
+  salvar(pf) {
+
+    const lista = this.listar();
+    const obj = this.toPlain(pf);
+
+    if (!obj.id) {
+      obj.id = this.gerarId();
+    }
+
+    lista.push(obj);
+
+    localStorage.setItem(
+      this.chave,
+      JSON.stringify(lista)
+    );
+
+    return obj;
+  }
+
+  // UPDATE: atualiza uma pessoa física
+  atualizar(id, novoPF) {
+
+    const lista = this.listar();
+    const obj = this.toPlain(novoPF);
+
+    obj.id = id;
+
+    const idx = lista.findIndex(
+      (p) => p.id === id
+    );
+
+    if (idx >= 0) {
+      lista[idx] = obj;
+    } else {
+      lista.push(obj);
+    }
+
+    localStorage.setItem(
+      this.chave,
+      JSON.stringify(lista)
+    );
+  }
+
+  // DELETE: exclui uma pessoa física
+  excluir(id) {
+
+    const novaLista = this.listar().filter(
+      (p) => p.id !== id
+    );
+
+    localStorage.setItem(
+      this.chave,
+      JSON.stringify(novaLista)
+    );
+  }
+}
+```
+
+### 3.2. Recuperando os registros com listar()
+
+O método `listar()` recupera as informações armazenadas na chave `pessoasFisicas`.
+
+```javascript
+listar() {
+  try {
+    const dados = localStorage.getItem(this.chave);
+
+    return dados ? JSON.parse(dados) : [];
+
+  } catch (e) {
+    console.error("Erro ao ler PF:", e);
+    return [];
+  }
+}
+```
+
+A instrução:
+
+```javascript
+localStorage.getItem(this.chave)
+```
+
+recupera o conteúdo armazenado no navegador.
+
+Como o `localStorage` armazena strings, precisamos utilizar:
+
+```javascript
+JSON.parse(dados)
+```
+
+para transformar o texto JSON em um objeto JavaScript.
+
+Caso não existam dados, o método retorna um array vazio.
+
+O bloco `try/catch` permite tratar situações em que o conteúdo armazenado não seja um JSON válido.
+
+:::info Objetos recuperados do localStorage
+
+O método `JSON.parse()` recupera objetos JavaScript comuns.
+
+Isso significa que os objetos retornados não são automaticamente instâncias das classes `PF`, `PJ` ou `Endereco`.
+
+Por esse motivo, os componentes de listagem e visualização acessarão diretamente os atributos armazenados.
+
+:::
+
+### 3.3. Gerando identificadores com gerarId()
+
+O método `gerarId()` cria uma string utilizada para identificar um registro.
+
+```javascript
+gerarId() {
+  return (
+    Date.now().toString(36) +
+    Math.random().toString(36).substring(2, 9)
+  );
+}
+```
+
+A instrução `Date.now()` retorna a quantidade de milissegundos decorridos desde 1º de janeiro de 1970.
+
+O método `toString(36)` transforma esse número em uma representação alfanumérica.
+
+Já `Math.random()` produz um número pseudoaleatório, utilizado para complementar o identificador.
+
+A combinação dessas informações reduz a possibilidade de repetição dos identificadores em nosso protótipo.
+
+:::warning Atenção
+
+Esse método é adequado como mecanismo simples de identificação para a atividade didática, mas não garante unicidade absoluta.
+
+Em aplicações reais, a estratégia de geração de identificadores deve considerar os requisitos de segurança, concorrência e integridade dos dados.
+
+:::
+
+### 3.4. Convertendo objetos com toPlain()
+
+No capítulo anterior, utilizamos classes para representar pessoas físicas e seus atributos.
+
+Por exemplo, uma pessoa física pode conter objetos associados:
+
+```text
+PF
+├── nome
+├── email
+├── cpf
+├── Endereco
+├── Telefone[]
+└── Titulo
+```
+
+Entretanto, ao armazenar essas informações, precisamos representar os dados em uma estrutura compatível com JSON.
+
+O método `toPlain()` realiza essa conversão.
+
+Observe:
+
+```javascript
+const end = pf.getEndereco?.();
+const titulo = pf.getTitulo?.();
+const telefones = pf.getTelefones?.() || [];
+```
+
+Essas instruções recuperam os objetos associados à pessoa física.
+
+O operador `?.` é conhecido como **encadeamento opcional** (*optional chaining*).
+
+Ele permite acessar um método somente quando a referência correspondente está disponível.
+
+Em seguida, os dados são organizados em um objeto simples.
+
+Por exemplo:
+
+```javascript
+endereco: end
+  ? {
+      cep: end.getCep?.(),
+      logradouro: end.getLogradouro?.(),
+      bairro: end.getBairro?.(),
+      cidade: end.getCidade?.(),
+      uf: end.getUf?.(),
+      regiao: end.getRegiao?.(),
+    }
+  : {},
+```
+
+Observe que não estamos armazenando uma instância da classe `Endereco`.
+
+Estamos armazenando um objeto que contém os valores necessários para representar o endereço.
+
+Esse procedimento é importante porque o JSON não preserva os métodos das classes.
+
+### 3.5. Armazenando registros com salvar()
+
+O método `salvar()` representa a operação **Create** do CRUD.
+
+```javascript
+salvar(pf) {
+
+  const lista = this.listar();
+  const obj = this.toPlain(pf);
+
+  if (!obj.id) {
+    obj.id = this.gerarId();
+  }
+
+  lista.push(obj);
+
+  localStorage.setItem(
+    this.chave,
+    JSON.stringify(lista)
+  );
+
+  return obj;
+}
+```
+
+O procedimento é realizado em etapas:
+
+1. Recuperar os registros existentes;
+2. Converter a pessoa física em objeto simples;
+3. Garantir que o novo registro possua um identificador;
+4. Adicionar o objeto ao array;
+5. Atualizar os dados armazenados no navegador.
+
+Observe que o método utiliza:
+
+```javascript
+lista.push(obj);
+```
+
+Essa instrução adiciona um novo elemento ao final do array.
+
+Depois, utilizamos:
+
+```javascript
+localStorage.setItem(
+  this.chave,
+  JSON.stringify(lista)
+);
+```
+
+para armazenar a lista atualizada.
+
+### 3.6. Atualizando registros com atualizar()
+
+O método `atualizar()` representa a operação **Update** do CRUD.
+
+Ele recebe dois parâmetros:
+
+```javascript
+atualizar(id, novoPF)
+```
+
+O primeiro parâmetro identifica o registro que deverá ser atualizado.
+
+O segundo contém as novas informações da pessoa física.
+
+Observe:
+
+```javascript
+const idx = lista.findIndex(
+  (p) => p.id === id
+);
+```
+
+O método `findIndex()` percorre o array e retorna o índice do primeiro elemento que satisfaz a condição informada.
+
+Caso o registro seja encontrado, seu índice será maior ou igual a zero.
+
+```javascript
+if (idx >= 0) {
+  lista[idx] = obj;
+} else {
+  lista.push(obj);
+}
+```
+
+Na implementação utilizada, quando o identificador é encontrado, o objeto existente é substituído.
+
+Caso contrário, o método adiciona um novo objeto à lista.
+
+Esse comportamento é conhecido como **upsert**, pois combina atualização e inserção.
+
+:::warning Observe o comportamento
+
+Embora o método se chame `atualizar()`, a implementação também permite inserir um registro quando o identificador não é encontrado.
+
+Em sistemas que exigem atualização estrita, seria possível lançar um erro caso o registro não existisse.
+
+Neste capítulo, manteremos o comportamento da implementação utilizada no projeto.
+
+:::
+
+### 3.7. Excluindo registros com excluir()
+
+O método `excluir()` representa a operação **Delete** do CRUD.
+
+```javascript
+excluir(id) {
+
+  const novaLista = this.listar().filter(
+    (p) => p.id !== id
+  );
+
+  localStorage.setItem(
+    this.chave,
+    JSON.stringify(novaLista)
+  );
+}
+```
+
+O método `filter()` percorre o array e constrói um novo array contendo somente os elementos que satisfazem a condição.
+
+Observe a expressão:
+
+```javascript
+p.id !== id
+```
+
+Ela indica que devemos manter todos os registros cujo identificador seja diferente daquele informado.
+
+Assim, o registro correspondente ao `id` será removido do novo array.
+
+Por fim, a lista resultante substitui os dados armazenados anteriormente.
+
+---
+
+## 4. Evoluindo o DAO de Pessoa Jurídica
+
+**Arquivo: `src/objetos/dao/PJDAOLocal.mjs` — MODIFICADO**
+
+Agora, aplicaremos a mesma estrutura ao DAO de Pessoa Jurídica.
+
+A principal diferença estará nos atributos específicos de PJ.
+
+Enquanto a pessoa física possui CPF e título eleitoral, a pessoa jurídica utiliza CNPJ e inscrição estadual.
+
+A chave de armazenamento continuará sendo `pessoasJuridicas`.
+
+### 4.1. Código completo do arquivo
+
+Substitua integralmente o conteúdo do arquivo `PJDAOLocal.mjs` pelo código abaixo.
+
+```javascript title="src/objetos/dao/PJDAOLocal.mjs"
+export default class PJDAO {
+
+  constructor() {
+    this.chave = "pessoasJuridicas";
+  }
+
+  // Recupera os registros armazenados
+  listar() {
+    try {
+      const dados = localStorage.getItem(this.chave);
+
+      return dados ? JSON.parse(dados) : [];
+
+    } catch (e) {
+      console.error("Erro ao ler PJ:", e);
+      return [];
+    }
+  }
+
+  // Gera um identificador para o registro
+  gerarId() {
+    return (
+      Date.now().toString(36) +
+      Math.random().toString(36).substring(2, 9)
+    );
+  }
+
+  // Converte a instância de PJ em objeto simples
+  toPlain(pj) {
+
+    if (!pj) return {};
+
+    const end = pj.getEndereco?.();
+    const ie = pj.getIE?.();
+    const telefones = pj.getTelefones?.() || [];
+
+    return {
+      id: pj.id ?? this.gerarId(),
+
+      nome: pj.getNome?.(),
+      email: pj.getEmail?.(),
+      cnpj: pj.getCNPJ?.(),
+
+      endereco: end
+        ? {
+            cep: end.getCep?.(),
+            logradouro: end.getLogradouro?.(),
+            bairro: end.getBairro?.(),
+            cidade: end.getCidade?.(),
+            uf: end.getUf?.(),
+            regiao: end.getRegiao?.(),
+          }
+        : {},
+
+      telefones: telefones.map((t) => ({
+        ddd: t.getDdd?.(),
+        numero: t.getNumero?.(),
+      })),
+
+      ie: ie
+        ? {
+            numero: ie.getNumero?.(),
+            estado: ie.getEstado?.(),
+            dataRegistro: ie.getDataRegistro?.(),
+          }
+        : {},
+    };
+  }
+
+  // CREATE: cadastra uma pessoa jurídica
+  salvar(pj) {
+
+    const lista = this.listar();
+    const obj = this.toPlain(pj);
+
+    if (!obj.id) {
+      obj.id = this.gerarId();
+    }
+
+    lista.push(obj);
+
+    localStorage.setItem(
+      this.chave,
+      JSON.stringify(lista)
+    );
+
+    return obj;
+  }
+
+  // UPDATE: atualiza uma pessoa jurídica
+  atualizar(id, novoPJ) {
+
+    const lista = this.listar();
+    const obj = this.toPlain(novoPJ);
+
+    obj.id = id;
+
+    const idx = lista.findIndex(
+      (p) => p.id === id
+    );
+
+    if (idx >= 0) {
+      lista[idx] = obj;
+    } else {
+      lista.push(obj);
+    }
+
+    localStorage.setItem(
+      this.chave,
+      JSON.stringify(lista)
+    );
+  }
+
+  // DELETE: exclui uma pessoa jurídica
+  excluir(id) {
+
+    const novaLista = this.listar().filter(
+      (p) => p.id !== id
+    );
+
+    localStorage.setItem(
+      this.chave,
+      JSON.stringify(novaLista)
+    );
+  }
+}
+```
+
+### 4.2. Comparando os dois DAOs
+
+Observe que `PFDAO` e `PJDAO` apresentam a mesma organização.
+
+Ambos possuem os métodos:
+
+```javascript
+listar()
+gerarId()
+toPlain()
+salvar()
+atualizar()
+excluir()
+```
+
+Entretanto, existem diferenças relacionadas aos atributos específicos de cada tipo de pessoa.
+
+| Característica | PFDAO | PJDAO |
+|---|---|---|
+| Chave de armazenamento | `pessoasFisicas` | `pessoasJuridicas` |
+| Documento principal | CPF | CNPJ |
+| Objeto específico | Título eleitoral | Inscrição estadual |
+| Endereço | Sim | Sim |
+| Telefones | Sim | Sim |
+| Métodos CRUD | Sim | Sim |
+
+Essa padronização permite que os componentes React utilizem os dois DAOs de maneira semelhante.
+
+Por exemplo:
+
+```javascript
+const dao = tipo === "PF"
+  ? new PFDAO()
+  : new PJDAO();
+
+const registros = dao.listar();
+```
+
+A aplicação escolhe o DAO conforme o tipo de pessoa, mas utiliza a mesma operação.
+
+Essa organização reforça os benefícios da abstração e da separação de responsabilidades.
+
+---
+
+## 5. Como os dados são armazenados
+
+Após as modificações, cada pessoa cadastrada terá um identificador próprio.
+
+Considere um exemplo simplificado de pessoa física:
+
+```json
+{
+  "id": "m4abc123",
+  "nome": "Ana Silva",
+  "email": "ana@email.com",
+  "cpf": "11111111111",
+  "endereco": {
+    "cep": "70000000",
+    "logradouro": "Rua Exemplo",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "999999999"
+    }
+  ],
+  "titulo": {
+    "numero": "123456789",
+    "zona": "10",
+    "secao": "20"
+  }
+}
+```
+
+Os dados serão armazenados como elementos de um array associado à chave `pessoasFisicas`.
+
+No caso das pessoas jurídicas, o array será associado à chave `pessoasJuridicas`.
+
+:::info Armazenamento local
+
+O `localStorage` permite que os dados permaneçam disponíveis após o recarregamento da página, desde que não sejam removidos pelo usuário ou pelo navegador.
+
+Entretanto, esses dados ficam associados à origem da aplicação no navegador utilizado.
+
+Eles não são automaticamente compartilhados com outros dispositivos ou usuários.
+
+:::
+
+---
+
+## 6. Verificando o funcionamento dos DAOs
+
+Antes de avançar para a implementação das telas de listagem, é importante verificar se os novos métodos estão disponíveis.
+
+Como ainda não modificamos o `App.jsx`, o cadastro desenvolvido anteriormente deverá continuar funcionando.
+
+### 6.1. Testando o cadastro
+
+Execute a aplicação normalmente:
+
+```bash
+npm run dev
+```
+
+Em seguida:
+
+1. Abra o formulário de cadastro;
+2. Cadastre uma pessoa física;
+3. Cadastre uma pessoa jurídica;
+4. Verifique se os registros foram armazenados.
+
+### 6.2. Consultando o localStorage
+
+No navegador, abra as ferramentas de desenvolvedor.
+
+No Google Chrome, acesse:
+
+**Ferramentas do desenvolvedor → Application → Local Storage**
+
+Selecione a origem correspondente à aplicação.
+
+Você deverá encontrar as chaves:
+
+```text
+pessoasFisicas
+pessoasJuridicas
+```
+
+Observe os dados armazenados em cada chave.
+
+Os novos registros deverão possuir o atributo `id`.
+
+:::warning Registros cadastrados anteriormente
+
+Os registros criados antes da implementação de `gerarId()` podem não possuir identificadores.
+
+Os novos cadastros receberão o atributo `id` automaticamente, mas os registros antigos não serão modificados apenas pela substituição dos DAOs.
+
+Para os testes didáticos das operações de edição e exclusão, utilize novos cadastros com identificadores.
+
+Se decidir limpar os dados anteriores, faça isso somente após verificar que não existem informações que precisam ser preservadas.
+
+:::
+
+### 6.3. Testando as operações de consulta e exclusão
+
+Como ainda não construímos a tela de listagem, podemos utilizar temporariamente o console do navegador para observar os dados.
+
+Por exemplo:
+
+```javascript
+JSON.parse(
+  localStorage.getItem("pessoasFisicas") || "[]"
+);
+```
+
+Essa instrução retorna os registros de pessoas físicas armazenados.
+
+Para consultar as pessoas jurídicas:
+
+```javascript
+JSON.parse(
+  localStorage.getItem("pessoasJuridicas") || "[]"
+);
+```
+
+Observe que os dados são apresentados como objetos JavaScript.
+
+Nas próximas partes, utilizaremos os métodos `listar()` e `excluir()` dos DAOs diretamente nos componentes React, dispensando a manipulação manual do armazenamento.
+
+---
+
+## 7. Relação entre os DAOs e as futuras telas
+
+Com a evolução da persistência, já temos os métodos necessários para implementar as próximas funcionalidades.
+
+A relação entre os componentes e os DAOs será:
+
+```text
+                   COMPONENTES REACT
+                          │
+         ┌────────────────┼────────────────┐
+         │                │                │
+         ▼                ▼                ▼
+   PessoaFormOO      ListaPessoas    VisualizaPessoa
+         │                │                │
+         │                │                │
+         └────────────────┼────────────────┘
+                          │
+                          ▼
+                    CAMADA DAO
+                          │
+                ┌─────────┴─────────┐
+                │                   │
+                ▼                   ▼
+         PFDAOLocal.mjs      PJDAOLocal.mjs
+                │                   │
+                └─────────┬─────────┘
+                          │
+                          ▼
+                     localStorage
+```
+
+O componente `PessoaFormOO` utilizará os métodos `salvar()` e `atualizar()`.
+
+O componente `ListaPessoas` utilizará `listar()` e `excluir()`.
+
+O componente `VisualizaPessoa` utilizará os registros recuperados por `listar()` para localizar e apresentar uma pessoa específica.
+
+Observe que a lógica de persistência permanece concentrada nos DAOs.
+
+Essa separação evita que cada componente precise conhecer diretamente os detalhes de armazenamento dos dados.
+
+---
+
+## 8. Atividade de fixação
+
+Nesta etapa, o objetivo é verificar o funcionamento da camada de persistência desenvolvida.
+
+Realize as seguintes atividades:
+
+1. Substitua integralmente o conteúdo dos arquivos `PFDAOLocal.mjs` e `PJDAOLocal.mjs` pelos códigos apresentados.
+2. Execute a aplicação utilizando `npm run dev`.
+3. Cadastre uma nova pessoa física e uma nova pessoa jurídica.
+4. Acesse o `localStorage` por meio das ferramentas de desenvolvedor do navegador.
+5. Localize os registros cadastrados e identifique o atributo `id`.
+6. Compare as estruturas armazenadas para PF e PJ.
+7. Identifique no código dos DAOs os métodos responsáveis pelas operações de criação, consulta, atualização e exclusão.
+
+**Questões para reflexão:**
+
+- Por que cada registro precisa possuir um identificador?
+- Qual é a finalidade do método `toPlain()`?
+- Por que utilizamos `JSON.stringify()` antes de armazenar os dados?
+- Qual é a diferença entre `findIndex()` e `filter()`?
+- O que acontece quando `atualizar()` recebe um identificador que não existe?
+- Por que é interessante manter os mesmos nomes de métodos nos dois DAOs?
+
+:::tip Importante
+
+Não modifique o arquivo `App.jsx` nesta etapa.
+
+A aplicação deverá continuar utilizando o formulário de cadastro desenvolvido no capítulo anterior.
+
+As novas funcionalidades serão integradas progressivamente nas próximas partes.
+
+:::
+
+---
+
+## 9. Síntese da Parte 2
+
+Nesta etapa, ampliamos a camada de persistência da aplicação para oferecer as operações necessárias ao CRUD.
+
+Os arquivos modificados foram:
+
+```text
+src/objetos/dao/PFDAOLocal.mjs
+src/objetos/dao/PJDAOLocal.mjs
+```
+
+Estudamos:
+
+- A utilização de identificadores para registros;
+- A geração de IDs;
+- A conversão de instâncias de classes em objetos simples;
+- A recuperação de registros com `listar()`;
+- A criação de registros com `salvar()`;
+- A atualização de registros com `atualizar()`;
+- A exclusão de registros com `excluir()`;
+- A utilização de `findIndex()` e `filter()` em operações CRUD;
+- A importância da separação entre interface e persistência.
+
+Com essas modificações, a aplicação estará preparada, na camada de dados, para as operações de listagem, visualização, edição e exclusão.
+
+**Na próxima parte, construiremos o componente `ListaPessoas.jsx`, responsável por apresentar os registros cadastrados e disponibilizar as ações de visualização, edição e exclusão.**
+
+
+# Parte 3 — Listagem de Pessoas Físicas e Jurídicas
+
+Nas etapas anteriores, preparamos a estrutura de navegação da aplicação e ampliamos a camada de persistência para oferecer as operações necessárias ao CRUD.
+
+Agora, desenvolveremos uma interface que permitirá ao usuário consultar os registros armazenados no `localStorage`.
+
+Até o momento, nossa aplicação permite cadastrar pessoas físicas e jurídicas. Entretanto, os registros cadastrados ainda não são apresentados em uma interface de consulta.
+
+Nesta etapa, criaremos um componente React responsável por recuperar e apresentar essas informações em uma tabela.
+
+Também disponibilizaremos recursos para filtrar os registros e acessar as operações de visualização, edição e exclusão.
+
+Ao final desta parte, teremos um componente capaz de:
+
+- Listar pessoas físicas e jurídicas;
+- Alternar entre os dois tipos de cadastro;
+- Filtrar registros pelo nome;
+- Atualizar a listagem;
+- Exibir os dados em uma tabela;
+- Disponibilizar ações para visualizar, editar e excluir registros;
+- Solicitar confirmação antes da exclusão.
+
+:::info Continuidade do projeto
+
+Nesta etapa, criaremos apenas um novo arquivo:
+
+**NOVO:** `src/components/listapessoas/ListaPessoas.jsx`
+
+Serão reaproveitados, sem alterações:
+
+- `src/objetos/dao/PFDAOLocal.mjs`
+- `src/objetos/dao/PJDAOLocal.mjs`
+
+O arquivo `App.jsx` continuará inalterado.
+
+A integração da listagem com o sistema de navegação será realizada ao final do capítulo, quando todos os componentes necessários estiverem implementados.
+
+:::
+
+---
+
+## 1. A operação Read no CRUD
+
+A sigla CRUD representa quatro operações fundamentais:
+
+| Operação | Significado | Funcionalidade |
+|---|---|---|
+| Create | Criar | Cadastrar pessoas |
+| **Read** | **Ler** | **Consultar pessoas cadastradas** |
+| Update | Atualizar | Editar cadastros |
+| Delete | Excluir | Remover registros |
+
+Nesta etapa, nossa principal preocupação será a operação **Read**.
+
+No capítulo anterior, desenvolvemos os DAOs para organizar o acesso aos dados armazenados.
+
+Agora, utilizaremos o método `listar()` para recuperar os registros existentes.
+
+Observe:
+
+```javascript
+const dao = new PFDAO();
+
+const pessoas = dao.listar();
+```
+
+O método `listar()` retorna um array contendo os registros de pessoas físicas armazenados.
+
+Por exemplo:
+
+```json
+[
+  {
+    "id": "abc123",
+    "nome": "Ana Silva",
+    "email": "ana@email.com",
+    "cpf": "11111111111"
+  },
+  {
+    "id": "def456",
+    "nome": "Carlos Souza",
+    "email": "carlos@email.com",
+    "cpf": "22222222222"
+  }
+]
+```
+
+Esses objetos poderão ser utilizados diretamente pelos componentes React para construir a interface.
+
+:::tip Separação de responsabilidades
+
+O componente React não precisa conhecer os detalhes de armazenamento dos dados.
+
+Ele solicita as informações ao DAO, que fica responsável por recuperá-las do `localStorage`.
+
+Essa organização mantém a separação entre a camada de apresentação e a camada de persistência.
+
+:::
+
+---
+
+## 2. Apresentando dados com o componente Table
+
+Para construir a listagem, utilizaremos o componente `Table`, disponibilizado pela biblioteca Ant Design.
+
+Esse componente permite apresentar coleções de objetos em uma estrutura de linhas e colunas.
+
+Uma tabela normalmente possui dois elementos principais:
+
+- **Fonte de dados:** array contendo os objetos que serão apresentados;
+- **Definição das colunas:** configuração que indica quais atributos deverão aparecer na interface.
+
+Considere:
+
+```javascript
+const pessoas = [
+  {
+    id: "1",
+    nome: "Ana Silva",
+    email: "ana@email.com"
+  },
+  {
+    id: "2",
+    nome: "Carlos Souza",
+    email: "carlos@email.com"
+  }
+];
+```
+
+Podemos definir as colunas da seguinte maneira:
+
+```jsx
+const colunas = [
+  {
+    title: "Nome",
+    dataIndex: "nome",
+    key: "nome"
+  },
+  {
+    title: "Email",
+    dataIndex: "email",
+    key: "email"
+  }
+];
+```
+
+Observe os atributos utilizados:
+
+| Propriedade | Finalidade |
+|---|---|
+| `title` | Define o título apresentado no cabeçalho |
+| `dataIndex` | Identifica o atributo do objeto utilizado na coluna |
+| `key` | Identifica a coluna dentro da tabela |
+
+A apresentação dos dados pode ser realizada com:
+
+```jsx
+<Table
+  dataSource={pessoas}
+  columns={colunas}
+  rowKey="id"
+/>
+```
+
+A propriedade `rowKey` indica qual atributo deverá ser utilizado para identificar cada linha.
+
+Em nossa aplicação, utilizaremos o atributo `id`, introduzido na Parte 2.
+
+---
+
+## 3. Criando o componente ListaPessoas
+
+**Arquivo: `src/components/listapessoas/ListaPessoas.jsx` — NOVO**
+
+Crie o diretório:
+
+```text
+src/components/listapessoas/
+```
+
+Dentro dele, crie o arquivo:
+
+```text
+ListaPessoas.jsx
+```
+
+Esse componente será responsável por:
+
+1. Recuperar os registros por meio dos DAOs;
+2. Armazenar os dados no estado do componente;
+3. Aplicar filtros conforme a interação do usuário;
+4. Apresentar os registros em uma tabela;
+5. Disponibilizar as ações relacionadas ao CRUD.
+
+### 3.1. Código completo do arquivo
+
+Copie integralmente o código abaixo para `ListaPessoas.jsx`.
+
+```jsx title="src/components/listapessoas/ListaPessoas.jsx"
+import React, { useEffect, useState } from "react";
+
+import {
+  Table,
+  Button,
+  Space,
+  Popconfirm,
+  message,
+  Input,
+  Select
+} from "antd";
+
+import {
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined
+} from "@ant-design/icons";
+
+import { useNavigate } from "react-router-dom";
+
+import PFDAO from "../../objetos/dao/PFDAOLocal.mjs";
+import PJDAO from "../../objetos/dao/PJDAOLocal.mjs";
+
+export default function ListaPessoas() {
+
+  const navigate = useNavigate();
+
+  const [tipo, setTipo] = useState("PF");
+  const [filtroNome, setFiltroNome] = useState("");
+  const [dados, setDados] = useState([]);
+
+  const pfDAO = new PFDAO();
+  const pjDAO = new PJDAO();
+
+  // Atualiza a lista conforme o tipo ou filtro
+  function carregarLista() {
+
+    const dao = tipo === "PF" ? pfDAO : pjDAO;
+
+    const lista = dao.listar();
+
+    const filtrados = lista.filter((p) =>
+      p.nome?.toLowerCase().includes(filtroNome.toLowerCase())
+    );
+
+    setDados(filtrados);
+  }
+
+  useEffect(() => {
+    carregarLista();
+  }, [tipo, filtroNome]);
+
+  // Exclui o registro selecionado
+  function excluirPessoa(id) {
+
+    const dao = tipo === "PF" ? pfDAO : pjDAO;
+
+    dao.excluir(id);
+
+    message.success("Registro excluído com sucesso!");
+
+    carregarLista();
+  }
+
+  // Configuração das colunas da tabela
+  const colunas = [
+    {
+      title: "Nome",
+      dataIndex: "nome",
+      key: "nome",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: tipo === "PF" ? "CPF" : "CNPJ",
+      dataIndex: tipo === "PF" ? "cpf" : "cnpj",
+      key: "doc",
+      width: 200,
+    },
+    {
+      title: "Ações",
+      key: "acoes",
+      width: 180,
+
+      render: (_, record) => (
+        <Space>
+
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() =>
+              navigate(`/visualizar/${tipo}/${record.id}`)
+            }
+          />
+
+          <Button
+            icon={<EditOutlined />}
+            onClick={() =>
+              navigate(`/editar/${tipo}/${record.id}`)
+            }
+          />
+
+          <Popconfirm
+            title="Deseja realmente excluir?"
+            onConfirm={() => excluirPessoa(record.id)}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
+
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <div
+      style={{
+        maxWidth: 1000,
+        margin: "24px auto",
+        background: "#fff",
+        padding: 24,
+        borderRadius: 8,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+      }}
+    >
+
+      <h2
+        style={{
+          textAlign: "center",
+          marginBottom: 20
+        }}
+      >
+        Listagem de Pessoas
+      </h2>
+
+      <Space style={{ marginBottom: 20 }}>
+
+        <Select
+          value={tipo}
+          onChange={(v) => setTipo(v)}
+          style={{ width: 200 }}
+          options={[
+            {
+              value: "PF",
+              label: "Pessoa Física"
+            },
+            {
+              value: "PJ",
+              label: "Pessoa Jurídica"
+            },
+          ]}
+        />
+
+        <Input
+          placeholder="Filtrar por nome"
+          value={filtroNome}
+          onChange={(e) => setFiltroNome(e.target.value)}
+          allowClear
+          style={{ width: 300 }}
+        />
+
+        <Button
+          type="primary"
+          onClick={carregarLista}
+        >
+          Atualizar
+        </Button>
+
+      </Space>
+
+      <Table
+        dataSource={dados}
+        columns={colunas}
+        rowKey="id"
+        pagination={{ pageSize: 6 }}
+      />
+
+    </div>
+  );
+}
+```
+
+:::info Sobre o código apresentado
+
+O componente foi adaptado a partir da implementação funcional utilizada no projeto.
+
+A principal alteração de integração foi a atualização dos imports para os DAOs sem o sufixo `V2`, conforme a nomenclatura adotada neste material.
+
+Também removemos um import não utilizado, sem alterar o funcionamento do componente.
+
+:::
+
+---
+
+## 4. Gerenciando os dados com useState
+
+O componente utiliza três variáveis de estado:
+
+```jsx
+const [tipo, setTipo] = useState("PF");
+
+const [filtroNome, setFiltroNome] = useState("");
+
+const [dados, setDados] = useState([]);
+```
+
+Cada uma possui uma responsabilidade específica.
+
+| Estado | Valor inicial | Responsabilidade |
+|---|---|---|
+| `tipo` | `"PF"` | Identificar o tipo de pessoa selecionado |
+| `filtroNome` | `""` | Armazenar o texto utilizado no filtro |
+| `dados` | `[]` | Armazenar os registros apresentados na tabela |
+
+O estado `tipo` determina se o usuário deseja consultar pessoas físicas ou jurídicas.
+
+O estado `filtroNome` acompanha o texto informado no campo de pesquisa.
+
+Já o estado `dados` contém o resultado da consulta após a aplicação dos filtros.
+
+Quando `setDados()` recebe um novo array, o React atualiza a interface para apresentar os registros correspondentes.
+
+---
+
+## 5. Selecionando o DAO conforme o tipo de pessoa
+
+Observe a função:
+
+```javascript
+function carregarLista() {
+
+  const dao = tipo === "PF" ? pfDAO : pjDAO;
+
+  const lista = dao.listar();
+
+  const filtrados = lista.filter((p) =>
+    p.nome?.toLowerCase().includes(filtroNome.toLowerCase())
+  );
+
+  setDados(filtrados);
+}
+```
+
+A primeira operação consiste em selecionar o DAO adequado:
+
+```javascript
+const dao = tipo === "PF" ? pfDAO : pjDAO;
+```
+
+Essa instrução utiliza o operador condicional ternário.
+
+Se o valor de `tipo` for `"PF"`, será selecionado o objeto `pfDAO`.
+
+Caso contrário, será selecionado o objeto `pjDAO`.
+
+Em seguida, executamos:
+
+```javascript
+const lista = dao.listar();
+```
+
+Observe que não precisamos implementar duas funções diferentes para consultar pessoas físicas e jurídicas.
+
+Como ambos os DAOs possuem o método `listar()`, podemos utilizar a mesma estrutura de código.
+
+Esse comportamento demonstra a importância de manter uma interface padronizada entre objetos que desempenham responsabilidades semelhantes.
+
+---
+
+## 6. Implementando o filtro por nome
+
+Depois de recuperar os registros, precisamos selecionar aqueles que correspondem ao texto informado pelo usuário.
+
+Para isso, utilizamos:
+
+```javascript
+const filtrados = lista.filter((p) =>
+  p.nome?.toLowerCase().includes(filtroNome.toLowerCase())
+);
+```
+
+Essa instrução combina três recursos do JavaScript:
+
+- `filter()`;
+- `toLowerCase()`;
+- `includes()`.
+
+### 6.1. O método filter()
+
+O método `filter()` percorre um array e retorna um novo array contendo somente os elementos que satisfazem uma condição.
+
+Por exemplo:
+
+```javascript
+const nomes = [
+  "Ana Silva",
+  "Carlos Souza",
+  "Mariana Costa"
+];
+
+const resultado = nomes.filter(
+  (nome) => nome.includes("Ana")
+);
+```
+
+Nesse exemplo, o resultado será:
+
+```javascript
+["Ana Silva"]
+```
+
+### 6.2. O método includes()
+
+O método `includes()` verifica se uma string contém determinado texto.
+
+Por exemplo:
+
+```javascript
+"Ana Silva".includes("Ana"); // true
+
+"Ana Silva".includes("João"); // false
+```
+
+Em nosso componente, o método é utilizado para verificar se o nome de uma pessoa contém o texto informado no filtro.
+
+### 6.3. O método toLowerCase()
+
+O método `toLowerCase()` transforma os caracteres de uma string em letras minúsculas.
+
+Isso permite realizar uma pesquisa sem diferenciar letras maiúsculas e minúsculas.
+
+Por exemplo:
+
+```javascript
+"ANA SILVA".toLowerCase();
+```
+
+O resultado será:
+
+```text
+ana silva
+```
+
+Assim, uma pesquisa por `"ana"` poderá encontrar registros como `"Ana Silva"` ou `"ANA SILVA"`.
+
+:::tip Pesquisa dinâmica
+
+O filtro será atualizado conforme o usuário digitar no campo de pesquisa.
+
+Não será necessário pressionar um botão para executar a filtragem, pois utilizaremos o `useEffect()` para acompanhar as alterações no estado.
+
+:::
+
+---
+
+## 7. Atualizando a listagem com useEffect
+
+Observe:
+
+```jsx
+useEffect(() => {
+  carregarLista();
+}, [tipo, filtroNome]);
+```
+
+O hook `useEffect()` executa a função `carregarLista()` quando o componente é montado e sempre que ocorrer uma alteração em uma das dependências informadas.
+
+Neste caso, as dependências são:
+
+```javascript
+[tipo, filtroNome]
+```
+
+Isso significa que a listagem será atualizada quando:
+
+1. O usuário selecionar outro tipo de pessoa;
+2. O usuário modificar o texto utilizado no filtro.
+
+Considere a seguinte sequência:
+
+```text
+Usuário seleciona "Pessoa Física"
+              │
+              ▼
+         setTipo("PF")
+              │
+              ▼
+          useEffect()
+              │
+              ▼
+         carregarLista()
+              │
+              ▼
+          pfDAO.listar()
+              │
+              ▼
+       Aplicação do filtro
+              │
+              ▼
+          setDados()
+              │
+              ▼
+       Atualização da tabela
+```
+
+O mesmo processo ocorre quando o usuário seleciona `"PJ"`.
+
+Observe que a atualização da interface acontece em resposta às alterações do estado do componente.
+
+---
+
+## 8. Criando colunas dinâmicas para PF e PJ
+
+Uma das características da nossa aplicação é trabalhar com dois tipos diferentes de pessoa.
+
+Pessoas físicas possuem CPF, enquanto pessoas jurídicas possuem CNPJ.
+
+Entretanto, não precisamos criar duas tabelas diferentes.
+
+Podemos modificar dinamicamente a configuração das colunas.
+
+Observe:
+
+```jsx
+{
+  title: tipo === "PF" ? "CPF" : "CNPJ",
+  dataIndex: tipo === "PF" ? "cpf" : "cnpj",
+  key: "doc",
+  width: 200,
+}
+```
+
+A propriedade `title` determina o título apresentado no cabeçalho.
+
+A propriedade `dataIndex` determina qual atributo será recuperado de cada objeto.
+
+Assim:
+
+| Tipo selecionado | Título da coluna | Atributo utilizado |
+|---|---|---|
+| PF | CPF | `cpf` |
+| PJ | CNPJ | `cnpj` |
+
+Essa abordagem permite reutilizar o mesmo componente `Table` para apresentar diferentes tipos de registros.
+
+---
+
+## 9. Implementando as ações da tabela
+
+Além de apresentar os registros, nossa tabela disponibilizará três ações:
+
+- Visualizar;
+- Editar;
+- Excluir.
+
+Essas ações serão apresentadas por meio de botões com ícones.
+
+Observe a configuração da coluna:
+
+```jsx
+{
+  title: "Ações",
+  key: "acoes",
+  width: 180,
+
+  render: (_, record) => (
+    <Space>
+
+      <Button
+        icon={<EyeOutlined />}
+        onClick={() =>
+          navigate(`/visualizar/${tipo}/${record.id}`)
+        }
+      />
+
+      <Button
+        icon={<EditOutlined />}
+        onClick={() =>
+          navigate(`/editar/${tipo}/${record.id}`)
+        }
+      />
+
+      <Popconfirm
+        title="Deseja realmente excluir?"
+        onConfirm={() => excluirPessoa(record.id)}
+      >
+        <Button
+          danger
+          icon={<DeleteOutlined />}
+        />
+      </Popconfirm>
+
+    </Space>
+  ),
+}
+```
+
+A propriedade `render` permite personalizar o conteúdo apresentado em uma coluna.
+
+Nesse caso, utilizamos o parâmetro `record`, que representa o objeto correspondente à linha atual.
+
+Por exemplo, se uma linha apresentar a pessoa cujo identificador é `"abc123"`, teremos:
+
+```javascript
+record.id
+```
+
+com o valor:
+
+```text
+abc123
+```
+
+Esse identificador será utilizado nas operações de visualização, edição e exclusão.
+
+### 9.1. Ação de visualizar
+
+Observe:
+
+```jsx
+<Button
+  icon={<EyeOutlined />}
+  onClick={() =>
+    navigate(`/visualizar/${tipo}/${record.id}`)
+  }
+/>
+```
+
+O botão utiliza o ícone `EyeOutlined` e o hook `useNavigate()`.
+
+Quando o usuário clicar no botão, a aplicação navegará para uma URL como:
+
+```text
+/visualizar/PF/abc123
+```
+
+O componente responsável por apresentar os detalhes será desenvolvido na próxima parte.
+
+### 9.2. Ação de editar
+
+A operação de edição utiliza a mesma estratégia:
+
+```jsx
+<Button
+  icon={<EditOutlined />}
+  onClick={() =>
+    navigate(`/editar/${tipo}/${record.id}`)
+  }
+/>
+```
+
+Nesse caso, o usuário será direcionado para uma URL como:
+
+```text
+/editar/PJ/def456
+```
+
+Posteriormente, ampliaremos o componente `PessoaFormOO` para reconhecer essa rota e recuperar os dados da pessoa selecionada.
+
+### 9.3. Ação de excluir
+
+A exclusão possui uma característica diferente.
+
+Em vez de navegar para outra tela, precisamos executar uma operação no DAO.
+
+Entretanto, antes de excluir um registro, é importante solicitar a confirmação do usuário.
+
+Para isso, utilizaremos o componente `Popconfirm`, disponibilizado pelo Ant Design.
+
+```jsx
+<Popconfirm
+  title="Deseja realmente excluir?"
+  onConfirm={() => excluirPessoa(record.id)}
+>
+  <Button
+    danger
+    icon={<DeleteOutlined />}
+  />
+</Popconfirm>
+```
+
+O componente apresenta uma confirmação antes de executar a função associada a `onConfirm`.
+
+Assim, o registro somente será excluído quando o usuário confirmar a operação.
+
+:::warning Exclusão de registros
+
+A exclusão remove o registro do `localStorage`.
+
+Como ainda não implementamos um mecanismo de recuperação de dados excluídos, essa operação deverá ser utilizada com cuidado.
+
+A confirmação ajuda a evitar exclusões acidentais.
+
+:::
+
+---
+
+## 10. Executando a exclusão por meio do DAO
+
+Observe a função:
+
+```javascript
+function excluirPessoa(id) {
+
+  const dao = tipo === "PF" ? pfDAO : pjDAO;
+
+  dao.excluir(id);
+
+  message.success("Registro excluído com sucesso!");
+
+  carregarLista();
+}
+```
+
+A função recebe o identificador do registro que deverá ser excluído.
+
+Primeiramente, seleciona o DAO correspondente ao tipo de pessoa.
+
+Em seguida, executa:
+
+```javascript
+dao.excluir(id);
+```
+
+O método `excluir()` foi implementado na Parte 2.
+
+Ele remove o registro correspondente ao identificador informado e atualiza os dados armazenados.
+
+Depois, apresentamos uma mensagem ao usuário:
+
+```javascript
+message.success("Registro excluído com sucesso!");
+```
+
+Por fim, executamos:
+
+```javascript
+carregarLista();
+```
+
+Essa instrução recupera novamente os registros armazenados e atualiza o estado `dados`.
+
+Como consequência, a tabela deixa de apresentar o registro excluído.
+
+O fluxo completo será:
+
+```text
+Usuário clica em Excluir
+            │
+            ▼
+     Confirma a exclusão
+            │
+            ▼
+      excluirPessoa(id)
+            │
+            ▼
+      Seleciona o DAO
+            │
+            ▼
+       dao.excluir(id)
+            │
+            ▼
+   Atualiza o localStorage
+            │
+            ▼
+     Mensagem de sucesso
+            │
+            ▼
+       carregarLista()
+            │
+            ▼
+       Atualiza a tabela
+```
+
+---
+
+## 11. Adicionando paginação à tabela
+
+O componente `Table` também permite controlar a quantidade de registros apresentados por página.
+
+Observe:
+
+```jsx
+<Table
+  dataSource={dados}
+  columns={colunas}
+  rowKey="id"
+  pagination={{ pageSize: 6 }}
+/>
+```
+
+A propriedade:
+
+```javascript
+pagination={{ pageSize: 6 }}
+```
+
+determina que a tabela apresentará até seis registros por página.
+
+Caso existam mais registros, o Ant Design disponibilizará os controles de navegação entre as páginas.
+
+Essa funcionalidade é importante porque evita que tabelas com muitos registros ocupem uma quantidade excessiva de espaço na interface.
+
+---
+
+## 12. Integração com a aplicação
+
+Neste momento, já criamos o componente `ListaPessoas.jsx`.
+
+Entretanto, ainda não modificaremos o arquivo `App.jsx`.
+
+A razão é simples: a aplicação ainda depende da implementação das telas de visualização e edição.
+
+Se ativarmos todas as rotas antes de concluir esses componentes, poderemos encontrar erros relacionados a arquivos ainda não implementados.
+
+Por isso, manteremos a estratégia de desenvolvimento progressivo.
+
+### Arquivos disponíveis até esta etapa
+
+```text
+src/
+├── App.jsx                         [MANTIDO]
+│
+├── routes/
+│   └── AppRoutes.jsx               [CRIADO NA PARTE 1]
+│
+├── layout/
+│   └── MainLayout.jsx              [CRIADO NA PARTE 1]
+│
+├── components/
+│   ├── cadastrapessoa/
+│   │   └── PessoaFormOO.jsx         [MANTIDO]
+│   │
+│   └── listapessoas/
+│       └── ListaPessoas.jsx         [NOVO]
+│
+└── objetos/
+    └── dao/
+        ├── PFDAOLocal.mjs           [MODIFICADO NA PARTE 2]
+        └── PJDAOLocal.mjs           [MODIFICADO NA PARTE 2]
+```
+
+:::info Importante
+
+O componente `ListaPessoas.jsx` utiliza o hook `useNavigate()`.
+
+Esse hook precisa ser executado dentro de um contexto de navegação fornecido pelo React Router.
+
+Por isso, a listagem não deve substituir diretamente o formulário no `App.jsx` atual, caso ele ainda não utilize `BrowserRouter`.
+
+A execução integrada será realizada ao final do capítulo.
+
+:::
+
+---
+
+## 13. Atividade de fixação
+
+Nesta etapa, você deverá preparar o componente de listagem que será utilizado na aplicação.
+
+Realize as seguintes atividades:
+
+1. Crie o diretório `src/components/listapessoas/`.
+2. Crie o arquivo `ListaPessoas.jsx`.
+3. Copie integralmente o código apresentado.
+4. Verifique os caminhos dos imports dos DAOs.
+5. Identifique no código as três variáveis de estado.
+6. Localize a função responsável por recuperar os registros.
+7. Identifique como a aplicação seleciona o DAO de PF ou PJ.
+8. Localize a implementação do filtro por nome.
+9. Identifique as rotas utilizadas para visualização e edição.
+10. Localize a chamada ao método `excluir()` do DAO.
+
+**Questões para reflexão:**
+
+- Por que utilizamos o estado `dados` para apresentar os registros na tabela?
+- Qual é a função do método `filter()` na pesquisa por nome?
+- Como a mesma tabela consegue apresentar CPF ou CNPJ?
+- Por que utilizamos o atributo `id` como `rowKey`?
+- Qual é a finalidade do componente `Popconfirm`?
+- Por que executamos `carregarLista()` depois de excluir um registro?
+- Qual é a vantagem de utilizar `useNavigate()` em vez de manipular diretamente a URL do navegador?
+
+:::tip Orientação para os testes
+
+Nesta etapa, a verificação deverá concentrar-se na criação do arquivo, na organização dos imports e na compreensão das operações implementadas.
+
+O teste funcional da listagem, incluindo navegação e exclusão pela interface, será realizado quando ativarmos as rotas da aplicação.
+
+:::
+
+---
+
+## 14. Síntese da Parte 3
+
+Nesta etapa, desenvolvemos o componente responsável pela listagem de pessoas físicas e jurídicas.
+
+Criamos o arquivo:
+
+```text
+src/components/listapessoas/ListaPessoas.jsx
+```
+
+Estudamos:
+
+- A operação Read do CRUD;
+- A apresentação de dados com o componente `Table`;
+- A utilização de estados para armazenar registros e filtros;
+- A seleção dinâmica de DAOs;
+- A utilização de `filter()`, `includes()` e `toLowerCase()`;
+- A atualização da listagem com `useEffect()`;
+- A criação de colunas dinâmicas;
+- A navegação programática com `useNavigate()`;
+- A confirmação de exclusão com `Popconfirm`;
+- A atualização da interface após operações de persistência;
+- A utilização de paginação em tabelas.
+
+Com esse componente, nossa aplicação passa a possuir a estrutura necessária para apresentar os registros cadastrados e disponibilizar as ações do CRUD.
+
+**Na próxima parte, construiremos o componente `VisualizaPessoa.jsx`, responsável por recuperar e apresentar os detalhes de uma pessoa física ou jurídica selecionada na listagem.**
+
+
+# Parte 4 — Visualização detalhada de Pessoas Físicas e Jurídicas
+
+Na etapa anterior, desenvolvemos o componente `ListaPessoas.jsx`, responsável por apresentar os registros cadastrados e disponibilizar as ações de visualização, edição e exclusão.
+
+Agora, implementaremos a funcionalidade de **visualização detalhada de um cadastro**.
+
+Enquanto a listagem apresenta apenas algumas informações, como nome, e-mail e CPF ou CNPJ, a visualização detalhada permitirá consultar todos os principais dados associados à pessoa selecionada.
+
+Para isso, utilizaremos:
+
+- Os parâmetros de navegação disponibilizados pelo React Router;
+- Os métodos de consulta implementados nos DAOs;
+- O método `find()` do JavaScript;
+- Os hooks `useParams()`, `useNavigate()`, `useState()` e `useEffect()`;
+- Os componentes `Card` e `Descriptions` do Ant Design.
+
+Ao final desta etapa, teremos um componente capaz de identificar uma pessoa pela URL, recuperar seu cadastro no `localStorage` e apresentar suas informações.
+
+:::info Continuidade do projeto
+
+Nesta etapa, criaremos somente um novo arquivo:
+
+**NOVO:** `src/components/visualizapessoa/VisualizaPessoa.jsx`
+
+Serão reaproveitados, sem alterações:
+
+- `src/objetos/dao/PFDAOLocal.mjs`
+- `src/objetos/dao/PJDAOLocal.mjs`
+- `src/components/listapessoas/ListaPessoas.jsx`
+- `src/routes/AppRoutes.jsx`
+
+O arquivo `App.jsx` permanecerá inalterado.
+
+A ativação definitiva das rotas acontecerá somente após concluirmos os componentes necessários ao CRUD.
+
+:::
+
+---
+
+## 1. Da listagem à visualização de um cadastro
+
+Na Parte 3, implementamos uma tabela que apresenta os registros armazenados.
+
+Cada linha possui um botão de visualização, identificado pelo ícone de um olho.
+
+Observe a implementação utilizada:
+
+```jsx id="d7w4j8"
+<Button
+  icon={<EyeOutlined />}
+  onClick={() =>
+    navigate(`/visualizar/${tipo}/${record.id}`)
+  }
+/>
+```
+
+Quando o usuário clica nesse botão, o React Router recebe uma instrução para navegar até o endereço correspondente à pessoa selecionada.
+
+Por exemplo:
+
+```text id="q4w8pk"
+/visualizar/PF/abc123
+```
+
+Esse endereço contém informações importantes para identificar o cadastro.
+
+| Segmento | Significado |
+|---|---|
+| `visualizar` | Operação solicitada |
+| `PF` | Tipo de pessoa |
+| `abc123` | Identificador do registro |
+
+A partir dessas informações, podemos selecionar o DAO correspondente e localizar o objeto desejado.
+
+A mesma estrutura poderá ser utilizada para pessoas jurídicas:
+
+```text id="m8q3fy"
+/visualizar/PJ/def456
+```
+
+Observe que utilizaremos **um único componente de visualização** para os dois tipos de pessoa.
+
+---
+
+## 2. Recuperando parâmetros da URL com useParams
+
+O React Router disponibiliza o hook `useParams()` para recuperar os parâmetros definidos nas rotas.
+
+Na Parte 1, criamos a seguinte rota:
+
+```jsx id="o2r6yd"
+<Route
+  path="visualizar/:tipo/:id"
+  element={<VisualizaPessoa />}
+/>
+```
+
+Os segmentos iniciados por dois-pontos representam parâmetros dinâmicos.
+
+Nesse caso, temos:
+
+- `:tipo`: identifica se o registro pertence a PF ou PJ;
+- `:id`: identifica o registro que deverá ser consultado.
+
+Dentro do componente, podemos recuperar essas informações utilizando:
+
+```jsx id="f3y8qt"
+const { tipo, id } = useParams();
+```
+
+Considere a URL:
+
+```text id="c5p2wr"
+/visualizar/PF/abc123
+```
+
+O resultado será equivalente a:
+
+```javascript id="j6w4fk"
+tipo = "PF";
+id = "abc123";
+```
+
+:::tip Parâmetros de rota
+
+Os parâmetros recuperados por `useParams()` são strings.
+
+Em nosso projeto, os identificadores gerados pelos DAOs também são strings, permitindo compará-los diretamente.
+
+:::
+
+---
+
+## 3. Localizando um registro com o método find()
+
+Na Parte 2, implementamos o método `listar()` nos DAOs.
+
+Esse método retorna um array contendo os registros armazenados.
+
+Entretanto, na visualização detalhada, não queremos apresentar todos os registros.
+
+Precisamos localizar apenas a pessoa correspondente ao identificador recebido pela URL.
+
+Para isso, utilizaremos o método `find()`.
+
+Considere:
+
+```javascript id="w9q4cr"
+const pessoas = [
+  {
+    id: "abc123",
+    nome: "Ana Silva"
+  },
+  {
+    id: "def456",
+    nome: "Carlos Souza"
+  },
+  {
+    id: "ghi789",
+    nome: "Mariana Costa"
+  }
+];
+```
+
+Para localizar Carlos, podemos utilizar:
+
+```javascript id="r7j2vn"
+const pessoa = pessoas.find(
+  (p) => p.id === "def456"
+);
+```
+
+O resultado será:
+
+```javascript id="b3f8sm"
+{
+  id: "def456",
+  nome: "Carlos Souza"
+}
+```
+
+O método `find()` percorre o array e retorna o **primeiro elemento que satisfaz a condição informada**.
+
+Caso nenhum elemento seja encontrado, o resultado será `undefined`.
+
+### 3.1. Diferença entre find() e filter()
+
+Na Parte 3, utilizamos o método `filter()` para implementar a pesquisa por nome.
+
+Agora, utilizaremos `find()` para localizar um registro específico.
+
+| Método | Retorno | Utilização |
+|---|---|---|
+| `filter()` | Array de elementos encontrados | Filtrar uma lista |
+| `find()` | Primeiro elemento encontrado ou `undefined` | Localizar um registro |
+
+Observe:
+
+```javascript id="z2r9va"
+const encontrados = pessoas.filter(
+  (p) => p.nome.includes("Silva")
+);
+```
+
+O resultado será um array.
+
+Já:
+
+```javascript id="a6f3wu"
+const encontrada = pessoas.find(
+  (p) => p.id === "abc123"
+);
+```
+
+retornará diretamente o objeto correspondente.
+
+:::info Escolhendo o método adequado
+
+Quando precisamos recuperar vários registros, `filter()` costuma ser apropriado.
+
+Quando precisamos localizar apenas um objeto, `find()` representa melhor a intenção da operação.
+
+:::
+
+---
+
+## 4. Criando o componente VisualizaPessoa
+
+**Arquivo: `src/components/visualizapessoa/VisualizaPessoa.jsx` — NOVO**
+
+Crie o diretório:
+
+```text id="k7d4qn"
+src/components/visualizapessoa/
+```
+
+Dentro dele, crie o arquivo:
+
+```text id="u2v8fm"
+VisualizaPessoa.jsx
+```
+
+O componente será responsável por:
+
+1. Recuperar os parâmetros da URL;
+2. Identificar o tipo de pessoa;
+3. Selecionar o DAO correspondente;
+4. Recuperar os registros armazenados;
+5. Localizar a pessoa pelo identificador;
+6. Armazenar o resultado no estado do componente;
+7. Apresentar os dados;
+8. Disponibilizar as ações de edição e retorno à listagem.
+
+### 4.1. Código completo do arquivo
+
+Copie integralmente o código abaixo.
+
+```jsx title="src/components/visualizapessoa/VisualizaPessoa.jsx" id="e8n2vc"
+import React, { useEffect, useState } from "react";
+
+import {
+  Card,
+  Descriptions,
+  Button
+} from "antd";
+
+import {
+  useParams,
+  useNavigate
+} from "react-router-dom";
+
+import PFDAO from "../../objetos/dao/PFDAOLocal.mjs";
+import PJDAO from "../../objetos/dao/PJDAOLocal.mjs";
+
+export default function VisualizaPessoa() {
+
+  const { tipo, id } = useParams();
+
+  const navigate = useNavigate();
+
+  const [pessoa, setPessoa] = useState(null);
+
+  useEffect(() => {
+
+    const dao = tipo === "PF"
+      ? new PFDAO()
+      : new PJDAO();
+
+    const lista = dao.listar();
+
+    // Busca o registro pelo identificador
+    const encontrada = lista.find(
+      (p) => p.id === id
+    );
+
+    if (encontrada) {
+      setPessoa(encontrada);
+    }
+
+  }, [tipo, id]);
+
+  // Apresenta mensagem quando não encontra o cadastro
+  if (!pessoa) {
+
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: 40
+        }}
+      >
+
+        <h3>Nenhuma pessoa encontrada.</h3>
+
+        <Button
+          type="primary"
+          onClick={() => navigate("/listar")}
+        >
+          Voltar à lista
+        </Button>
+
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        maxWidth: 800,
+        margin: "24px auto",
+        background: "#fff",
+        padding: 24,
+        borderRadius: 8,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+      }}
+    >
+
+      <Card
+        title={`Detalhes da ${
+          tipo === "PF"
+            ? "Pessoa Física"
+            : "Pessoa Jurídica"
+        }`}
+        bordered={false}
+      >
+
+        <Descriptions
+          bordered
+          column={1}
+        >
+
+          <Descriptions.Item label="Nome">
+            {pessoa.nome}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="E-mail">
+            {pessoa.email}
+          </Descriptions.Item>
+
+          {/* Documento principal */}
+
+          {tipo === "PF" ? (
+
+            <Descriptions.Item label="CPF">
+              {pessoa.cpf}
+            </Descriptions.Item>
+
+          ) : (
+
+            <Descriptions.Item label="CNPJ">
+              {pessoa.cnpj}
+            </Descriptions.Item>
+
+          )}
+
+          {/* Endereço */}
+
+          <Descriptions.Item label="Endereço">
+
+            {pessoa.endereco?.logradouro},{" "}
+            {pessoa.endereco?.bairro} -{" "}
+            {pessoa.endereco?.cidade}/
+            {pessoa.endereco?.uf}
+
+            <br />
+
+            CEP: {pessoa.endereco?.cep}
+            {" | "}
+            Região: {pessoa.endereco?.regiao}
+
+          </Descriptions.Item>
+
+          {/* Telefones */}
+
+          <Descriptions.Item label="Telefones">
+
+            {pessoa.telefones?.length > 0
+              ? pessoa.telefones
+                  .map(
+                    (t) => `(${t.ddd}) ${t.numero}`
+                  )
+                  .join(" | ")
+              : "Não informado"}
+
+          </Descriptions.Item>
+
+          {/* Campos específicos de PF e PJ */}
+
+          {tipo === "PF" ? (
+
+            <>
+
+              <Descriptions.Item
+                label="Título Eleitoral"
+              >
+
+                {pessoa.titulo?.numero
+                  ? `Nº ${pessoa.titulo.numero} - Zona ${pessoa.titulo.zona} / Seção ${pessoa.titulo.secao}`
+                  : "Não informado"}
+
+              </Descriptions.Item>
+
+            </>
+
+          ) : (
+
+            <>
+
+              <Descriptions.Item
+                label="Inscrição Estadual"
+              >
+
+                {pessoa.ie?.numero
+                  ? `Nº ${pessoa.ie.numero} - ${pessoa.ie.estado} (${pessoa.ie.dataRegistro})`
+                  : "Não informado"}
+
+              </Descriptions.Item>
+
+            </>
+
+          )}
+
+        </Descriptions>
+
+        {/* Botões de navegação */}
+
+        <div
+          style={{
+            textAlign: "center",
+            marginTop: 24
+          }}
+        >
+
+          <Button
+            type="primary"
+            onClick={() =>
+              navigate(`/editar/${tipo}/${pessoa.id}`)
+            }
+            style={{ marginRight: 12 }}
+          >
+            Editar
+          </Button>
+
+          <Button
+            onClick={() => navigate("/listar")}
+          >
+            Voltar
+          </Button>
+
+        </div>
+
+      </Card>
+
+    </div>
+  );
+}
+```
+
+:::info Sobre o código apresentado
+
+A implementação mantém a estrutura do componente funcional utilizado no projeto original.
+
+Foram ajustados os caminhos de importação dos DAOs para utilizar os nomes definitivos, sem o sufixo `V2`.
+
+A lógica de recuperação, apresentação e navegação foi preservada.
+
+:::
+
+---
+
+## 5. Recuperando os dados da pessoa selecionada
+
+Observe o início do componente:
+
+```jsx id="x4q8sm"
+const { tipo, id } = useParams();
+
+const navigate = useNavigate();
+
+const [pessoa, setPessoa] = useState(null);
+```
+
+Temos três responsabilidades distintas.
+
+### 5.1. Identificação do registro
+
+A instrução:
+
+```javascript id="q9v2hk"
+const { tipo, id } = useParams();
+```
+
+recupera as informações da URL.
+
+### 5.2. Navegação
+
+A instrução:
+
+```javascript id="m6t3xp"
+const navigate = useNavigate();
+```
+
+disponibiliza uma função que permite navegar programaticamente para outras rotas.
+
+### 5.3. Armazenamento do registro
+
+A instrução:
+
+```javascript id="w8p4jn"
+const [pessoa, setPessoa] = useState(null);
+```
+
+cria uma variável de estado para armazenar o registro recuperado.
+
+Inicialmente, seu valor será `null`, pois ainda não realizamos a consulta.
+
+Quando o registro for encontrado, utilizaremos `setPessoa()` para atualizar o estado.
+
+---
+
+## 6. Utilizando useEffect para consultar os dados
+
+Observe:
+
+```jsx id="p7x2cv"
+useEffect(() => {
+
+  const dao = tipo === "PF"
+    ? new PFDAO()
+    : new PJDAO();
+
+  const lista = dao.listar();
+
+  const encontrada = lista.find(
+    (p) => p.id === id
+  );
+
+  if (encontrada) {
+    setPessoa(encontrada);
+  }
+
+}, [tipo, id]);
+```
+
+O hook `useEffect()` será executado quando o componente for montado e quando ocorrer alguma alteração nas dependências.
+
+Nesse caso:
+
+```javascript id="a4r9kw"
+[tipo, id]
+```
+
+A consulta seguirá a seguinte sequência:
+
+```text id="v5j8pf"
+Usuário acessa uma URL
+          │
+          ▼
+   useParams()
+          │
+          ▼
+ Recupera tipo e id
+          │
+          ▼
+      useEffect()
+          │
+          ▼
+   Seleciona o DAO
+          │
+          ▼
+      dao.listar()
+          │
+          ▼
+    lista.find()
+          │
+          ▼
+    setPessoa()
+          │
+          ▼
+  Atualiza a interface
+```
+
+Observe que o componente utiliza os DAOs desenvolvidos anteriormente.
+
+Isso significa que não precisamos acessar diretamente o `localStorage` dentro do componente React.
+
+---
+
+## 7. Tratando registros não encontrados
+
+É possível que o usuário tente acessar um registro que não existe.
+
+Por exemplo:
+
+```text id="b2m7fq"
+/visualizar/PF/registro-inexistente
+```
+
+Nesse caso, o método `find()` não encontrará nenhum objeto correspondente.
+
+Como o estado `pessoa` continuará com o valor `null`, apresentaremos uma mensagem.
+
+Observe:
+
+```jsx id="d9k3xr"
+if (!pessoa) {
+
+  return (
+    <div
+      style={{
+        textAlign: "center",
+        marginTop: 40
+      }}
+    >
+
+      <h3>Nenhuma pessoa encontrada.</h3>
+
+      <Button
+        type="primary"
+        onClick={() => navigate("/listar")}
+      >
+        Voltar à lista
+      </Button>
+
+    </div>
+  );
+}
+```
+
+Essa implementação utiliza **renderização condicional**.
+
+Quando não existe uma pessoa disponível no estado, o componente apresenta uma mensagem e um botão de retorno.
+
+Quando o registro é encontrado, o componente apresenta suas informações.
+
+:::tip Renderização condicional
+
+A renderização condicional permite apresentar diferentes interfaces conforme o estado da aplicação.
+
+Neste caso, utilizamos a condição `!pessoa` para verificar se existe um registro disponível para apresentação.
+
+:::
+
+---
+
+## 8. Apresentando os dados com Card e Descriptions
+
+Para organizar visualmente os dados, utilizaremos dois componentes do Ant Design:
+
+- `Card`;
+- `Descriptions`.
+
+O componente `Card` permite apresentar informações dentro de um contêiner visual.
+
+Já `Descriptions` organiza os dados em pares de rótulo e valor.
+
+Observe:
+
+```jsx id="q6n8sy"
+<Card title="Detalhes da Pessoa Física">
+
+  <Descriptions bordered column={1}>
+
+    <Descriptions.Item label="Nome">
+      Ana Silva
+    </Descriptions.Item>
+
+    <Descriptions.Item label="E-mail">
+      ana@email.com
+    </Descriptions.Item>
+
+  </Descriptions>
+
+</Card>
+```
+
+O resultado será uma apresentação organizada dos atributos do cadastro.
+
+### 8.1. A propriedade column
+
+A propriedade:
+
+```jsx id="y7k4bp"
+column={1}
+```
+
+determina que os itens sejam organizados em uma única coluna.
+
+Assim, cada atributo será apresentado em sua própria linha.
+
+### 8.2. A propriedade bordered
+
+A propriedade:
+
+```jsx id="n3v9qh"
+bordered
+```
+
+adiciona bordas à estrutura, facilitando a identificação visual dos campos.
+
+---
+
+## 9. Apresentando atributos específicos de PF e PJ
+
+Embora pessoas físicas e jurídicas compartilhem alguns atributos, existem informações específicas de cada tipo.
+
+Por isso, utilizaremos renderização condicional.
+
+Observe:
+
+```jsx id="f2q7kc"
+{tipo === "PF" ? (
+
+  <Descriptions.Item label="CPF">
+    {pessoa.cpf}
+  </Descriptions.Item>
+
+) : (
+
+  <Descriptions.Item label="CNPJ">
+    {pessoa.cnpj}
+  </Descriptions.Item>
+
+)}
+```
+
+Se o tipo for `"PF"`, apresentaremos o CPF.
+
+Caso contrário, apresentaremos o CNPJ.
+
+A mesma estratégia será utilizada para os atributos específicos.
+
+### 9.1. Título eleitoral
+
+Para pessoas físicas:
+
+```jsx id="p8m3zr"
+<Descriptions.Item label="Título Eleitoral">
+
+  {pessoa.titulo?.numero
+    ? `Nº ${pessoa.titulo.numero} - Zona ${pessoa.titulo.zona} / Seção ${pessoa.titulo.secao}`
+    : "Não informado"}
+
+</Descriptions.Item>
+```
+
+Observe a utilização do encadeamento opcional:
+
+```javascript id="j4s8wk"
+pessoa.titulo?.numero
+```
+
+Essa expressão permite verificar se o objeto `titulo` possui um número disponível.
+
+Caso não exista, apresentaremos a mensagem `"Não informado"`.
+
+### 9.2. Inscrição estadual
+
+Para pessoas jurídicas:
+
+```jsx id="c5y2xm"
+<Descriptions.Item label="Inscrição Estadual">
+
+  {pessoa.ie?.numero
+    ? `Nº ${pessoa.ie.numero} - ${pessoa.ie.estado} (${pessoa.ie.dataRegistro})`
+    : "Não informado"}
+
+</Descriptions.Item>
+```
+
+Nesse caso, apresentaremos as informações associadas à inscrição estadual.
+
+Observe que o componente acessa diretamente os atributos do objeto recuperado do DAO.
+
+Isso é possível porque o método `listar()` retorna objetos JavaScript simples, recuperados por meio de `JSON.parse()`.
+
+---
+
+## 10. Apresentando objetos compostos
+
+Além dos atributos específicos, precisamos apresentar informações que estão armazenadas em objetos associados.
+
+Esse é o caso do endereço e dos telefones.
+
+### 10.1. Endereço
+
+O endereço é armazenado como um objeto associado à pessoa.
+
+Por exemplo:
+
+```json id="w3n7qa"
+{
+  "endereco": {
+    "cep": "70000000",
+    "logradouro": "Rua Exemplo",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  }
+}
+```
+
+Para apresentar essas informações, utilizamos:
+
+```jsx id="s8k2fr"
+<Descriptions.Item label="Endereço">
+
+  {pessoa.endereco?.logradouro},{" "}
+  {pessoa.endereco?.bairro} -{" "}
+  {pessoa.endereco?.cidade}/
+  {pessoa.endereco?.uf}
+
+  <br />
+
+  CEP: {pessoa.endereco?.cep}
+  {" | "}
+  Região: {pessoa.endereco?.regiao}
+
+</Descriptions.Item>
+```
+
+Observe que utilizamos o operador `?.` para acessar os atributos do endereço.
+
+Essa abordagem evita erros quando o objeto `endereco` não está disponível.
+
+### 10.2. Telefones
+
+Uma pessoa pode possuir vários telefones cadastrados.
+
+Por isso, os telefones são armazenados em um array.
+
+Por exemplo:
+
+```json id="x6p9vt"
+{
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "999999999"
+    },
+    {
+      "ddd": "61",
+      "numero": "33333333"
+    }
+  ]
+}
+```
+
+Para apresentar essas informações, utilizamos:
+
+```jsx id="a7w4qp"
+{pessoa.telefones?.length > 0
+  ? pessoa.telefones
+      .map((t) => `(${t.ddd}) ${t.numero}`)
+      .join(" | ")
+  : "Não informado"}
+```
+
+Essa expressão combina dois métodos importantes do JavaScript:
+
+- `map()`;
+- `join()`.
+
+O método `map()` percorre o array e transforma cada telefone em uma string formatada.
+
+Por exemplo:
+
+```javascript id="k2r5yd"
+["(61) 999999999", "(61) 33333333"]
+```
+
+Em seguida, `join(" | ")` combina os elementos em uma única string.
+
+O resultado será:
+
+```text id="t4n8vm"
+(61) 999999999 | (61) 33333333
+```
+
+:::info Transformação de arrays
+
+O método `map()` não modifica diretamente os objetos originais.
+
+Ele produz um novo array contendo os valores resultantes da transformação aplicada a cada elemento.
+
+Já `join()` transforma os elementos do array em uma única string, utilizando o separador informado.
+
+:::
+
+---
+
+## 11. Implementando a navegação para edição
+
+Além de apresentar os dados, a tela disponibilizará um botão para editar o cadastro.
+
+Observe:
+
+```jsx id="m9q3jc"
+<Button
+  type="primary"
+  onClick={() =>
+    navigate(`/editar/${tipo}/${pessoa.id}`)
+  }
+  style={{ marginRight: 12 }}
+>
+  Editar
+</Button>
+```
+
+Quando o usuário clicar no botão, será direcionado para uma URL como:
+
+```text id="z7f2bk"
+/editar/PF/abc123
+```
+
+Essa rota foi definida na Parte 1.
+
+Posteriormente, modificaremos o componente `PessoaFormOO` para reconhecer os parâmetros da URL e recuperar os dados existentes.
+
+Assim, o mesmo formulário poderá ser utilizado tanto para cadastrar quanto para editar pessoas.
+
+---
+
+## 12. Implementando o retorno à listagem
+
+A tela também disponibilizará um botão para retornar à listagem.
+
+Observe:
+
+```jsx id="r5w8kn"
+<Button
+  onClick={() => navigate("/listar")}
+>
+  Voltar
+</Button>
+```
+
+Essa instrução utiliza o hook `useNavigate()` para direcionar o usuário à rota `/listar`.
+
+O fluxo de navegação será:
+
+```text id="p6x3vq"
+        ListaPessoas
+             │
+             │ Visualizar
+             ▼
+       VisualizaPessoa
+             │
+       ┌─────┴─────┐
+       │           │
+       ▼           ▼
+     Editar       Voltar
+       │           │
+       ▼           ▼
+  PessoaFormOO  ListaPessoas
+```
+
+Observe que a tela de visualização atua como uma interface intermediária entre a listagem e a edição.
+
+---
+
+## 13. Preparando a integração com o projeto
+
+Nesta etapa, já criamos o componente `VisualizaPessoa.jsx`.
+
+Entretanto, ainda não modificaremos o arquivo `App.jsx`.
+
+A aplicação continuará apresentando o formulário desenvolvido anteriormente.
+
+A ativação das rotas será realizada somente quando todos os componentes estiverem disponíveis.
+
+### 13.1. Estrutura atualizada
+
+```text id="v8n2cs"
+src/
+├── App.jsx                         [MANTIDO]
+│
+├── routes/
+│   └── AppRoutes.jsx               [CRIADO NA PARTE 1]
+│
+├── layout/
+│   └── MainLayout.jsx              [CRIADO NA PARTE 1]
+│
+├── components/
+│   ├── cadastrapessoa/
+│   │   └── PessoaFormOO.jsx         [MANTIDO]
+│   │
+│   ├── listapessoas/
+│   │   └── ListaPessoas.jsx         [CRIADO NA PARTE 3]
+│   │
+│   └── visualizapessoa/
+│       └── VisualizaPessoa.jsx      [NOVO]
+│
+└── objetos/
+    └── dao/
+        ├── PFDAOLocal.mjs           [MODIFICADO NA PARTE 2]
+        └── PJDAOLocal.mjs           [MODIFICADO NA PARTE 2]
+```
+
+:::warning Atenção
+
+O componente `VisualizaPessoa.jsx` utiliza os hooks `useParams()` e `useNavigate()`.
+
+Esses hooks dependem do contexto de navegação fornecido pelo React Router.
+
+Portanto, não substitua diretamente o formulário atual por `VisualizaPessoa` no `App.jsx`.
+
+A integração será realizada na última etapa do capítulo.
+
+:::
+
+---
+
+## 14. Atividade de fixação
+
+Nesta etapa, você deverá preparar o componente responsável pela visualização detalhada dos cadastros.
+
+Realize as seguintes atividades:
+
+1. Crie o diretório `src/components/visualizapessoa/`.
+2. Crie o arquivo `VisualizaPessoa.jsx`.
+3. Copie integralmente o código apresentado.
+4. Verifique os caminhos dos imports dos DAOs.
+5. Identifique a utilização do hook `useParams()`.
+6. Localize a instrução responsável por selecionar o DAO correspondente.
+7. Identifique o método utilizado para localizar o registro.
+8. Observe como os dados são armazenados no estado `pessoa`.
+9. Identifique os componentes utilizados para apresentar os atributos do cadastro.
+10. Localize as ações de edição e retorno à listagem.
+
+**Questões para reflexão:**
+
+- Qual é a finalidade do hook `useParams()`?
+- Qual é a diferença entre `find()` e `filter()`?
+- Por que utilizamos o atributo `id` para localizar o registro?
+- Qual é a finalidade do estado `pessoa`?
+- Por que utilizamos renderização condicional para apresentar CPF ou CNPJ?
+- Como os telefones são transformados em uma string para apresentação?
+- Qual é a vantagem de utilizar o mesmo componente para visualizar PF e PJ?
+
+:::tip Orientação para os testes
+
+Nesta etapa, a verificação deverá concentrar-se na criação do componente e na organização dos imports.
+
+O teste funcional da visualização será realizado após a integração das rotas, quando o `App.jsx` for modificado.
+
+:::
+
+---
+
+## 15. Síntese da Parte 4
+
+Nesta etapa, desenvolvemos o componente responsável pela visualização detalhada de pessoas físicas e jurídicas.
+
+Criamos o arquivo:
+
+```text id="g3v8qp"
+src/components/visualizapessoa/VisualizaPessoa.jsx
+```
+
+Estudamos:
+
+- A recuperação de parâmetros com `useParams()`;
+- A localização de objetos com `find()`;
+- A utilização de `useEffect()` para consultar registros;
+- A utilização de `useState()` para armazenar o resultado da consulta;
+- A renderização condicional de informações;
+- A apresentação de dados com `Card` e `Descriptions`;
+- A utilização de `map()` e `join()` para apresentar telefones;
+- A navegação programática com `useNavigate()`;
+- A reutilização de componentes para PF e PJ.
+
+Com esse componente, nossa aplicação passa a possuir a estrutura necessária para consultar os detalhes dos registros armazenados.
+
+**Na próxima parte, ampliaremos o componente `PessoaFormOO.jsx` para implementar a edição de pessoas físicas e jurídicas, reutilizando o formulário de cadastro desenvolvido anteriormente.**
+
+
+# Parte 5 — Evoluindo o formulário para cadastro e edição de pessoas
+
+Nas etapas anteriores, desenvolvemos os recursos necessários para consultar, listar e excluir registros de pessoas físicas e jurídicas.
+
+Agora, implementaremos a operação **Update**, responsável pela atualização de informações existentes.
+
+Até este momento, o componente `PessoaFormOO.jsx` foi utilizado exclusivamente para cadastrar novas pessoas.
+
+Entretanto, em um sistema CRUD, é comum utilizar o mesmo formulário para duas operações:
+
+- **Cadastro:** criação de um novo registro;
+- **Edição:** atualização de um registro existente.
+
+Nesta etapa, ampliaremos o componente `PessoaFormOO` para reconhecer essas duas situações.
+
+A principal diferença estará na maneira como o formulário é inicializado e na operação executada quando o usuário salva as informações.
+
+Ao final desta parte, o formulário será capaz de:
+
+- Identificar se está sendo utilizado para cadastro ou edição;
+- Recuperar o identificador de um registro pela URL;
+- Consultar os dados existentes por meio dos DAOs;
+- Preencher automaticamente os campos do formulário;
+- Manter os componentes de endereço, telefone e dados específicos de PF e PJ;
+- Atualizar registros existentes;
+- Continuar permitindo o cadastro de novas pessoas;
+- Redirecionar o usuário para a listagem após salvar.
+
+:::info Continuidade do projeto
+
+Nesta etapa, modificaremos apenas um arquivo:
+
+**MODIFICADO:** `src/components/cadastrapessoa/PessoaFormOO.jsx`
+
+Os seguintes componentes serão **REAPROVEITADOS**, sem alterações:
+
+- `EnderecoFormEX.jsx`
+- `TelefoneListOO.jsx`
+- `PFForm.jsx`
+- `PJForm.jsx`
+
+Também serão reaproveitados os DAOs modificados na Parte 2 e as classes de domínio desenvolvidas anteriormente.
+
+O arquivo `App.jsx` permanecerá inalterado até a integração final.
+
+:::
+
+---
+
+## 1. Reutilizando o formulário para diferentes operações
+
+Uma das vantagens da componentização em React é a possibilidade de reutilizar a mesma interface em diferentes situações.
+
+Considere o formulário de cadastro desenvolvido anteriormente.
+
+Ele já possui os campos necessários para representar pessoas físicas e jurídicas.
+
+Se criássemos outro componente exclusivamente para edição, precisaríamos repetir grande parte dessa estrutura.
+
+Isso aumentaria a quantidade de código e dificultaria a manutenção.
+
+Por exemplo, se futuramente adicionássemos um novo atributo à classe `Endereco`, seria necessário atualizar dois formulários diferentes.
+
+Em vez disso, utilizaremos um único componente:
+
+```text id="5h4vkn"
+PessoaFormOO.jsx
+       │
+       ├── Modo Cadastro
+       │      │
+       │      └── dao.salvar()
+       │
+       └── Modo Edição
+              │
+              └── dao.atualizar()
+```
+
+O componente identificará o modo de funcionamento por meio dos parâmetros da URL.
+
+---
+
+## 2. Identificando o modo de edição
+
+Na Parte 1, definimos duas rotas que utilizam o mesmo formulário:
+
+```jsx id="g7q3km"
+<Route
+  path="cadastrar"
+  element={<PessoaForm />}
+/>
+
+<Route
+  path="editar/:tipo/:id"
+  element={<PessoaForm />}
+/>
+```
+
+Observe que ambas apresentam o mesmo componente React.
+
+A diferença está na URL.
+
+No cadastro, utilizaremos:
+
+```text id="r4v8pq"
+/cadastrar
+```
+
+Na edição, utilizaremos uma URL como:
+
+```text id="k9m2fs"
+/editar/PF/abc123
+```
+
+O endereço de edição contém dois parâmetros:
+
+| Parâmetro | Finalidade |
+|---|---|
+| `tipo` | Identificar PF ou PJ |
+| `id` | Identificar o registro |
+
+Para recuperar essas informações, utilizaremos o hook `useParams()`.
+
+```jsx id="t6n3cw"
+const { tipo: tipoParam, id } = useParams();
+```
+
+Observe a expressão:
+
+```javascript id="y2f8qh"
+tipo: tipoParam
+```
+
+Ela permite atribuir um nome diferente à variável recuperada.
+
+Assim, o parâmetro `tipo` da URL será armazenado na variável `tipoParam`.
+
+Essa diferenciação é importante porque nosso formulário já possui uma variável de estado chamada `tipo`.
+
+---
+
+## 3. Controlando o modo de funcionamento
+
+Além de recuperar os parâmetros da URL, precisamos identificar se o formulário está sendo utilizado para edição.
+
+Para isso, utilizaremos:
+
+```jsx id="b5q9wr"
+const [editando, setEditando] = useState(false);
+```
+
+Inicialmente, o valor será `false`.
+
+Isso significa que o formulário será apresentado no modo de cadastro.
+
+Quando a aplicação identificar uma URL de edição, modificaremos esse estado:
+
+```javascript id="p3k7vy"
+setEditando(true);
+```
+
+O valor de `editando` será utilizado em diferentes situações.
+
+Por exemplo:
+
+| Situação | `editando` | Comportamento |
+|---|---|---|
+| Cadastro | `false` | Criar novo registro |
+| Edição | `true` | Atualizar registro existente |
+
+Também utilizaremos esse estado para modificar o título do formulário e o texto do botão principal.
+
+---
+
+## 4. Preparando o formulário para carregar dados existentes
+
+Quando o usuário acessa a edição de um registro, precisamos recuperar suas informações.
+
+Para isso, utilizaremos os DAOs desenvolvidos anteriormente.
+
+O procedimento será:
+
+```text id="n8x4ps"
+Usuário seleciona Editar
+            │
+            ▼
+ /editar/:tipo/:id
+            │
+            ▼
+       useParams()
+            │
+            ▼
+      Identifica o DAO
+            │
+            ▼
+        dao.listar()
+            │
+            ▼
+    Localiza o registro
+            │
+            ▼
+  Converte os dados para
+  os campos do formulário
+            │
+            ▼
+    form.setFieldsValue()
+            │
+            ▼
+    Formulário preenchido
+```
+
+A etapa de preenchimento utilizará o método `setFieldsValue()`, disponibilizado pelo Ant Design.
+
+Esse método permite atribuir valores aos campos de um formulário controlado pelo componente `Form`.
+
+Por exemplo:
+
+```jsx id="z4m7qc"
+form.setFieldsValue({
+  nome: "Ana Silva",
+  email: "ana@email.com",
+  cpf: "11111111111"
+});
+```
+
+Após a execução, os campos correspondentes serão preenchidos automaticamente.
+
+:::tip Formulários controlados pelo Ant Design
+
+O Ant Design disponibiliza métodos para recuperar, atribuir, validar e limpar valores de formulários.
+
+Nesta etapa, utilizaremos principalmente:
+
+- `Form.useForm()`;
+- `setFieldsValue()`;
+- `getFieldsValue()`;
+- `resetFields()`.
+
+Esses recursos permitem manipular os dados do formulário sem controlar individualmente o estado de cada campo.
+
+:::
+
+---
+
+## 5. Modificando o componente PessoaFormOO
+
+**Arquivo: `src/components/cadastrapessoa/PessoaFormOO.jsx` — MODIFICADO**
+
+Nesta etapa, substituiremos o conteúdo do componente pelo código completo apresentado a seguir.
+
+A implementação mantém a estrutura do formulário desenvolvido anteriormente, incluindo os componentes auxiliares e as classes de domínio.
+
+A principal evolução será a incorporação dos recursos necessários para edição.
+
+### 5.1. Código completo do arquivo
+
+```jsx title="src/components/cadastrapessoa/PessoaFormOO.jsx" id="f8n2vq"
+import React, { useState, useEffect } from "react";
+
+import {
+  Form,
+  Input,
+  Button,
+  Radio,
+  message
+} from "antd";
+
+import {
+  useParams,
+  useNavigate
+} from "react-router-dom";
+
+import dayjs from "dayjs";
+
+// Componentes auxiliares
+import EnderecoForm from "./EnderecoFormEX.jsx";
+import TelefoneList from "./TelefoneListOO.jsx";
+import PFForm from "./PFForm.jsx";
+import PJForm from "./PJForm.jsx";
+
+// DAOs
+import PFDAO from "../../objetos/dao/PFDAOLocal.mjs";
+import PJDAO from "../../objetos/dao/PJDAOLocal.mjs";
+
+// Classes de domínio
+import PF from "../../objetos/pessoas/PF.mjs";
+import PJ from "../../objetos/pessoas/PJ.mjs";
+import Endereco from "../../objetos/pessoas/Endereco.mjs";
+import Telefone from "../../objetos/pessoas/Telefone.mjs";
+import Titulo from "../../objetos/pessoas/Titulo.mjs";
+import IE from "../../objetos/pessoas/IE.mjs";
+
+export default function PessoaFormOO() {
+
+  const [tipo, setTipo] = useState("PF");
+
+  const [editando, setEditando] = useState(false);
+
+  const [form] = Form.useForm();
+
+  const navigate = useNavigate();
+
+  const {
+    tipo: tipoParam,
+    id
+  } = useParams();
+
+  const pfDAO = new PFDAO();
+  const pjDAO = new PJDAO();
+
+  // =========================================
+  // CARREGAMENTO DOS DADOS NO MODO DE EDIÇÃO
+  // =========================================
+
+  useEffect(() => {
+
+    if (id && tipoParam) {
+
+      setEditando(true);
+      setTipo(tipoParam);
+
+      const dao = tipoParam === "PF"
+        ? pfDAO
+        : pjDAO;
+
+      const lista = dao.listar();
+
+      const pessoa = lista.find(
+        (p) => p.id === id
+      );
+
+      if (pessoa) {
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
+
+        const valores = {
+          tipo: tipoParam,
+          nome: pessoa.nome,
+          email: pessoa.email,
+          endereco: pessoa.endereco || {},
+          telefones: pessoa.telefones || [],
+        };
+
+        if (tipoParam === "PF") {
+
+          valores.cpf = pessoa.cpf;
+
+          valores.titulo = pessoa.titulo || {
+            numero: "",
+            zona: "",
+            secao: ""
+          };
+
+        } else {
+
+          const ieObj = pessoa.ie || {};
+
+          valores.cnpj = pessoa.cnpj;
+
+          valores.ie = {
+            numero: ieObj.numero || "",
+            estado: ieObj.estado || "",
+            dataRegistro: ieObj.dataRegistro
+              ? dayjs(ieObj.dataRegistro)
+              : null,
+          };
+
+        }
+
+        form.setFieldsValue(valores);
+
+      } else {
+
+        message.error("Pessoa não encontrada!");
+
+        navigate("/listar");
+
+      }
+
+    }
+
+  }, [id, tipoParam]);
+
+  // =========================================
+  // ALTERAÇÃO DO TIPO DE PESSOA
+  // =========================================
+
+  function onChangeTipo(e) {
+
+    const novoTipo = e.target.value;
+
+    setTipo(novoTipo);
+
+    const valoresAtuais = form.getFieldsValue();
+
+    form.resetFields();
+
+    form.setFieldsValue({
+      ...valoresAtuais,
+      tipo: novoTipo,
+    });
+
+  }
+
+  // =========================================
+  // SALVAR OU ATUALIZAR O REGISTRO
+  // =========================================
+
+  async function onFinish(values) {
+
+    try {
+
+      let pessoa;
+
+      const endVals = values.endereco || {};
+
+      // Construção do objeto Endereco
+      const end = new Endereco();
+
+      end.setCep(endVals.cep);
+      end.setLogradouro(endVals.logradouro);
+      end.setBairro(endVals.bairro);
+      end.setCidade(endVals.cidade);
+      end.setUf(endVals.uf);
+      end.setRegiao(endVals.regiao);
+
+      // =====================================
+      // PESSOA FÍSICA
+      // =====================================
+
+      if (values.tipo === "PF") {
+
+        const pf = new PF();
+
+        pf.setNome(values.nome);
+        pf.setEmail(values.email);
+        pf.setCPF(values.cpf);
+        pf.setEndereco(end);
+
+        // Título eleitoral
+        if (values.titulo) {
+
+          const t = new Titulo();
+
+          t.setNumero(values.titulo.numero);
+          t.setZona(values.titulo.zona);
+          t.setSecao(values.titulo.secao);
+
+          pf.setTitulo(t);
+
+        }
+
+        // Telefones
+        if (values.telefones?.length > 0) {
+
+          values.telefones.forEach((tel) => {
+
+            const fone = new Telefone();
+
+            fone.setDdd(tel.ddd);
+            fone.setNumero(tel.numero);
+
+            pf.addTelefone(fone);
+
+          });
+
+        }
+
+        pessoa = pf;
+
+      } else {
+
+        // ===================================
+        // PESSOA JURÍDICA
+        // ===================================
+
+        const pj = new PJ();
+
+        pj.setNome(values.nome);
+        pj.setEmail(values.email);
+        pj.setCNPJ(values.cnpj);
+        pj.setEndereco(end);
+
+        // Inscrição Estadual
+        if (values.ie) {
+
+          const ie = new IE();
+
+          ie.setNumero(values.ie.numero);
+          ie.setEstado(values.ie.estado);
+
+          // Converte dayjs para string
+          const dr = values.ie.dataRegistro;
+
+          const dataRegistro =
+            dr &&
+            typeof dr === "object" &&
+            typeof dr.format === "function"
+              ? dr.format("YYYY-MM-DD")
+              : dr || "";
+
+          ie.setDataRegistro(dataRegistro);
+
+          pj.setIE(ie);
+
+        }
+
+        // Telefones
+        if (values.telefones?.length > 0) {
+
+          values.telefones.forEach((tel) => {
+
+            const fone = new Telefone();
+
+            fone.setDdd(tel.ddd);
+            fone.setNumero(tel.numero);
+
+            pj.addTelefone(fone);
+
+          });
+
+        }
+
+        pessoa = pj;
+
+      }
+
+      // =====================================
+      // PERSISTÊNCIA: CADASTRO OU EDIÇÃO
+      // =====================================
+
+      const dao = tipo === "PF"
+        ? pfDAO
+        : pjDAO;
+
+      if (editando && id) {
+
+        dao.atualizar(id, pessoa);
+
+        message.success(
+          "Registro atualizado com sucesso!"
+        );
+
+      } else {
+
+        dao.salvar(pessoa);
+
+        message.success(
+          "Registro criado com sucesso!"
+        );
+
+      }
+
+      form.resetFields();
+
+      setTimeout(
+        () => navigate("/listar"),
+        600
+      );
+
+    } catch (erro) {
+
+      console.error(
+        "Erro ao salvar:",
+        erro
+      );
+
+      message.error(
+        "Erro ao salvar registro: " + erro.message
+      );
+
+    }
+
+  }
+
+  // =========================================
+  // APRESENTAÇÃO DO FORMULÁRIO
+  // =========================================
+
+  return (
+
+    <div
+      className="main-scroll"
+      style={{
+        overflowY: "auto",
+        overflowX: "hidden",
+        height: "100vh",
+        background: "#f9f9f9",
+      }}
+    >
+
+      <div
+        className="form-container"
+        style={{
+          maxWidth: 800,
+          margin: "24px auto",
+          background: "#fff",
+          padding: 24,
+          borderRadius: 8,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
+
+        <h2
+          style={{
+            textAlign: "center",
+            marginBottom: 20
+          }}
+        >
+
+          {editando
+            ? `Editar ${
+                tipo === "PF"
+                  ? "Pessoa Física"
+                  : "Pessoa Jurídica"
+              }`
+            : `Cadastro de ${
+                tipo === "PF"
+                  ? "Pessoa Física"
+                  : "Pessoa Jurídica"
+              }`}
+
+        </h2>
+
+        <Form
+          layout="vertical"
+          form={form}
+          onFinish={onFinish}
+          scrollToFirstError
+        >
+
+          {/* Tipo de Pessoa */}
+
+          <Form.Item
+            label="Tipo de Pessoa"
+            name="tipo"
+            initialValue="PF"
+            style={{ marginBottom: 10 }}
+          >
+
+            <Radio.Group
+              onChange={onChangeTipo}
+              disabled={editando}
+            >
+
+              <Radio value="PF">
+                Pessoa Física
+              </Radio>
+
+              <Radio value="PJ">
+                Pessoa Jurídica
+              </Radio>
+
+            </Radio.Group>
+
+          </Form.Item>
+
+          {/* Nome */}
+
+          <Form.Item
+            label="Nome"
+            name="nome"
+            rules={[
+              {
+                required: true,
+                message: "Informe o nome!"
+              }
+            ]}
+          >
+
+            <Input
+              placeholder="Nome completo ou razão social"
+            />
+
+          </Form.Item>
+
+          {/* E-mail */}
+
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                message: "Informe o e-mail!"
+              },
+              {
+                type: "email",
+                message: "Formato de e-mail inválido!"
+              }
+            ]}
+          >
+
+            <Input
+              placeholder="exemplo@email.com"
+            />
+
+          </Form.Item>
+
+          {/* CPF ou CNPJ */}
+
+          {tipo === "PF" ? (
+
+            <Form.Item
+              label="CPF"
+              name="cpf"
+              rules={[
+                {
+                  required: true,
+                  message: "Informe o CPF!"
+                }
+              ]}
+            >
+
+              <Input
+                placeholder="Somente números"
+                maxLength={11}
+              />
+
+            </Form.Item>
+
+          ) : (
+
+            <Form.Item
+              label="CNPJ"
+              name="cnpj"
+              rules={[
+                {
+                  required: true,
+                  message: "Informe o CNPJ!"
+                }
+              ]}
+            >
+
+              <Input
+                placeholder="Somente números"
+                maxLength={18}
+              />
+
+            </Form.Item>
+
+          )}
+
+          {/* Endereço */}
+
+          <EnderecoForm />
+
+          {/* Telefones */}
+
+          <TelefoneList form={form} />
+
+          {/* Campos específicos */}
+
+          {tipo === "PF"
+            ? <PFForm />
+            : <PJForm />}
+
+          {/* Botão principal */}
+
+          <Form.Item
+            style={{ marginTop: 20 }}
+          >
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+            >
+
+              {editando
+                ? "Salvar Alterações"
+                : "Salvar"}
+
+            </Button>
+
+          </Form.Item>
+
+          {/* Cancelamento da edição */}
+
+          {editando && (
+
+            <Form.Item>
+
+              <Button
+                block
+                onClick={() => navigate("/listar")}
+              >
+                Cancelar
+              </Button>
+
+            </Form.Item>
+
+          )}
+
+        </Form>
+
+      </div>
+
+    </div>
+
+  );
+}
+```
+
+:::info Sobre a implementação
+
+O código foi adaptado a partir do formulário funcional utilizado no projeto.
+
+Foram atualizados os nomes dos imports para os arquivos definitivos, sem o sufixo `V2`.
+
+Também foi desabilitada a alteração do tipo de pessoa durante a edição, evitando que um cadastro existente seja alterado de PF para PJ sem uma operação específica de migração.
+
+As demais operações seguem a estrutura da implementação original.
+
+:::
+
+---
+
+## 6. Carregando os dados no modo de edição
+
+A principal evolução do formulário está no hook `useEffect()`.
+
+Observe:
+
+```jsx id="q8n2fm"
+useEffect(() => {
+
+  if (id && tipoParam) {
+
+    setEditando(true);
+    setTipo(tipoParam);
+
+    const dao = tipoParam === "PF"
+      ? pfDAO
+      : pjDAO;
+
+    const lista = dao.listar();
+
+    const pessoa = lista.find(
+      (p) => p.id === id
+    );
+
+    // Preenchimento dos campos...
+
+  }
+
+}, [id, tipoParam]);
+```
+
+A condição:
+
+```javascript id="v4m9qr"
+if (id && tipoParam)
+```
+
+verifica se existem parâmetros de edição na URL.
+
+Caso existam, o componente identifica que deverá recuperar um registro já cadastrado.
+
+Em seguida, seleciona o DAO correspondente e localiza a pessoa pelo identificador.
+
+Observe que utilizamos o método `find()`, estudado na Parte 4.
+
+---
+
+## 7. Preenchendo o formulário com setFieldsValue()
+
+Depois de localizar o registro, precisamos preencher os campos do formulário.
+
+Para isso, organizamos os dados recuperados em um objeto:
+
+```javascript id="b7p3kc"
+const valores = {
+  tipo: tipoParam,
+  nome: pessoa.nome,
+  email: pessoa.email,
+  endereco: pessoa.endereco || {},
+  telefones: pessoa.telefones || [],
+};
+```
+
+Esse objeto contém os atributos comuns às pessoas físicas e jurídicas.
+
+Em seguida, acrescentamos os atributos específicos.
+
+### 7.1. Dados de Pessoa Física
+
+```javascript id="t9q4nx"
+if (tipoParam === "PF") {
+
+  valores.cpf = pessoa.cpf;
+
+  valores.titulo = pessoa.titulo || {
+    numero: "",
+    zona: "",
+    secao: ""
+  };
+
+}
+```
+
+Observe que o título eleitoral é representado por um objeto associado.
+
+Essa estrutura corresponde aos campos utilizados pelo componente `PFForm`.
+
+### 7.2. Dados de Pessoa Jurídica
+
+```javascript id="k5m8wv"
+const ieObj = pessoa.ie || {};
+
+valores.cnpj = pessoa.cnpj;
+
+valores.ie = {
+  numero: ieObj.numero || "",
+  estado: ieObj.estado || "",
+  dataRegistro: ieObj.dataRegistro
+    ? dayjs(ieObj.dataRegistro)
+    : null,
+};
+```
+
+Nesse caso, precisamos realizar uma conversão adicional.
+
+O campo de data utilizado no formulário trabalha com objetos `dayjs`.
+
+Entretanto, os dados armazenados no `localStorage` são recuperados como strings.
+
+Por isso, utilizamos:
+
+```javascript id="r2v7ps"
+dayjs(ieObj.dataRegistro)
+```
+
+para transformar a string em um objeto compatível com o componente de seleção de data.
+
+Após organizar os valores, executamos:
+
+```javascript id="w6q3yt"
+form.setFieldsValue(valores);
+```
+
+Essa instrução preenche os campos do formulário.
+
+:::tip Objetos aninhados
+
+O método `setFieldsValue()` permite atribuir valores a campos simples e também a estruturas aninhadas.
+
+Por exemplo, o atributo `endereco` contém outros atributos, como CEP, logradouro, bairro e cidade.
+
+Da mesma maneira, o atributo `telefones` contém um array de objetos.
+
+Isso permite reutilizar os componentes auxiliares desenvolvidos anteriormente.
+
+:::
+
+---
+
+## 8. Reutilizando os componentes auxiliares
+
+Observe a estrutura utilizada no formulário:
+
+```jsx id="f3n8qw"
+<EnderecoForm />
+
+<TelefoneList form={form} />
+
+{tipo === "PF"
+  ? <PFForm />
+  : <PJForm />}
+```
+
+Esses componentes foram desenvolvidos anteriormente e não precisam ser modificados nesta etapa.
+
+### 8.1. EnderecoFormEX
+
+O componente `EnderecoFormEX` continuará responsável pelos campos de endereço e pela integração com a API ViaCEP.
+
+Durante o cadastro, permitirá informar os dados de um novo endereço.
+
+Durante a edição, apresentará os valores recuperados do registro existente.
+
+### 8.2. TelefoneListOO
+
+O componente `TelefoneListOO` continuará utilizando `Form.List` para gerenciar dinamicamente os telefones associados à pessoa.
+
+Durante a edição, os telefones existentes serão apresentados no formulário.
+
+O usuário poderá acrescentar ou remover telefones antes de salvar as alterações.
+
+### 8.3. PFForm e PJForm
+
+Os componentes `PFForm` e `PJForm` continuarão responsáveis pelos atributos específicos.
+
+O formulário principal apenas identifica o tipo de pessoa e apresenta o componente correspondente.
+
+Essa organização demonstra como a componentização permite evoluir uma aplicação sem reimplementar funcionalidades já existentes.
+
+---
+
+## 9. Convertendo os valores do formulário em objetos
+
+Quando o usuário confirma o formulário, o Ant Design executa a função associada a `onFinish`.
+
+Observe:
+
+```jsx id="n7p2kx"
+<Form
+  layout="vertical"
+  form={form}
+  onFinish={onFinish}
+  scrollToFirstError
+>
+```
+
+A função recebe um objeto contendo os valores informados:
+
+```javascript id="j8v4mr"
+async function onFinish(values) {
+  // Processamento dos dados
+}
+```
+
+Entretanto, os valores recebidos não são automaticamente instâncias das classes de domínio.
+
+Por isso, precisamos construir os objetos correspondentes.
+
+### 9.1. Construção do endereço
+
+```javascript id="q4m7zc"
+const endVals = values.endereco || {};
+
+const end = new Endereco();
+
+end.setCep(endVals.cep);
+end.setLogradouro(endVals.logradouro);
+end.setBairro(endVals.bairro);
+end.setCidade(endVals.cidade);
+end.setUf(endVals.uf);
+end.setRegiao(endVals.regiao);
+```
+
+Observe que utilizamos os métodos setters da classe `Endereco`.
+
+Essa abordagem preserva a utilização das classes de domínio desenvolvidas anteriormente.
+
+### 9.2. Construção de Pessoa Física
+
+```javascript id="p6k3fy"
+const pf = new PF();
+
+pf.setNome(values.nome);
+pf.setEmail(values.email);
+pf.setCPF(values.cpf);
+pf.setEndereco(end);
+```
+
+Depois, acrescentamos os objetos associados, como título eleitoral e telefones.
+
+### 9.3. Construção de Pessoa Jurídica
+
+```javascript id="x9q2vs"
+const pj = new PJ();
+
+pj.setNome(values.nome);
+pj.setEmail(values.email);
+pj.setCNPJ(values.cnpj);
+pj.setEndereco(end);
+```
+
+Nesse caso, acrescentamos a inscrição estadual e os telefones correspondentes.
+
+Observe que a construção dos objetos segue a mesma lógica utilizada no cadastro.
+
+Isso significa que não precisamos criar uma segunda estrutura de conversão exclusivamente para edição.
+
+---
+
+## 10. Implementando a operação Update
+
+A principal diferença entre cadastro e edição aparece no momento da persistência.
+
+Observe:
+
+```javascript id="z3n8qw"
+const dao = tipo === "PF"
+  ? pfDAO
+  : pjDAO;
+
+if (editando && id) {
+
+  dao.atualizar(id, pessoa);
+
+  message.success(
+    "Registro atualizado com sucesso!"
+  );
+
+} else {
+
+  dao.salvar(pessoa);
+
+  message.success(
+    "Registro criado com sucesso!"
+  );
+
+}
+```
+
+O componente seleciona o DAO correspondente ao tipo de pessoa.
+
+Em seguida, verifica se está no modo de edição.
+
+### 10.1. Modo cadastro
+
+Quando `editando` for `false`, executaremos:
+
+```javascript id="f7p4km"
+dao.salvar(pessoa);
+```
+
+O DAO criará um novo registro e armazenará as informações.
+
+### 10.2. Modo edição
+
+Quando `editando` for `true` e existir um identificador, executaremos:
+
+```javascript id="r5v9qc"
+dao.atualizar(id, pessoa);
+```
+
+Nesse caso, o DAO localizará o registro correspondente ao identificador e substituirá suas informações.
+
+O fluxo será:
+
+```text id="m8q2px"
+Usuário preenche o formulário
+               │
+               ▼
+        Validação Ant Design
+               │
+               ▼
+           onFinish()
+               │
+               ▼
+      Construção dos objetos
+               │
+               ▼
+         Verifica editando
+               │
+        ┌──────┴──────┐
+        │             │
+        ▼             ▼
+      false          true
+        │             │
+        ▼             ▼
+   dao.salvar()  dao.atualizar()
+        │             │
+        └──────┬──────┘
+               │
+               ▼
+       Atualiza localStorage
+               │
+               ▼
+       Mensagem de sucesso
+               │
+               ▼
+        Retorna à listagem
+```
+
+:::info Reutilização da lógica de persistência
+
+Observe que o componente não implementa diretamente as operações de armazenamento.
+
+Ele apenas solicita ao DAO a operação desejada.
+
+Essa separação permite modificar futuramente o mecanismo de persistência sem reimplementar toda a interface do formulário.
+
+:::
+
+---
+
+## 11. Alterando a apresentação conforme o modo
+
+Além da persistência, o estado `editando` também será utilizado para modificar a interface.
+
+### 11.1. Título do formulário
+
+Observe:
+
+```jsx id="k2w7fr"
+{editando
+  ? `Editar ${
+      tipo === "PF"
+        ? "Pessoa Física"
+        : "Pessoa Jurídica"
+    }`
+  : `Cadastro de ${
+      tipo === "PF"
+        ? "Pessoa Física"
+        : "Pessoa Jurídica"
+    }`}
+```
+
+Quando o formulário estiver no modo de cadastro, apresentará:
+
+```text id="a4q9xm"
+Cadastro de Pessoa Física
+```
+
+ou:
+
+```text id="s6n3vp"
+Cadastro de Pessoa Jurídica
+```
+
+No modo de edição, apresentará:
+
+```text id="w8p2ky"
+Editar Pessoa Física
+```
+
+ou:
+
+```text id="z7m4qr"
+Editar Pessoa Jurídica
+```
+
+### 11.2. Botão principal
+
+O botão também terá seu texto alterado:
+
+```jsx id="v3n8fw"
+<Button
+  type="primary"
+  htmlType="submit"
+  block
+>
+  {editando
+    ? "Salvar Alterações"
+    : "Salvar"}
+</Button>
+```
+
+Essa diferenciação ajuda o usuário a compreender qual operação será executada.
+
+### 11.3. Botão Cancelar
+
+No modo de edição, apresentaremos um botão adicional:
+
+```jsx id="p9k2ws"
+{editando && (
+
+  <Form.Item>
+
+    <Button
+      block
+      onClick={() => navigate("/listar")}
+    >
+      Cancelar
+    </Button>
+
+  </Form.Item>
+
+)}
+```
+
+Esse botão permite abandonar a edição e retornar à listagem.
+
+Observe que utilizamos renderização condicional para apresentar o botão somente quando necessário.
+
+---
+
+## 12. Navegação após salvar
+
+Depois de concluir a operação de persistência, o formulário apresenta uma mensagem de sucesso.
+
+Em seguida, executa:
+
+```javascript id="q6v3mx"
+form.resetFields();
+
+setTimeout(
+  () => navigate("/listar"),
+  600
+);
+```
+
+O método `resetFields()` limpa os valores do formulário.
+
+Já `setTimeout()` agenda a navegação para a listagem após um intervalo de aproximadamente 600 milissegundos.
+
+Esse pequeno intervalo permite que a mensagem de sucesso seja apresentada antes da mudança de tela.
+
+:::tip Navegação programática
+
+O hook `useNavigate()` permite realizar navegação a partir de funções JavaScript.
+
+Ele é especialmente útil quando precisamos mudar de rota após uma operação, como salvar ou atualizar um registro.
+
+:::
+
+---
+
+## 13. Tratamento de erros
+
+O processamento do formulário está organizado dentro de um bloco `try/catch`.
+
+Observe:
+
+```javascript id="y8p4kn"
+try {
+
+  // Construção dos objetos
+  // Persistência
+
+} catch (erro) {
+
+  console.error(
+    "Erro ao salvar:",
+    erro
+  );
+
+  message.error(
+    "Erro ao salvar registro: " + erro.message
+  );
+
+}
+```
+
+Essa estrutura permite capturar exceções que ocorram durante a construção dos objetos ou a persistência dos dados.
+
+Quando um erro é identificado, apresentamos uma mensagem ao usuário por meio do componente `message` do Ant Design.
+
+Também registramos informações no console do navegador, facilitando a identificação do problema durante o desenvolvimento.
+
+---
+
+## 14. Preparando a integração com a aplicação
+
+Com a evolução do formulário, já temos os principais componentes necessários para o CRUD.
+
+Entretanto, ainda não modificaremos o arquivo `App.jsx`.
+
+A estrutura do projeto estará organizada da seguinte maneira:
+
+```text id="t5q8vc"
+src/
+├── App.jsx                         [MANTIDO]
+│
+├── routes/
+│   └── AppRoutes.jsx               [CRIADO NA PARTE 1]
+│
+├── layout/
+│   └── MainLayout.jsx              [CRIADO NA PARTE 1]
+│
+├── components/
+│   ├── cadastrapessoa/
+│   │   ├── PessoaFormOO.jsx         [MODIFICADO]
+│   │   ├── EnderecoFormEX.jsx       [REAPROVEITADO]
+│   │   ├── TelefoneListOO.jsx       [REAPROVEITADO]
+│   │   ├── PFForm.jsx               [REAPROVEITADO]
+│   │   └── PJForm.jsx               [REAPROVEITADO]
+│   │
+│   ├── listapessoas/
+│   │   └── ListaPessoas.jsx         [CRIADO NA PARTE 3]
+│   │
+│   └── visualizapessoa/
+│       └── VisualizaPessoa.jsx      [CRIADO NA PARTE 4]
+│
+└── objetos/
+    └── dao/
+        ├── PFDAOLocal.mjs           [MODIFICADO NA PARTE 2]
+        └── PJDAOLocal.mjs           [MODIFICADO NA PARTE 2]
+```
+
+:::warning Atenção à integração
+
+A nova versão do `PessoaFormOO.jsx` utiliza os hooks `useParams()` e `useNavigate()`.
+
+Esses hooks precisam ser executados dentro de um contexto de navegação fornecido pelo React Router.
+
+Portanto, após substituir o arquivo, **não execute ainda o formulário diretamente pelo `App.jsx` antigo**, caso ele não esteja envolvido por um `BrowserRouter`.
+
+A ativação definitiva da aplicação será realizada na próxima parte, quando modificaremos o `App.jsx` e testaremos as operações do CRUD.
+
+:::
+
+---
+
+## 15. Atividade de fixação
+
+Nesta etapa, você deverá preparar o formulário para permitir a edição de pessoas físicas e jurídicas.
+
+Realize as seguintes atividades:
+
+1. Substitua integralmente o conteúdo de `PessoaFormOO.jsx` pelo código apresentado.
+2. Verifique os caminhos de importação dos componentes auxiliares.
+3. Verifique os imports dos DAOs e das classes de domínio.
+4. Identifique o estado responsável por controlar o modo de edição.
+5. Localize a utilização do hook `useParams()`.
+6. Identifique como o registro é recuperado por meio do DAO.
+7. Localize o método utilizado para preencher automaticamente os campos.
+8. Identifique a conversão da data de inscrição estadual com `dayjs`.
+9. Localize a condição que diferencia cadastro e edição.
+10. Identifique os métodos utilizados para salvar e atualizar registros.
+
+**Questões para reflexão:**
+
+- Qual é a vantagem de utilizar o mesmo formulário para cadastro e edição?
+- Como o componente identifica que está no modo de edição?
+- Qual é a finalidade do método `setFieldsValue()`?
+- Por que precisamos converter a data recuperada do `localStorage` em um objeto `dayjs`?
+- Qual é a diferença entre `dao.salvar()` e `dao.atualizar()`?
+- Por que o tipo de pessoa foi desabilitado durante a edição?
+- Qual é a importância de manter a lógica de persistência nos DAOs?
+
+---
+
+## 16. Síntese da Parte 5
+
+Nesta etapa, ampliamos o componente `PessoaFormOO.jsx` para permitir o cadastro e a edição de pessoas físicas e jurídicas.
+
+O arquivo modificado foi:
+
+```text id="m4q7nw"
+src/components/cadastrapessoa/PessoaFormOO.jsx
+```
+
+Estudamos:
+
+- A reutilização de formulários;
+- A identificação do modo de edição;
+- A recuperação de parâmetros com `useParams()`;
+- A consulta de registros existentes;
+- O preenchimento automático com `setFieldsValue()`;
+- A manipulação de objetos aninhados;
+- A conversão de datas com `dayjs`;
+- A construção de objetos de domínio a partir dos valores do formulário;
+- A utilização de `salvar()` e `atualizar()`;
+- A renderização condicional de elementos;
+- A navegação programática após a persistência.
+
+Com essa evolução, o formulário estará preparado para executar duas operações do CRUD: **Create** e **Update**.
+
+**Na próxima parte, realizaremos a integração final da aplicação, modificando o `App.jsx` e ativando as rotas para cadastro, listagem, visualização, edição e exclusão.**
+
+
+# Parte 6 — Integração final: ativando o CRUD com React Router
+
+Nas etapas anteriores, desenvolvemos os componentes e os recursos necessários para implementar um CRUD completo de pessoas físicas e jurídicas.
+
+Nossa aplicação já possui:
+
+- Classes de domínio para representar pessoas físicas, jurídicas e seus atributos;
+- DAOs responsáveis pela persistência no `localStorage`;
+- Formulário para cadastro e edição;
+- Componente de listagem com filtros e ações;
+- Componente de visualização detalhada;
+- Estrutura de rotas;
+- Layout principal de navegação.
+
+Entretanto, até o momento, mantivemos o arquivo `App.jsx` sem alterações para evitar que a aplicação tentasse carregar componentes ainda não implementados.
+
+Agora, integraremos todos esses recursos.
+
+Ao final desta etapa, o usuário poderá navegar entre as telas e realizar as quatro operações do CRUD:
+
+| Operação | Funcionalidade |
+|---|---|
+| Create | Cadastrar pessoas físicas e jurídicas |
+| Read | Listar e visualizar os registros |
+| Update | Editar informações existentes |
+| Delete | Excluir registros cadastrados |
+
+:::info Arquivos utilizados nesta etapa
+
+**REAPROVEITADOS — sem alterações:**
+
+- `src/layout/MainLayout.jsx`
+- `src/components/listapessoas/ListaPessoas.jsx`
+- `src/components/visualizapessoa/VisualizaPessoa.jsx`
+- `src/components/cadastrapessoa/PessoaFormOO.jsx`
+- `src/objetos/dao/PFDAOLocal.mjs`
+- `src/objetos/dao/PJDAOLocal.mjs`
+
+**VERIFICAR — arquivo criado na Parte 1:**
+
+- `src/routes/AppRoutes.jsx`
+
+**MODIFICADO — último arquivo desta etapa:**
+
+- `src/App.jsx`
+
+Nesta etapa, não será necessário modificar as classes de domínio nem os componentes auxiliares do formulário.
+
+:::
+
+---
+
+## 1. Compreendendo a integração da aplicação
+
+Até o momento, desenvolvemos diferentes componentes React.
+
+Entretanto, para que eles funcionem como partes de uma única aplicação, precisamos estabelecer como ocorrerá a navegação entre as telas.
+
+Utilizaremos o React Router para relacionar cada endereço da aplicação a um componente.
+
+A organização será:
+
+```text
+                     App.jsx
+                        │
+                        ▼
+                   BrowserRouter
+                        │
+                        ▼
+                   AppRoutes.jsx
+                        │
+                        ▼
+                   MainLayout.jsx
+                        │
+                        ▼
+                       Outlet
+                        │
+        ┌───────────────┼────────────────┐
+        │               │                │
+        ▼               ▼                ▼
+   PessoaFormOO    ListaPessoas    VisualizaPessoa
+        │               │                │
+        └───────────────┼────────────────┘
+                        │
+                        ▼
+                  PFDAO / PJDAO
+                        │
+                        ▼
+                   localStorage
+```
+
+Observe que cada elemento possui uma responsabilidade específica.
+
+O `App.jsx` inicializa o sistema de navegação.
+
+O `AppRoutes.jsx` define qual componente deverá ser apresentado para cada URL.
+
+O `MainLayout.jsx` disponibiliza a estrutura visual compartilhada entre as telas.
+
+Os componentes executam as operações solicitadas pelo usuário.
+
+Os DAOs realizam a persistência dos dados.
+
+Essa separação permite organizar o projeto em camadas com responsabilidades bem definidas.
+
+---
+
+## 2. Revisando as rotas da aplicação
+
+Na Parte 1, criamos o arquivo:
+
+```text
+src/routes/AppRoutes.jsx
+```
+
+Esse arquivo centraliza as rotas da aplicação.
+
+Antes de ativarmos o `App.jsx`, vamos conferir se todas as rotas estão configuradas corretamente.
+
+### 2.1. Código completo de AppRoutes.jsx
+
+**Arquivo: `src/routes/AppRoutes.jsx` — CRIADO NA PARTE 1**
+
+Confira se o conteúdo corresponde ao código abaixo.
+
+```jsx title="src/routes/AppRoutes.jsx"
+import React from "react";
+
+import {
+  Routes,
+  Route,
+  Navigate
+} from "react-router-dom";
+
+import MainLayout from "../layout/MainLayout.jsx";
+
+import PessoaForm from "../components/cadastrapessoa/PessoaFormOO.jsx";
+
+import ListaPessoas from "../components/listapessoas/ListaPessoas.jsx";
+
+import VisualizaPessoa from "../components/visualizapessoa/VisualizaPessoa.jsx";
+
+function AppRoutes() {
+
+  return (
+
+    <Routes>
+
+      {/* Rotas dentro do layout principal */}
+
+      <Route
+        path="/"
+        element={<MainLayout />}
+      >
+
+        {/* Rota inicial */}
+
+        <Route
+          index
+          element={
+            <Navigate
+              to="cadastrar"
+              replace
+            />
+          }
+        />
+
+        {/* Cadastro */}
+
+        <Route
+          path="cadastrar"
+          element={<PessoaForm />}
+        />
+
+        {/* Listagem */}
+
+        <Route
+          path="listar"
+          element={<ListaPessoas />}
+        />
+
+        {/* Visualização */}
+
+        <Route
+          path="visualizar/:tipo/:id"
+          element={<VisualizaPessoa />}
+        />
+
+        {/* Edição */}
+
+        <Route
+          path="editar/:tipo/:id"
+          element={<PessoaForm />}
+        />
+
+      </Route>
+
+    </Routes>
+
+  );
+
+}
+
+export default AppRoutes;
+```
+
+Observe que as rotas de cadastro e edição utilizam o mesmo componente:
+
+```jsx
+<Route
+  path="cadastrar"
+  element={<PessoaForm />}
+/>
+
+<Route
+  path="editar/:tipo/:id"
+  element={<PessoaForm />}
+/>
+```
+
+Essa configuração permite reutilizar o formulário desenvolvido na Parte 5.
+
+O próprio componente identifica se está no modo de cadastro ou edição, conforme os parâmetros recebidos.
+
+---
+
+## 3. Compreendendo o papel do MainLayout
+
+O arquivo `MainLayout.jsx` foi criado na Parte 1.
+
+Ele estabelece a estrutura visual compartilhada pelas diferentes telas.
+
+Em nosso projeto, utilizamos os componentes de layout e navegação do Ant Design.
+
+A principal característica dessa organização é permitir que o menu permaneça disponível enquanto o conteúdo central é alterado.
+
+Para isso, utilizamos o componente `Outlet`, disponibilizado pelo React Router.
+
+Observe:
+
+```jsx
+import { Outlet } from "react-router-dom";
+```
+
+No ponto em que o componente `Outlet` é apresentado, o React Router renderiza o componente correspondente à rota atual.
+
+Por exemplo:
+
+```text
+MainLayout
+    │
+    ├── Menu de navegação
+    │
+    └── Outlet
+          │
+          ├── PessoaFormOO
+          ├── ListaPessoas
+          └── VisualizaPessoa
+```
+
+Quando o usuário acessa `/cadastrar`, o `Outlet` apresenta o formulário.
+
+Quando acessa `/listar`, apresenta a tabela.
+
+Quando acessa `/visualizar/PF/abc123`, apresenta os detalhes do registro identificado.
+
+:::tip Reutilização de layouts
+
+A utilização de um layout compartilhado evita repetir o menu e outros elementos estruturais em cada componente.
+
+Também facilita futuras modificações na aparência da aplicação.
+
+:::
+
+---
+
+## 4. Conferindo as dependências
+
+Antes de ativar a navegação, verifique se as bibliotecas utilizadas estão instaladas.
+
+Neste projeto, utilizamos:
+
+- React Router;
+- Ant Design;
+- Ant Design Icons;
+- Day.js.
+
+Caso alguma dessas dependências ainda não esteja instalada, execute:
+
+```bash
+npm install react-router-dom antd @ant-design/icons dayjs
+```
+
+Essas bibliotecas desempenham responsabilidades diferentes.
+
+| Biblioteca | Utilização |
+|---|---|
+| `react-router-dom` | Navegação entre as telas |
+| `antd` | Componentes de interface |
+| `@ant-design/icons` | Ícones dos botões e menus |
+| `dayjs` | Manipulação de datas |
+
+:::info Dependências existentes
+
+Se essas bibliotecas já foram instaladas nas etapas anteriores, não será necessário repetir a instalação.
+
+O comando apresentado permite instalar as dependências que eventualmente estejam ausentes.
+
+:::
+
+---
+
+## 5. Conferindo a estrutura do projeto
+
+Antes de modificar o `App.jsx`, verifique se os arquivos desenvolvidos nas etapas anteriores estão disponíveis.
+
+A estrutura deverá ser semelhante à seguinte:
+
+```text
+src/
+│
+├── App.jsx
+│
+├── routes/
+│   └── AppRoutes.jsx
+│
+├── layout/
+│   └── MainLayout.jsx
+│
+├── components/
+│   │
+│   ├── cadastrapessoa/
+│   │   ├── PessoaFormOO.jsx
+│   │   ├── EnderecoFormEX.jsx
+│   │   ├── TelefoneListOO.jsx
+│   │   ├── PFForm.jsx
+│   │   └── PJForm.jsx
+│   │
+│   ├── listapessoas/
+│   │   └── ListaPessoas.jsx
+│   │
+│   └── visualizapessoa/
+│       └── VisualizaPessoa.jsx
+│
+└── objetos/
+    │
+    ├── dao/
+    │   ├── PFDAOLocal.mjs
+    │   └── PJDAOLocal.mjs
+    │
+    └── pessoas/
+        ├── PF.mjs
+        ├── PJ.mjs
+        ├── Endereco.mjs
+        ├── Telefone.mjs
+        ├── Titulo.mjs
+        └── IE.mjs
+```
+
+Observe que não estamos criando novamente os componentes auxiliares nem as classes de domínio.
+
+Esses arquivos foram desenvolvidos anteriormente e serão reaproveitados.
+
+### 5.1. Verificações antes da integração
+
+Confirme que:
+
+1. Os arquivos estão nos diretórios indicados;
+2. Os nomes utilizados nos imports correspondem aos arquivos existentes;
+3. Os DAOs possuem os métodos `salvar()`, `listar()`, `atualizar()` e `excluir()`;
+4. O componente `PessoaFormOO.jsx` contém os recursos de edição apresentados na Parte 5;
+5. O componente `ListaPessoas.jsx` possui as ações de visualizar, editar e excluir;
+6. O componente `VisualizaPessoa.jsx` recupera os parâmetros `tipo` e `id`;
+7. O arquivo `MainLayout.jsx` contém o componente `Outlet`.
+
+Somente após essa conferência, prossiga para a modificação do arquivo principal.
+
+---
+
+## 6. Ativando a navegação no App.jsx
+
+**Arquivo: `src/App.jsx` — MODIFICADO**
+
+Agora, realizaremos a última modificação necessária para integrar a aplicação.
+
+Até o capítulo anterior, o `App.jsx` apresentava diretamente o componente de cadastro.
+
+Entretanto, nossa aplicação agora possui diferentes telas.
+
+Por isso, utilizaremos o `BrowserRouter` para disponibilizar o contexto de navegação.
+
+### 6.1. Código completo do App.jsx
+
+Substitua integralmente o conteúdo do arquivo `App.jsx` pelo código abaixo.
+
+```jsx title="src/App.jsx"
+import {
+  BrowserRouter as Router
+} from "react-router-dom";
+
+import AppRoutes from "./routes/AppRoutes.jsx";
+
+function App() {
+
+  return (
+
+    <Router>
+
+      <AppRoutes />
+
+    </Router>
+
+  );
+
+}
+
+export default App;
+```
+
+Observe que o código é relativamente pequeno.
+
+Isso acontece porque as responsabilidades da aplicação estão distribuídas entre diferentes componentes.
+
+O `App.jsx` não precisa conhecer os detalhes do formulário, da listagem ou da persistência.
+
+Sua responsabilidade é inicializar o contexto de navegação e apresentar o componente que organiza as rotas.
+
+### 6.2. O papel do BrowserRouter
+
+O componente `BrowserRouter` permite que a aplicação utilize a URL do navegador para controlar a navegação.
+
+Observe:
+
+```jsx
+<Router>
+
+  <AppRoutes />
+
+</Router>
+```
+
+Todos os componentes apresentados dentro de `Router` poderão utilizar os recursos de navegação disponibilizados pelo React Router.
+
+Isso inclui os hooks:
+
+```javascript
+useNavigate()
+useParams()
+```
+
+Esses hooks foram utilizados nas etapas anteriores.
+
+Agora, com a ativação do `BrowserRouter`, poderão funcionar dentro do contexto de navegação da aplicação.
+
+:::warning Atenção
+
+O `BrowserRouter` deverá envolver o conjunto de rotas da aplicação.
+
+Evite criar outro `BrowserRouter` dentro dos componentes `ListaPessoas`, `VisualizaPessoa` ou `PessoaFormOO`.
+
+Nesta implementação, utilizaremos apenas um contexto principal de navegação, definido no `App.jsx`.
+
+:::
+
+---
+
+## 7. Executando a aplicação
+
+Com todos os arquivos preparados, execute o projeto.
+
+No terminal, utilize:
+
+```bash
+npm run dev
+```
+
+Em seguida, abra o endereço informado pelo ambiente de desenvolvimento.
+
+Ao acessar a aplicação, o React Router deverá identificar a rota inicial:
+
+```text
+/
+```
+
+A configuração:
+
+```jsx
+<Route
+  index
+  element={
+    <Navigate
+      to="cadastrar"
+      replace
+    />
+  }
+/>
+```
+
+redirecionará o usuário para:
+
+```text
+/cadastrar
+```
+
+Assim, a aplicação apresentará inicialmente o formulário de cadastro.
+
+---
+
+## 8. Testando o cadastro de pessoas
+
+Começaremos verificando a operação **Create**.
+
+### 8.1. Cadastro de Pessoa Física
+
+Acesse:
+
+```text
+/cadastrar
+```
+
+Selecione Pessoa Física e preencha os campos disponíveis.
+
+Depois, clique no botão **Salvar**.
+
+O formulário deverá executar:
+
+```javascript
+dao.salvar(pessoa);
+```
+
+O registro será armazenado no `localStorage` por meio do `PFDAO`.
+
+Após a operação, a aplicação deverá apresentar uma mensagem de sucesso e navegar para a listagem.
+
+### 8.2. Cadastro de Pessoa Jurídica
+
+Retorne à tela de cadastro.
+
+Selecione Pessoa Jurídica e preencha os campos correspondentes.
+
+Depois, clique em **Salvar**.
+
+Nesse caso, o formulário utilizará o `PJDAO`.
+
+Os dados serão armazenados na chave:
+
+```text
+pessoasJuridicas
+```
+
+Observe que utilizamos o mesmo formulário para cadastrar dois tipos diferentes de pessoa.
+
+---
+
+## 9. Testando a listagem de registros
+
+Agora, acesse:
+
+```text
+/listar
+```
+
+O componente `ListaPessoas.jsx` será apresentado.
+
+Inicialmente, a listagem estará configurada para consultar pessoas físicas.
+
+Selecione Pessoa Jurídica para apresentar os registros correspondentes.
+
+Verifique:
+
+1. Se os registros cadastrados são apresentados;
+2. Se os nomes e e-mails correspondem aos dados informados;
+3. Se a coluna CPF ou CNPJ é apresentada conforme o tipo;
+4. Se o filtro por nome funciona;
+5. Se o botão Atualizar recupera os registros;
+6. Se os botões de ação estão disponíveis.
+
+### 9.1. Testando o filtro
+
+Digite parte do nome de uma pessoa cadastrada.
+
+O componente deverá atualizar a tabela conforme o texto informado.
+
+Por exemplo, ao pesquisar:
+
+```text
+Ana
+```
+
+a tabela deverá apresentar somente os registros cujo nome contém esse texto.
+
+Observe que a filtragem acontece no próprio componente React, após a recuperação dos registros pelo DAO.
+
+---
+
+## 10. Testando a visualização detalhada
+
+Na tabela, localize uma pessoa cadastrada.
+
+Clique no botão de visualização.
+
+A aplicação deverá navegar para uma URL semelhante a:
+
+```text
+/visualizar/PF/abc123
+```
+
+O componente `VisualizaPessoa.jsx` utilizará os parâmetros da URL para recuperar o registro.
+
+Verifique se são apresentados:
+
+- Nome;
+- E-mail;
+- CPF ou CNPJ;
+- Endereço;
+- Telefones;
+- Título eleitoral ou inscrição estadual.
+
+Também verifique se o botão **Voltar** retorna à listagem.
+
+:::tip Teste de navegação
+
+Observe que o endereço apresentado no navegador muda conforme a pessoa selecionada.
+
+Isso acontece porque utilizamos parâmetros dinâmicos nas rotas.
+
+Esses parâmetros permitem identificar o registro que deverá ser apresentado.
+
+:::
+
+---
+
+## 11. Testando a edição de registros
+
+A operação **Update** será realizada por meio do formulário desenvolvido na Parte 5.
+
+Na listagem, selecione uma pessoa e clique no botão de edição.
+
+A aplicação deverá navegar para uma URL semelhante a:
+
+```text
+/editar/PF/abc123
+```
+
+O componente `PessoaFormOO.jsx` deverá:
+
+1. Recuperar os parâmetros da URL;
+2. Identificar o modo de edição;
+3. Consultar o DAO correspondente;
+4. Localizar o registro pelo identificador;
+5. Preencher os campos com os valores existentes.
+
+Altere uma ou mais informações.
+
+Por exemplo:
+
+- Nome;
+- E-mail;
+- Endereço;
+- Telefone.
+
+Depois, clique em **Salvar Alterações**.
+
+O formulário deverá executar:
+
+```javascript
+dao.atualizar(id, pessoa);
+```
+
+O DAO localizará o registro correspondente e atualizará as informações armazenadas.
+
+Após a operação, a aplicação retornará à listagem.
+
+### 11.1. Verificando a atualização
+
+Localize novamente o registro alterado.
+
+Clique no botão de visualização e confira se os novos valores foram armazenados.
+
+Observe que o identificador do registro deverá permanecer o mesmo.
+
+A operação de edição modifica os atributos da pessoa, mas não cria uma nova identidade para o cadastro.
+
+---
+
+## 12. Testando a exclusão de registros
+
+A última operação do CRUD é **Delete**.
+
+Na listagem, localize um registro e clique no botão de exclusão.
+
+O componente `Popconfirm` apresentará uma solicitação de confirmação.
+
+Caso o usuário cancele, nenhuma alteração deverá ocorrer.
+
+Caso confirme, o componente executará:
+
+```javascript
+dao.excluir(id);
+```
+
+O DAO removerá o registro correspondente do `localStorage`.
+
+Em seguida, a listagem será atualizada.
+
+### 12.1. Verificando a exclusão
+
+Após excluir um registro:
+
+1. Confira se ele desapareceu da tabela;
+2. Clique no botão Atualizar;
+3. Verifique se o registro continua ausente;
+4. Consulte o `localStorage` nas ferramentas de desenvolvedor.
+
+O registro excluído não deverá estar presente no array correspondente.
+
+:::warning Exclusão definitiva
+
+Nesta implementação, a exclusão remove diretamente o registro do armazenamento local.
+
+Não desenvolvemos um mecanismo de recuperação de registros excluídos.
+
+Por esse motivo, a confirmação apresentada pelo `Popconfirm` é importante para reduzir exclusões acidentais.
+
+:::
+
+---
+
+## 13. Roteiro de validação do CRUD
+
+Para verificar o funcionamento da aplicação, utilize o roteiro abaixo.
+
+| Nº | Operação | Procedimento | Resultado esperado |
+|---|---|---|---|
+| 1 | Create | Cadastrar uma PF | Registro armazenado |
+| 2 | Create | Cadastrar uma PJ | Registro armazenado |
+| 3 | Read | Acessar a listagem de PF | PFs apresentadas |
+| 4 | Read | Alternar para PJ | PJs apresentadas |
+| 5 | Read | Filtrar por nome | Registros filtrados |
+| 6 | Read | Visualizar uma pessoa | Detalhes apresentados |
+| 7 | Update | Alterar o e-mail de uma PF | Registro atualizado |
+| 8 | Update | Alterar o endereço de uma PJ | Registro atualizado |
+| 9 | Delete | Cancelar uma exclusão | Registro preservado |
+| 10 | Delete | Confirmar uma exclusão | Registro removido |
+
+:::info Critério de conclusão
+
+O CRUD estará funcional quando as operações de criação, consulta, atualização e exclusão puderem ser realizadas pela interface e os resultados forem refletidos corretamente no `localStorage`.
+
+:::
+
+---
+
+## 14. Compreendendo a arquitetura final
+
+Com a integração concluída, nossa aplicação apresenta uma organização em camadas.
+
+### 14.1. Camada de apresentação
+
+Responsável pela interação com o usuário.
+
+Inclui:
+
+```text
+PessoaFormOO.jsx
+ListaPessoas.jsx
+VisualizaPessoa.jsx
+```
+
+Esses componentes apresentam informações, recebem dados e respondem às ações do usuário.
+
+### 14.2. Camada de navegação
+
+Responsável pela organização das rotas e pela estrutura compartilhada da interface.
+
+Inclui:
+
+```text
+App.jsx
+AppRoutes.jsx
+MainLayout.jsx
+```
+
+Essa camada determina qual componente será apresentado conforme a URL.
+
+### 14.3. Camada de domínio
+
+Responsável pela representação dos objetos da aplicação.
+
+Inclui as classes:
+
+```text
+PF
+PJ
+Endereco
+Telefone
+Titulo
+IE
+```
+
+Essas classes representam as entidades e seus atributos.
+
+### 14.4. Camada de persistência
+
+Responsável pelo armazenamento e pela recuperação dos registros.
+
+Inclui:
+
+```text
+PFDAOLocal.mjs
+PJDAOLocal.mjs
+```
+
+Esses DAOs utilizam o `localStorage` para executar as operações CRUD.
+
+A organização final será:
+
+```text
+              USUÁRIO
+                 │
+                 ▼
+        COMPONENTES REACT
+                 │
+                 ▼
+          CLASSES DE DOMÍNIO
+                 │
+                 ▼
+                DAOs
+                 │
+                 ▼
+            localStorage
+```
+
+Observe que a aplicação utiliza diferentes recursos tecnológicos, mas mantém responsabilidades organizadas.
+
+Essa separação facilitará a evolução do projeto nas próximas etapas.
+
+---
+
+## 15. Atividade de fixação
+
+Nesta atividade, você deverá executar e validar o CRUD completo desenvolvido ao longo do capítulo.
+
+### Parte A — Organização do projeto
+
+Verifique se todos os arquivos apresentados estão disponíveis nos diretórios correspondentes.
+
+Confirme que os imports utilizam os nomes definitivos dos arquivos.
+
+### Parte B — Integração
+
+Atualize o arquivo `App.jsx` conforme o código apresentado nesta etapa.
+
+Execute a aplicação e verifique se a rota inicial apresenta o formulário de cadastro.
+
+### Parte C — Operações CRUD
+
+Realize as seguintes operações:
+
+1. Cadastre duas pessoas físicas;
+2. Cadastre duas pessoas jurídicas;
+3. Acesse a listagem e alterne entre PF e PJ;
+4. Utilize o filtro para localizar um registro;
+5. Visualize os detalhes de uma pessoa física;
+6. Visualize os detalhes de uma pessoa jurídica;
+7. Edite o endereço de uma pessoa física;
+8. Edite o e-mail de uma pessoa jurídica;
+9. Exclua um registro;
+10. Verifique os dados armazenados no `localStorage`.
+
+### Parte D — Reflexão
+
+Responda às questões:
+
+1. Qual é a responsabilidade do arquivo `App.jsx`?
+2. Qual é a finalidade do componente `AppRoutes`?
+3. Por que utilizamos o componente `Outlet` no layout?
+4. Como o React Router identifica qual pessoa deverá ser editada?
+5. Por que o mesmo formulário pode ser utilizado para cadastro e edição?
+6. Qual é a responsabilidade dos DAOs?
+7. Qual é a vantagem de separar a camada de apresentação da camada de persistência?
+8. Quais limitações existem na utilização do `localStorage` como mecanismo de armazenamento?
+
+---
+
+## 16. Síntese da Parte 6
+
+Nesta etapa, concluímos a integração dos componentes desenvolvidos ao longo do capítulo.
+
+Modificamos o arquivo:
+
+```text
+src/App.jsx
+```
+
+E ativamos os recursos disponíveis em:
+
+```text
+src/routes/AppRoutes.jsx
+src/layout/MainLayout.jsx
+```
+
+Com isso, nossa aplicação passou a oferecer as quatro operações fundamentais do CRUD:
+
+- **Create:** cadastro de pessoas;
+- **Read:** listagem e visualização;
+- **Update:** edição de registros;
+- **Delete:** exclusão de registros.
+
+Também consolidamos a utilização de:
+
+- React Router;
+- Componentes React;
+- Hooks;
+- Ant Design;
+- Classes JavaScript;
+- Padrão DAO;
+- `localStorage`.
+
+A aplicação está organizada para permitir futuras evoluções, mantendo separadas as responsabilidades de apresentação, navegação, domínio e persistência.
+
+**No próximo capítulo, poderemos evoluir a aplicação para utilizar serviços REST, substituindo gradualmente a persistência local por uma camada de comunicação com um backend.**
