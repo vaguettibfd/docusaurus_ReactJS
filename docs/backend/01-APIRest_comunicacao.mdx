@@ -1,0 +1,6075 @@
+
+# API REST — Gerenciamento de Pessoas Físicas e Jurídicas
+
+## Parte 1 — Introdução e apresentação da API
+
+Nos capítulos anteriores, desenvolvemos uma aplicação para o gerenciamento de Pessoas Físicas (PF) e Pessoas Jurídicas (PJ), utilizando ReactJS para construir a interface e `localStorage` para armazenar os registros.
+
+Essa abordagem permitiu compreender as operações fundamentais de um sistema CRUD:
+
+- **Create:** cadastrar novos registros;
+- **Read:** consultar registros existentes;
+- **Update:** atualizar informações;
+- **Delete:** excluir registros.
+
+Entretanto, o armazenamento no `localStorage` apresenta uma característica importante: os dados permanecem associados ao navegador em que foram cadastrados.
+
+Em aplicações que precisam compartilhar informações entre diferentes usuários e dispositivos, é comum utilizar um **backend**, responsável por disponibilizar serviços de acesso e manipulação dos dados.
+
+Neste material, conheceremos uma API REST desenvolvida para o gerenciamento de Pessoas Físicas e Jurídicas.
+
+Nosso objetivo será compreender como essa API funciona e como podemos nos comunicar com ela utilizando requisições HTTP.
+
+:::info Objetivos de aprendizagem
+
+Ao final desta parte, você deverá ser capaz de:
+
+- Compreender o papel de uma API na comunicação entre sistemas;
+- Diferenciar cliente e servidor;
+- Reconhecer o conceito de API REST;
+- Identificar a URL base de uma API;
+- Compreender a finalidade de um endpoint;
+- Reconhecer os recursos disponibilizados pela API de Pessoas;
+- Acessar os endereços necessários para explorar o serviço.
+
+:::
+
+---
+
+## 1. O que é uma API?
+
+A sigla **API** significa *Application Programming Interface*, ou Interface de Programação de Aplicações.
+
+Uma API estabelece uma forma de comunicação entre diferentes sistemas ou componentes de software.
+
+Por meio dela, uma aplicação pode solicitar informações ou executar operações disponibilizadas por outra aplicação.
+
+Considere um sistema de cadastro de pessoas.
+
+O usuário interage com uma interface para informar nome, e-mail, CPF ou CNPJ.
+
+Entretanto, essa interface não precisa ser responsável pelo armazenamento definitivo dos dados.
+
+Ela pode encaminhar as informações para um serviço especializado, que executará a operação solicitada.
+
+Esse serviço disponibiliza uma API para que outras aplicações possam se comunicar com ele.
+
+### 1.1. Exemplo de utilização
+
+Imagine que um usuário deseja consultar as pessoas físicas cadastradas.
+
+A aplicação poderá enviar uma solicitação para a API.
+
+A API receberá a solicitação, consultará os registros disponíveis e retornará uma resposta.
+
+O processo pode ser representado da seguinte maneira:
+
+```text
+       APLICAÇÃO CLIENTE
+               |
+               | Solicita os registros
+               |
+               v
+          API REST
+               |
+               | Consulta os dados
+               |
+               v
+        ARMAZENAMENTO
+               |
+               | Retorna os registros
+               |
+               v
+          API REST
+               |
+               | Envia a resposta
+               |
+               v
+       APLICAÇÃO CLIENTE
+```
+
+Observe que a aplicação cliente não precisa conhecer os detalhes internos do armazenamento.
+
+Ela precisa conhecer apenas a forma correta de realizar a solicitação e interpretar a resposta.
+
+Essa separação é uma das principais vantagens da utilização de APIs.
+
+---
+
+## 2. Compreendendo a arquitetura cliente-servidor
+
+A comunicação com uma API REST normalmente envolve dois participantes principais: o **cliente** e o **servidor**.
+
+### 2.1. Cliente
+
+O cliente é a aplicação responsável por iniciar uma solicitação.
+
+Pode ser, por exemplo:
+
+- Uma aplicação web;
+- Um aplicativo para dispositivos móveis;
+- Um programa desenvolvido em outra linguagem;
+- Uma ferramenta de testes de requisições HTTP.
+
+Em nosso contexto, uma aplicação ReactJS poderá atuar como cliente da API de Pessoas.
+
+Entretanto, neste material, utilizaremos também ferramentas que permitem realizar requisições diretamente, sem desenvolver uma interface.
+
+### 2.2. Servidor
+
+O servidor é responsável por receber as solicitações, processá-las e retornar respostas.
+
+No caso da API de Pessoas, o servidor disponibiliza operações para consultar, cadastrar, atualizar e excluir registros.
+
+Por exemplo, quando um cliente solicita a listagem de Pessoas Físicas, o servidor recebe a requisição e retorna os dados correspondentes.
+
+### 2.3. Comunicação entre cliente e servidor
+
+A comunicação acontece por meio de mensagens.
+
+O cliente envia uma **requisição**, e o servidor retorna uma **resposta**.
+
+```text
+           CLIENTE                      SERVIDOR
+              |                             |
+              |-------- Requisição -------->|
+              |                             |
+              |       Processamento         |
+              |                             |
+              |<--------- Resposta ---------|
+              |                             |
+```
+
+Essa comunicação é conhecida como modelo de **requisição e resposta** (*request-response*).
+
+:::tip Importante
+
+O cliente não precisa conhecer a implementação interna do servidor.
+
+Para utilizar uma API, é necessário compreender quais operações estão disponíveis, como solicitá-las e como interpretar as respostas.
+
+:::
+
+---
+
+## 3. O que é uma API REST?
+
+REST é a sigla para *Representational State Transfer*.
+
+Trata-se de um estilo arquitetural utilizado no desenvolvimento de sistemas distribuídos.
+
+Uma API REST disponibiliza recursos que podem ser acessados e manipulados por meio de requisições HTTP.
+
+Em nosso exemplo, os principais recursos são:
+
+- Pessoas Físicas;
+- Pessoas Jurídicas.
+
+Cada recurso possui um endereço que permite identificá-lo.
+
+Esses endereços são utilizados em conjunto com os métodos HTTP para indicar a operação desejada.
+
+### 3.1. Recursos
+
+Um recurso representa uma informação ou entidade disponibilizada pela API.
+
+Por exemplo:
+
+```text
+/pf
+```
+
+representa o conjunto de Pessoas Físicas.
+
+Já:
+
+```text
+/pj
+```
+
+representa o conjunto de Pessoas Jurídicas.
+
+A API utiliza esses endereços para organizar o acesso aos dados.
+
+### 3.2. Métodos HTTP
+
+O método HTTP indica a operação que o cliente deseja executar.
+
+Os principais métodos utilizados pela API de Pessoas são:
+
+| Método | Finalidade |
+|---|---|
+| `GET` | Consultar informações |
+| `POST` | Cadastrar um novo registro |
+| `PUT` | Atualizar um registro existente |
+| `DELETE` | Excluir um registro |
+
+Observe que um mesmo endereço pode ser utilizado com métodos diferentes.
+
+Por exemplo:
+
+```http
+GET /pf
+```
+
+solicita a listagem de Pessoas Físicas.
+
+Já:
+
+```http
+POST /pf
+```
+
+solicita o cadastro de uma nova Pessoa Física.
+
+A diferença entre essas operações está no método HTTP utilizado.
+
+Estudaremos cada método com mais detalhes na próxima parte.
+
+---
+
+## 4. Conhecendo a API de Pessoas
+
+Utilizaremos uma API REST desenvolvida especificamente para o gerenciamento de Pessoas Físicas e Jurídicas.
+
+Essa API disponibiliza operações CRUD completas e permite realizar consultas por nome.
+
+Os dados de cada pessoa podem incluir informações de endereço, telefones e atributos específicos.
+
+### 4.1. Pessoa Física
+
+Uma Pessoa Física possui:
+
+- Nome;
+- E-mail;
+- CPF;
+- Endereço;
+- Telefones;
+- Título de Eleitor.
+
+### 4.2. Pessoa Jurídica
+
+Uma Pessoa Jurídica possui:
+
+- Nome;
+- E-mail;
+- CNPJ;
+- Endereço;
+- Telefones;
+- Inscrição Estadual.
+
+Observe que Pessoas Físicas e Jurídicas compartilham algumas características.
+
+Entretanto, cada tipo também possui atributos específicos.
+
+Essa organização corresponde ao modelo de objetos que estudamos nos capítulos anteriores.
+
+---
+
+## 5. Endereços para acessar e explorar a API
+
+Para acompanhar este material, utilizaremos três endereços principais.
+
+### 5.1. API publicada
+
+**URL base:**
+
+https://backend-pessoas.vercel.app/
+
+Esse endereço identifica o serviço que disponibiliza os recursos de Pessoas Físicas e Jurídicas.
+
+Todas as rotas apresentadas neste material serão relativas a essa URL.
+
+Por exemplo, para consultar o recurso `/pf`, utilizaremos:
+
+```text
+https://backend-pessoas.vercel.app/pf
+```
+
+Para consultar o recurso `/pj`, utilizaremos:
+
+```text
+https://backend-pessoas.vercel.app/pj
+```
+
+:::info URL base e rota
+
+A **URL base** identifica o endereço principal do serviço.
+
+A **rota** identifica o recurso ou a operação disponibilizada.
+
+A combinação desses elementos forma o endereço utilizado na requisição.
+
+:::
+
+### 5.2. Repositório GitHub
+
+**Código-fonte da API:**
+
+https://github.com/vaguettibfd/backend_pessoas/
+
+O repositório contém o projeto utilizado para desenvolver o backend.
+
+Neste momento, não será necessário compreender sua implementação.
+
+Nosso objetivo será utilizar os serviços disponibilizados pela API.
+
+Em capítulos posteriores, estudaremos a construção do backend, permitindo compreender como esses serviços são implementados.
+
+### 5.3. Ferramenta de testes HTTP
+
+**ReqBin:**
+
+https://reqbin.com/
+
+O ReqBin é uma ferramenta que permite construir e enviar requisições HTTP.
+
+Com ela, podemos:
+
+- Informar o endereço de uma API;
+- Selecionar o método HTTP;
+- Configurar informações da requisição;
+- Enviar dados em formato JSON;
+- Visualizar as respostas retornadas pelo servidor.
+
+Essa ferramenta será utilizada nas atividades práticas deste material.
+
+:::warning Atenção aos dados utilizados
+
+A API apresentada é um serviço publicado, e as operações de cadastro, atualização e exclusão podem modificar dados armazenados no servidor.
+
+Durante as atividades práticas, utilize exclusivamente registros fictícios, criados para testes.
+
+Não utilize CPF, CNPJ, endereço, telefone ou outras informações pessoais reais.
+
+:::
+
+---
+
+## 6. Compreendendo os endpoints
+
+Um **endpoint** é um endereço disponibilizado por uma API para acessar determinado recurso ou operação.
+
+Na API de Pessoas, temos endpoints para Pessoas Físicas e Jurídicas.
+
+### 6.1. Endpoints de Pessoa Física
+
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| `GET` | `/pf` | Listar Pessoas Físicas |
+| `GET` | `/pf/filtrar?nome=texto` | Filtrar Pessoas Físicas por nome |
+| `POST` | `/pf` | Cadastrar Pessoa Física |
+| `PUT` | `/pf/:id` | Atualizar Pessoa Física |
+| `DELETE` | `/pf/:id` | Excluir Pessoa Física |
+
+### 6.2. Endpoints de Pessoa Jurídica
+
+| Método | Endpoint | Finalidade |
+|---|---|---|
+| `GET` | `/pj` | Listar Pessoas Jurídicas |
+| `GET` | `/pj/filtrar?nome=texto` | Filtrar Pessoas Jurídicas por nome |
+| `POST` | `/pj` | Cadastrar Pessoa Jurídica |
+| `PUT` | `/pj/:id` | Atualizar Pessoa Jurídica |
+| `DELETE` | `/pj/:id` | Excluir Pessoa Jurídica |
+
+Observe que os endpoints apresentam uma organização semelhante.
+
+A principal diferença está no recurso utilizado:
+
+```text
+/pf
+```
+
+ou:
+
+```text
+/pj
+```
+
+Isso permite manter um padrão de comunicação para os diferentes tipos de pessoa.
+
+### 6.3. O significado de :id
+
+Algumas rotas apresentam a expressão:
+
+```text
+:id
+```
+
+Esse elemento representa um parâmetro que deverá ser substituído pelo identificador de um registro.
+
+Por exemplo:
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+Nesse exemplo, o identificador informa qual Pessoa Física deverá ser atualizada.
+
+O mesmo princípio será utilizado nas operações de exclusão.
+
+:::tip Identificadores
+
+Nos exemplos da API, os registros retornados apresentam um atributo chamado `_id`.
+
+Esse identificador é utilizado para distinguir os registros armazenados no backend.
+
+Nos capítulos anteriores, nossa aplicação com `localStorage` utilizava o atributo `id`.
+
+É importante reconhecer essa diferença ao trabalhar com os dados retornados pela API.
+
+:::
+
+---
+
+## 7. Primeira exploração da API
+
+Antes de estudar detalhadamente os métodos HTTP, realizaremos uma primeira consulta.
+
+### 7.1. Consultando Pessoas Físicas
+
+Abra uma nova aba do navegador e informe o endereço:
+
+https://backend-pessoas.vercel.app/pf
+
+Ao acessar esse endereço, o navegador enviará uma requisição HTTP utilizando o método `GET`.
+
+O servidor deverá processar a solicitação e retornar os registros disponíveis, caso o serviço esteja acessível.
+
+O conteúdo retornado poderá ser apresentado em formato JSON.
+
+### 7.2. Consultando Pessoas Jurídicas
+
+Agora, acesse:
+
+https://backend-pessoas.vercel.app/pj
+
+Observe que alteramos apenas o recurso solicitado.
+
+Na primeira consulta, utilizamos `/pf`.
+
+Na segunda consulta, utilizamos `/pj`.
+
+Essa diferença permite selecionar o conjunto de registros que desejamos consultar.
+
+:::note Sobre os resultados
+
+Os registros retornados dependem dos dados existentes no servidor no momento da consulta.
+
+Por isso, os resultados podem ser diferentes dos exemplos apresentados neste material.
+
+Caso o serviço esteja indisponível ou apresente um erro, a consulta poderá não retornar os dados esperados.
+
+:::
+
+---
+
+## 8. Compreendendo o formato JSON
+
+As informações disponibilizadas pela API são representadas em formato JSON.
+
+JSON significa *JavaScript Object Notation*.
+
+Trata-se de um formato textual utilizado para representar dados estruturados.
+
+Considere o exemplo:
+
+```json
+{
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+Observe que as informações são organizadas em pares de chave e valor.
+
+Por exemplo:
+
+```json
+"nome": "Ana Silva"
+```
+
+Nesse caso:
+
+- `nome` representa a chave;
+- `"Ana Silva"` representa o valor.
+
+O JSON também permite representar objetos aninhados e listas.
+
+### 8.1. Objetos aninhados
+
+Considere uma pessoa que possui endereço:
+
+```json
+{
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  }
+}
+```
+
+Observe que o atributo `endereco` contém outro objeto JSON.
+
+Essa organização permite representar relacionamentos entre entidades.
+
+### 8.2. Listas de objetos
+
+Agora, considere o atributo `telefones`:
+
+```json
+{
+  "nome": "Ana Silva",
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    },
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ]
+}
+```
+
+Nesse exemplo, o atributo `telefones` contém um array.
+
+Cada elemento do array representa um telefone.
+
+Essa estrutura é semelhante à organização dos objetos utilizada em nossa aplicação ReactJS.
+
+---
+
+## 9. Atividade de fixação — Explorando a API
+
+Nesta primeira atividade, você deverá reconhecer os recursos disponibilizados pela API e compreender a estrutura básica das respostas.
+
+### Parte A — Acesso aos recursos
+
+1. Abra a URL base da API:
+
+   https://backend-pessoas.vercel.app/
+
+2. Acesse o endpoint de Pessoas Físicas:
+
+   https://backend-pessoas.vercel.app/pf
+
+3. Acesse o endpoint de Pessoas Jurídicas:
+
+   https://backend-pessoas.vercel.app/pj
+
+4. Observe os resultados apresentados.
+
+5. Identifique se os registros são apresentados como objetos ou arrays JSON.
+
+### Parte B — Análise dos dados
+
+Considerando os registros retornados, responda:
+
+1. Quais atributos identificam uma Pessoa Física?
+2. Quais atributos identificam uma Pessoa Jurídica?
+3. Como os endereços são representados?
+4. Como os telefones são representados?
+5. Qual atributo é utilizado para identificar individualmente os registros?
+6. Quais atributos são comuns aos dois tipos de pessoa?
+7. Quais atributos são exclusivos de cada tipo?
+
+### Parte C — Compreensão da comunicação
+
+Responda:
+
+1. O que é uma API?
+2. Qual é a diferença entre cliente e servidor?
+3. O que representa um endpoint?
+4. Qual é a finalidade de uma URL base?
+5. Qual método HTTP é utilizado quando acessamos um endpoint diretamente pelo navegador?
+6. Qual é a diferença entre os endpoints `/pf` e `/pj`?
+7. Por que uma aplicação cliente não precisa conhecer os detalhes internos do armazenamento do servidor?
+
+---
+
+## 10. Síntese da Parte 1
+
+Nesta primeira parte, conhecemos os conceitos fundamentais necessários para compreender a comunicação com uma API REST.
+
+Estudamos:
+
+- O conceito de API;
+- A arquitetura cliente-servidor;
+- O modelo de requisição e resposta;
+- O conceito de API REST;
+- A identificação de recursos e endpoints;
+- Os métodos HTTP utilizados em operações CRUD;
+- A URL base da API de Pessoas;
+- O repositório GitHub do backend;
+- A ferramenta ReqBin;
+- A representação de dados em formato JSON.
+
+Também realizamos uma primeira exploração dos recursos disponibilizados pela API.
+
+**Na próxima parte, aprofundaremos o estudo da comunicação HTTP, compreendendo a estrutura das requisições e respostas, os métodos GET, POST, PUT e DELETE, os cabeçalhos, o corpo das mensagens e os códigos de status HTTP.**
+
+
+# Parte 2 — Comunicação HTTP: requisições, respostas e métodos
+
+Na parte anterior, conhecemos a API REST de gerenciamento de Pessoas Físicas (PF) e Pessoas Jurídicas (PJ).
+
+Compreendemos que uma API permite a comunicação entre diferentes aplicações e que essa comunicação ocorre por meio de requisições e respostas.
+
+Agora, estudaremos como essas mensagens são organizadas e quais informações precisamos fornecer para executar as operações disponibilizadas pela API.
+
+Ao longo desta parte, utilizaremos os endpoints da API de Pessoas para compreender os principais métodos HTTP e a estrutura das mensagens trocadas entre cliente e servidor.
+
+:::info Objetivos de aprendizagem
+
+Ao final desta parte, você deverá ser capaz de:
+
+- Compreender a estrutura de uma requisição HTTP;
+- Identificar os elementos de uma resposta HTTP;
+- Diferenciar os métodos `GET`, `POST`, `PUT` e `DELETE`;
+- Compreender a finalidade dos cabeçalhos HTTP;
+- Reconhecer o papel do corpo de uma requisição;
+- Identificar parâmetros de rota e parâmetros de consulta;
+- Interpretar códigos de status HTTP;
+- Relacionar os métodos HTTP às operações CRUD.
+
+:::
+
+---
+
+## 1. Como acontece a comunicação HTTP?
+
+HTTP significa *Hypertext Transfer Protocol*, ou Protocolo de Transferência de Hipertexto.
+
+É um protocolo utilizado para a comunicação entre clientes e servidores.
+
+Quando uma aplicação deseja consultar ou modificar informações disponibilizadas por uma API REST, ela envia uma requisição HTTP.
+
+O servidor recebe essa requisição, realiza o processamento necessário e retorna uma resposta.
+
+Considere uma consulta à API de Pessoas:
+
+```http
+GET https://backend-pessoas.vercel.app/pf
+```
+
+Essa requisição solicita ao servidor os registros de Pessoas Físicas.
+
+O processo pode ser representado da seguinte maneira:
+
+```text
+        CLIENTE                         SERVIDOR
+           |                                |
+           |   GET /pf                      |
+           |------------------------------->|
+           |                                |
+           |        Processamento           |
+           |                                |
+           |   HTTP 200 + Dados JSON        |
+           |<-------------------------------|
+           |                                |
+```
+
+Observe que a comunicação possui dois momentos:
+
+1. **Requisição:** o cliente solicita uma operação.
+2. **Resposta:** o servidor informa o resultado da operação.
+
+Essas mensagens possuem uma estrutura que estudaremos a seguir.
+
+---
+
+## 2. Estrutura de uma requisição HTTP
+
+Uma requisição HTTP é composta por elementos que permitem ao servidor compreender qual operação deverá ser executada.
+
+Os principais elementos são:
+
+- Método HTTP;
+- Endereço do recurso;
+- Cabeçalhos (*headers*);
+- Corpo da requisição (*body*), quando necessário.
+
+Considere o exemplo de uma requisição para cadastrar uma Pessoa Física:
+
+```http
+POST /pf HTTP/1.1
+Host: backend-pessoas.vercel.app
+Content-Type: application/json
+
+{
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+Esse exemplo apresenta uma representação didática da mensagem HTTP.
+
+Vamos compreender cada elemento.
+
+### 2.1. Método HTTP
+
+O método indica a operação que desejamos executar.
+
+No exemplo, utilizamos:
+
+```http
+POST
+```
+
+Esse método é utilizado para solicitar a criação de um novo recurso.
+
+### 2.2. Endereço do recurso
+
+O endereço identifica qual recurso será utilizado.
+
+No exemplo:
+
+```text
+/pf
+```
+
+representa o conjunto de Pessoas Físicas.
+
+A URL completa será:
+
+```text
+https://backend-pessoas.vercel.app/pf
+```
+
+### 2.3. Cabeçalhos HTTP
+
+Os cabeçalhos fornecem informações adicionais sobre a requisição.
+
+Observe:
+
+```http
+Content-Type: application/json
+```
+
+Esse cabeçalho informa que o corpo da requisição está representado em formato JSON.
+
+### 2.4. Corpo da requisição
+
+O corpo contém os dados enviados ao servidor.
+
+No exemplo:
+
+```json
+{
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+Essas informações serão utilizadas para solicitar o cadastro de uma nova Pessoa Física.
+
+:::tip Requisições com e sem corpo
+
+Nem toda requisição HTTP precisa apresentar um corpo.
+
+Uma consulta utilizando `GET`, por exemplo, normalmente não necessita enviar um JSON.
+
+Já uma operação de cadastro utilizando `POST` precisa informar os dados do registro que será criado.
+
+:::
+
+---
+
+## 3. Estrutura de uma resposta HTTP
+
+Após processar a requisição, o servidor retorna uma resposta.
+
+Uma resposta HTTP normalmente apresenta:
+
+- Código de status;
+- Cabeçalhos;
+- Corpo da resposta, quando houver.
+
+Considere o exemplo ilustrativo:
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+### 3.1. Código de status
+
+O código informa o resultado do processamento.
+
+No exemplo:
+
+```http
+201 Created
+```
+
+indica que um novo recurso foi criado.
+
+### 3.2. Cabeçalhos da resposta
+
+Os cabeçalhos também podem informar características da resposta.
+
+Por exemplo:
+
+```http
+Content-Type: application/json
+```
+
+indica que o conteúdo retornado está representado em JSON.
+
+### 3.3. Corpo da resposta
+
+O corpo contém os dados retornados pelo servidor.
+
+Observe que o exemplo apresenta o atributo:
+
+```json
+"_id": "675b2e1b7a9d48a52b7a0009"
+```
+
+Esse atributo representa o identificador do registro.
+
+O documento da API utiliza `_id` para identificar os registros armazenados no backend.
+
+:::note Identificadores
+
+Os valores de `_id` apresentados neste material são exemplos.
+
+Quando um registro é criado, o identificador retornado dependerá do processamento realizado pelo servidor.
+
+:::
+
+---
+
+## 4. Conhecendo os métodos HTTP
+
+A API de Pessoas disponibiliza quatro métodos principais para manipulação dos registros.
+
+Esses métodos correspondem às operações fundamentais do CRUD.
+
+| CRUD | Método HTTP | Finalidade |
+|---|---|---|
+| Create | `POST` | Criar um registro |
+| Read | `GET` | Consultar registros |
+| Update | `PUT` | Atualizar um registro |
+| Delete | `DELETE` | Excluir um registro |
+
+Vamos compreender como cada método é utilizado.
+
+---
+
+## 5. Método GET — Consultando informações
+
+O método `GET` é utilizado para solicitar informações ao servidor.
+
+Na API de Pessoas, podemos consultar os registros de Pessoas Físicas utilizando:
+
+```http
+GET /pf
+```
+
+A URL completa será:
+
+https://backend-pessoas.vercel.app/pf
+
+Para consultar Pessoas Jurídicas, utilizaremos:
+
+```http
+GET /pj
+```
+
+A URL completa será:
+
+https://backend-pessoas.vercel.app/pj
+
+### 5.1. Resposta de uma consulta
+
+Uma resposta de listagem pode apresentar um array JSON contendo diferentes registros.
+
+Por exemplo:
+
+```json
+[
+  {
+    "_id": "675b2e1b7a9d48a52b7a0009",
+    "nome": "Ana Silva",
+    "email": "ana@exemplo.com",
+    "cpf": "12345678903"
+  },
+  {
+    "_id": "675b2e1b7a9d48a52b7a0010",
+    "nome": "Carlos Souza",
+    "email": "carlos@exemplo.com",
+    "cpf": "98765432100"
+  }
+]
+```
+
+Observe que o resultado é representado por um array.
+
+Cada elemento corresponde a um objeto JSON.
+
+Os atributos apresentados dependerão das informações disponibilizadas pelo servidor.
+
+### 5.2. Características do GET
+
+O método `GET` é utilizado para recuperar informações.
+
+Uma requisição `GET` não deve modificar os dados armazenados no servidor.
+
+Isso significa que consultar uma listagem não deve criar, atualizar ou excluir registros.
+
+:::info Primeira consulta prática
+
+Abra o navegador e acesse:
+
+https://backend-pessoas.vercel.app/pf
+
+Observe o conteúdo retornado.
+
+Depois, acesse:
+
+https://backend-pessoas.vercel.app/pj
+
+Compare as estruturas dos registros apresentados.
+
+:::
+
+---
+
+## 6. Método POST — Criando registros
+
+O método `POST` é utilizado para solicitar a criação de um novo recurso.
+
+Na API de Pessoas, utilizaremos:
+
+```http
+POST /pf
+```
+
+para cadastrar uma Pessoa Física.
+
+Para cadastrar uma Pessoa Jurídica, utilizaremos:
+
+```http
+POST /pj
+```
+
+Diferentemente de uma consulta simples, a operação de cadastro precisa enviar os dados do novo registro.
+
+Esses dados são apresentados no corpo da requisição.
+
+### 6.1. Exemplo de cadastro de Pessoa Física
+
+Considere o seguinte JSON:
+
+```json
+{
+  "nome": "Ana Silva",
+  "email": "ana@exemplo.com",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "numero": "123456",
+    "zona": "001",
+    "secao": "002"
+  }
+}
+```
+
+Esse exemplo contém:
+
+- Dados básicos da Pessoa Física;
+- Um objeto de endereço;
+- Um array de telefones;
+- Um objeto de título eleitoral.
+
+A requisição será enviada para:
+
+```text
+https://backend-pessoas.vercel.app/pf
+```
+
+utilizando o método `POST`.
+
+Também será necessário informar:
+
+```http
+Content-Type: application/json
+```
+
+### 6.2. Resposta da operação
+
+Quando o cadastro é realizado com sucesso, a API documenta a utilização do status:
+
+```http
+201 Created
+```
+
+A resposta poderá apresentar os dados do registro criado, incluindo seu identificador `_id`.
+
+:::warning Atenção
+
+O JSON apresentado é um exemplo didático.
+
+Os valores utilizados são fictícios e não devem ser interpretados como dados pessoais reais.
+
+Durante os testes, utilize informações criadas exclusivamente para atividades de aprendizagem.
+
+:::
+
+---
+
+## 7. Método PUT — Atualizando registros
+
+O método `PUT` é utilizado pela API de Pessoas para atualizar registros existentes.
+
+Diferentemente do `POST`, precisamos informar qual registro deverá ser modificado.
+
+Para isso, utilizaremos seu identificador.
+
+Considere a rota:
+
+```http
+PUT /pf/:id
+```
+
+A expressão `:id` representa o identificador da Pessoa Física.
+
+Por exemplo:
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+O corpo da requisição deverá apresentar as informações que serão enviadas para atualização.
+
+### 7.1. Exemplo de atualização
+
+Considere o seguinte JSON:
+
+```json
+{
+  "nome": "Ana Maria Silva",
+  "email": "anamaria@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+Esse exemplo solicita a atualização dos atributos informados.
+
+O comportamento exato de atualização de atributos omitidos depende da implementação da API.
+
+No documento original, os exemplos de `PUT` também apresentam objetos associados, como título eleitoral e inscrição estadual.
+
+### 7.2. Atualização de Pessoa Jurídica
+
+Para atualizar uma Pessoa Jurídica, utilizaremos:
+
+```http
+PUT /pj/:id
+```
+
+Por exemplo:
+
+```http
+PUT /pj/675b301b7a9d48a52b7a0012
+```
+
+Observe que a estrutura da rota é semelhante à utilizada para Pessoas Físicas.
+
+A diferença está no recurso solicitado.
+
+:::tip POST e PUT
+
+Uma maneira simples de diferenciar essas operações é observar sua finalidade:
+
+- `POST /pf`: solicita a criação de uma Pessoa Física;
+- `PUT /pf/:id`: solicita a atualização de uma Pessoa Física identificada por `id`.
+
+Na API estudada, a atualização utiliza o método `PUT`.
+
+:::
+
+---
+
+## 8. Método DELETE — Excluindo registros
+
+O método `DELETE` é utilizado para solicitar a exclusão de um recurso.
+
+Na API de Pessoas, utilizaremos:
+
+```http
+DELETE /pf/:id
+```
+
+para excluir uma Pessoa Física.
+
+Para excluir uma Pessoa Jurídica, utilizaremos:
+
+```http
+DELETE /pj/:id
+```
+
+Observe que a operação depende do identificador do registro.
+
+### 8.1. Exemplo de exclusão
+
+Considere:
+
+```http
+DELETE /pf/675b2e1b7a9d48a52b7a0009
+```
+
+Essa requisição solicita a exclusão da Pessoa Física identificada pelo valor informado.
+
+No documento da API, a exclusão de uma Pessoa Física também remove o Título de Eleitor vinculado.
+
+Entretanto, telefones e endereços compartilhados não são removidos automaticamente.
+
+Para Pessoas Jurídicas, a exclusão também remove a Inscrição Estadual associada.
+
+### 8.2. Cuidados com a exclusão
+
+A exclusão é uma operação que modifica os dados armazenados no servidor.
+
+Por isso, devemos utilizá-la com cuidado.
+
+Durante as atividades práticas, exclua somente registros fictícios criados por você para testes.
+
+---
+
+## 9. Parâmetros de rota
+
+Algumas operações precisam identificar um registro específico.
+
+Para isso, utilizamos parâmetros de rota.
+
+Considere:
+
+```text
+/pf/:id
+```
+
+Nesse exemplo, `:id` representa um valor que será informado pelo cliente.
+
+Se o identificador do registro for:
+
+```text
+675b2e1b7a9d48a52b7a0009
+```
+
+a rota utilizada será:
+
+```text
+/pf/675b2e1b7a9d48a52b7a0009
+```
+
+Observe que o identificador faz parte do caminho da URL.
+
+Esse tipo de informação é chamado de **parâmetro de rota**.
+
+Na API de Pessoas, os parâmetros de rota são utilizados nas operações de atualização e exclusão.
+
+---
+
+## 10. Parâmetros de consulta — Query Parameters
+
+Além dos parâmetros de rota, uma URL pode apresentar parâmetros de consulta.
+
+Esses parâmetros são utilizados para fornecer informações adicionais à operação solicitada.
+
+Na API de Pessoas, podemos utilizar um parâmetro para filtrar registros pelo nome.
+
+Considere:
+
+```http
+GET /pf/filtrar?nome=ana
+```
+
+Nesse exemplo:
+
+- `/pf/filtrar` identifica o endpoint;
+- `?` inicia a lista de parâmetros de consulta;
+- `nome` identifica o parâmetro;
+- `ana` representa o valor informado.
+
+A URL completa será:
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+```
+
+### 10.1. Filtrando Pessoas Jurídicas
+
+O mesmo recurso está disponível para Pessoas Jurídicas:
+
+```http
+GET /pj/filtrar?nome=tech
+```
+
+URL completa:
+
+```text
+https://backend-pessoas.vercel.app/pj/filtrar?nome=tech
+```
+
+O documento da API informa que o filtro realiza uma busca parcial, sem diferenciar letras maiúsculas e minúsculas.
+
+Isso significa que uma pesquisa por:
+
+```text
+tech
+```
+
+poderá localizar registros com nomes como:
+
+```text
+Tech Soluções
+```
+
+ou:
+
+```text
+TECH SERVIÇOS
+```
+
+A documentação também informa que os resultados são organizados em ordem alfabética pelo nome.
+
+### 10.2. Diferença entre parâmetros de rota e consulta
+
+| Característica | Parâmetro de rota | Parâmetro de consulta |
+|---|---|---|
+| Exemplo | `/pf/123` | `/pf/filtrar?nome=ana` |
+| Finalidade | Identificar um recurso | Informar critérios de consulta |
+| Localização | Caminho da URL | Após o símbolo `?` |
+| Utilização na API | Atualização e exclusão | Filtro por nome |
+
+:::info Observação
+
+Os parâmetros de consulta também são conhecidos como *query parameters*.
+
+Eles são especialmente úteis em operações de pesquisa e filtragem.
+
+:::
+
+---
+
+## 11. Cabeçalhos HTTP
+
+Os cabeçalhos HTTP permitem transmitir informações adicionais sobre uma requisição ou resposta.
+
+Um dos cabeçalhos mais importantes para nossa API é:
+
+```http
+Content-Type: application/json
+```
+
+Esse cabeçalho informa que os dados enviados no corpo da requisição estão representados em JSON.
+
+### 11.1. Content-Type
+
+Considere uma operação de cadastro.
+
+O cliente envia:
+
+```http
+POST /pf HTTP/1.1
+Host: backend-pessoas.vercel.app
+Content-Type: application/json
+```
+
+Em seguida, apresenta o corpo JSON.
+
+O servidor utiliza essa informação para interpretar o formato dos dados recebidos.
+
+### 11.2. Accept
+
+Outro cabeçalho comum é:
+
+```http
+Accept: application/json
+```
+
+Ele informa que o cliente deseja receber uma representação JSON.
+
+Observe a diferença:
+
+| Cabeçalho | Finalidade |
+|---|---|
+| `Content-Type` | Informa o formato do conteúdo enviado |
+| `Accept` | Informa o formato de resposta desejado |
+
+:::tip Atenção
+
+O documento da API informa que as requisições com corpo utilizam `application/json`.
+
+O cabeçalho `Accept` foi apresentado aqui como conceito geral de HTTP; o documento não estabelece que seja obrigatório para utilizar essa API.
+
+:::
+
+---
+
+## 12. Códigos de status HTTP
+
+Quando o servidor processa uma requisição, ele retorna um código de status.
+
+Esse código informa o resultado da operação.
+
+Os códigos são organizados em grupos.
+
+| Grupo | Significado geral |
+|---|---|
+| `2xx` | Operação bem-sucedida |
+| `3xx` | Redirecionamento |
+| `4xx` | Erro relacionado à requisição |
+| `5xx` | Erro relacionado ao servidor |
+
+Vamos conhecer os códigos mais relevantes para a API de Pessoas.
+
+### 12.1. Status 200 — OK
+
+O código `200` indica que a requisição foi processada com sucesso.
+
+É frequentemente utilizado em operações de consulta.
+
+Por exemplo:
+
+```http
+GET /pf
+```
+
+pode retornar:
+
+```http
+200 OK
+```
+
+acompanhado dos registros solicitados.
+
+### 12.2. Status 201 — Created
+
+O código `201` indica que um recurso foi criado.
+
+O documento da API apresenta esse status nos exemplos de cadastro de Pessoas Físicas e Jurídicas.
+
+Por exemplo:
+
+```http
+POST /pf
+```
+
+pode retornar:
+
+```http
+201 Created
+```
+
+### 12.3. Status 400 — Bad Request
+
+O código `400` indica que o servidor não conseguiu processar a requisição devido a um problema nos dados enviados.
+
+O documento da API apresenta como exemplo a ausência de campos obrigatórios no corpo da requisição.
+
+### 12.4. Status 404 — Not Found
+
+O código `404` indica que o recurso solicitado não foi encontrado.
+
+Na documentação da API, esse erro é associado à tentativa de atualizar ou excluir um registro inexistente.
+
+### 12.5. Status 500 — Internal Server Error
+
+O código `500` indica que ocorreu um erro interno no servidor.
+
+O documento apresenta como possíveis exemplos problemas de conexão com o MongoDB ou falhas no DAO do backend.
+
+### 12.6. Resumo dos códigos
+
+| Código | Significado | Exemplo |
+|---|---|---|
+| `200` | Requisição bem-sucedida | Consulta realizada |
+| `201` | Recurso criado | Cadastro realizado |
+| `400` | Dados inválidos | Campo obrigatório ausente |
+| `404` | Recurso não encontrado | ID inexistente |
+| `500` | Erro interno do servidor | Falha no processamento |
+
+:::note Sobre os códigos apresentados
+
+Os códigos `201`, `400`, `404` e `500` aparecem no documento da API.
+
+O código `200` foi incluído para complementar a explicação dos resultados bem-sucedidos em HTTP.
+
+A documentação não especifica todos os códigos possíveis para cada endpoint.
+
+:::
+
+---
+
+## 13. Relacionando HTTP e CRUD
+
+Agora que conhecemos os métodos e a estrutura das mensagens, podemos relacionar esses conceitos às operações CRUD.
+
+Considere a seguinte tabela:
+
+| Operação | Método | Endpoint PF | Endpoint PJ |
+|---|---|---|---|
+| Criar | `POST` | `/pf` | `/pj` |
+| Consultar | `GET` | `/pf` | `/pj` |
+| Filtrar | `GET` | `/pf/filtrar?nome=...` | `/pj/filtrar?nome=...` |
+| Atualizar | `PUT` | `/pf/:id` | `/pj/:id` |
+| Excluir | `DELETE` | `/pf/:id` | `/pj/:id` |
+
+Observe que os métodos HTTP e os endpoints trabalham em conjunto.
+
+O método informa **qual operação** deverá ser executada.
+
+O endpoint informa **qual recurso** será utilizado.
+
+O corpo da requisição, quando necessário, informa **quais dados** serão enviados.
+
+---
+
+## 14. Atividade de fixação — Interpretando requisições HTTP
+
+Nesta atividade, você deverá analisar diferentes requisições e identificar suas características.
+
+### Parte A — Identificação dos métodos
+
+Considere as seguintes requisições:
+
+```http
+GET /pf
+```
+
+```http
+POST /pj
+```
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+```http
+DELETE /pj/675b301b7a9d48a52b7a0012
+```
+
+Para cada requisição, identifique:
+
+1. O método HTTP utilizado;
+2. O recurso solicitado;
+3. A operação CRUD correspondente;
+4. Se a operação precisa identificar um registro específico;
+5. Se a operação normalmente precisa enviar dados no corpo.
+
+### Parte B — Interpretando parâmetros
+
+Analise a URL:
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+```
+
+Responda:
+
+1. Qual é a URL base?
+2. Qual é o endpoint?
+3. Qual é o nome do parâmetro de consulta?
+4. Qual é o valor informado?
+5. Qual método HTTP deverá ser utilizado?
+6. Qual é a finalidade dessa requisição?
+
+### Parte C — Interpretando respostas
+
+Considere os seguintes códigos de status:
+
+```text
+201
+400
+404
+500
+```
+
+Explique o significado de cada código e apresente uma situação em que ele poderá ocorrer durante a utilização da API de Pessoas.
+
+### Parte D — Construindo requisições
+
+Escreva o método HTTP e o endpoint que deverão ser utilizados para:
+
+1. Listar todas as Pessoas Físicas;
+2. Listar todas as Pessoas Jurídicas;
+3. Filtrar Pessoas Físicas pelo nome "Maria";
+4. Filtrar Pessoas Jurídicas pelo nome "Soluções";
+5. Cadastrar uma nova Pessoa Física;
+6. Cadastrar uma nova Pessoa Jurídica;
+7. Atualizar uma Pessoa Física;
+8. Excluir uma Pessoa Jurídica.
+
+---
+
+## 15. Síntese da Parte 2
+
+Nesta parte, aprofundamos o estudo da comunicação HTTP utilizada pelas APIs REST.
+
+Compreendemos:
+
+- A estrutura de requisições e respostas;
+- A finalidade dos métodos HTTP;
+- A utilização de cabeçalhos;
+- O envio de dados em formato JSON;
+- A diferença entre parâmetros de rota e parâmetros de consulta;
+- Os códigos de status HTTP;
+- A relação entre métodos HTTP e operações CRUD.
+
+Também utilizamos os endpoints da API de Pessoas para exemplificar diferentes operações.
+
+**Na próxima parte, estudaremos detalhadamente a estrutura dos dados de Pessoas Físicas e Jurídicas, incluindo os objetos de endereço, telefones, título eleitoral e inscrição estadual, preparando a compreensão dos JSONs utilizados nas operações da API.**
+
+
+# Parte 3 — Estrutura dos dados: Pessoas Físicas e Jurídicas
+
+Nas partes anteriores, conhecemos a API REST de gerenciamento de Pessoas Físicas (PF) e Pessoas Jurídicas (PJ) e estudamos os principais elementos da comunicação HTTP.
+
+Compreendemos que uma requisição HTTP permite solicitar operações ao servidor e que as informações podem ser transmitidas utilizando o formato JSON.
+
+Agora, estudaremos **como os dados são organizados nas requisições e respostas da API de Pessoas**.
+
+Essa compreensão é importante porque, para cadastrar ou atualizar um registro, não basta conhecer o método HTTP e o endpoint. Também precisamos saber quais informações serão enviadas e como elas deverão ser estruturadas.
+
+:::info Objetivos de aprendizagem
+
+Ao final desta parte, você deverá ser capaz de:
+
+- Identificar os atributos de Pessoas Físicas e Jurídicas;
+- Reconhecer os atributos comuns e específicos de cada tipo;
+- Interpretar objetos JSON com estruturas aninhadas;
+- Compreender a representação de listas de telefones;
+- Diferenciar objetos aninhados de referências por identificador;
+- Reconhecer o atributo `_id` nas respostas da API;
+- Interpretar a representação de datas em JSON;
+- Construir documentos JSON compatíveis com os exemplos da API.
+
+:::
+
+---
+
+## 1. Organização dos dados na API
+
+A API de Pessoas disponibiliza dois recursos principais:
+
+- **Pessoa Física (PF)**;
+- **Pessoa Jurídica (PJ)**.
+
+Embora esses recursos possuam atributos específicos, também compartilham informações.
+
+Por exemplo, ambos apresentam:
+
+- Nome;
+- E-mail;
+- Endereço;
+- Telefones.
+
+A principal diferença está nos documentos e atributos próprios de cada tipo de pessoa.
+
+| Atributo | Pessoa Física | Pessoa Jurídica |
+|---|---|---|
+| Nome | Sim | Sim |
+| E-mail | Sim | Sim |
+| CPF | Sim | Não |
+| CNPJ | Não | Sim |
+| Endereço | Sim | Sim |
+| Telefones | Sim | Sim |
+| Título de Eleitor | Sim | Não |
+| Inscrição Estadual | Não | Sim |
+
+Observe que essa organização corresponde ao modelo de pessoas que estudamos anteriormente.
+
+Entretanto, agora as informações serão transmitidas entre aplicações por meio de documentos JSON.
+
+---
+
+## 2. Representando uma Pessoa Física
+
+Uma Pessoa Física possui informações básicas e objetos associados.
+
+No documento da API, os principais atributos são:
+
+| Atributo | Descrição |
+|---|---|
+| `nome` | Nome da Pessoa Física |
+| `email` | Endereço de e-mail |
+| `cpf` | CPF |
+| `endereco` | Informações do endereço |
+| `telefones` | Lista de telefones |
+| `titulo` | Informações do Título de Eleitor |
+
+Considere o seguinte exemplo, baseado na estrutura apresentada na documentação da API:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "email": "pessoa.fisica@exemplo.com",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "numero": "123456",
+    "zona": "001",
+    "secao": "002"
+  }
+}
+```
+
+Observe que o documento apresenta diferentes tipos de valores.
+
+Os atributos `nome`, `email` e `cpf` possuem valores textuais.
+
+O atributo `endereco` contém outro objeto JSON.
+
+O atributo `telefones` contém um array.
+
+O atributo `titulo` contém outro objeto JSON.
+
+Essa organização permite representar informações relacionadas dentro de um mesmo documento.
+
+:::tip Atenção aos exemplos
+
+Os dados apresentados neste material são ilustrativos.
+
+Durante as atividades, utilize exclusivamente informações fictícias, evitando o envio de dados pessoais reais para a API.
+
+:::
+
+---
+
+## 3. Compreendendo objetos aninhados
+
+Um objeto aninhado é um objeto JSON apresentado como valor de uma propriedade de outro objeto.
+
+Considere:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "endereco": {
+    "cep": "71000-000",
+    "cidade": "Brasília",
+    "uf": "DF"
+  }
+}
+```
+
+Nesse exemplo, `endereco` é uma propriedade da pessoa.
+
+Entretanto, seu valor não é uma string ou um número.
+
+O valor é outro objeto, contendo suas próprias propriedades.
+
+Podemos representar essa organização da seguinte maneira:
+
+```text
+Pessoa Física
+    │
+    ├── nome
+    │
+    └── endereco
+           │
+           ├── cep
+           ├── cidade
+           └── uf
+```
+
+### 3.1. Acessando atributos aninhados
+
+Em JavaScript, podemos acessar esses atributos utilizando a notação de ponto.
+
+Considere:
+
+```javascript
+const pessoa = {
+  nome: "Pessoa Física Exemplo",
+  endereco: {
+    cep: "71000-000",
+    cidade: "Brasília",
+    uf: "DF"
+  }
+};
+
+console.log(pessoa.nome);
+
+console.log(pessoa.endereco.cidade);
+```
+
+A primeira instrução acessa o atributo `nome`.
+
+A segunda acessa o atributo `cidade`, que pertence ao objeto `endereco`.
+
+**Resultado esperado:**
+
+```text
+Pessoa Física Exemplo
+Brasília
+```
+
+Observe que a organização do JSON permite representar diferentes níveis de informações.
+
+---
+
+## 4. Estrutura do endereço
+
+Na API de Pessoas, o endereço é representado por um objeto que contém diferentes atributos.
+
+O exemplo de cadastro apresentado na documentação utiliza:
+
+| Atributo | Descrição |
+|---|---|
+| `cep` | Código de Endereçamento Postal |
+| `logradouro` | Nome da rua, avenida ou outro logradouro |
+| `bairro` | Bairro |
+| `cidade` | Cidade |
+| `uf` | Unidade Federativa |
+| `regiao` | Região do Brasil |
+
+Exemplo:
+
+```json
+{
+  "cep": "71000-000",
+  "logradouro": "Rua das Palmeiras",
+  "bairro": "Centro",
+  "cidade": "Brasília",
+  "uf": "DF",
+  "regiao": "Centro-Oeste"
+}
+```
+
+Esse objeto poderá ser utilizado dentro de uma Pessoa Física ou Jurídica.
+
+Por exemplo:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "email": "pessoa.fisica@exemplo.com",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  }
+}
+```
+
+Observe que o endereço está associado à pessoa por meio da propriedade `endereco`.
+
+Não precisamos repetir os atributos de endereço diretamente no nível principal do objeto.
+
+Essa organização facilita a identificação das informações pertencentes a cada entidade.
+
+---
+
+## 5. Representando listas de telefones
+
+Uma pessoa pode possuir diferentes telefones.
+
+Por isso, a API utiliza um array para representar essa associação.
+
+Considere:
+
+```json
+{
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    },
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ]
+}
+```
+
+Observe que:
+
+- `telefones` é o nome da propriedade;
+- Os colchetes `[]` representam um array;
+- Cada elemento do array é um objeto JSON;
+- Cada telefone possui os atributos `ddd` e `numero`.
+
+A estrutura pode ser representada da seguinte maneira:
+
+```text
+Pessoa
+  │
+  └── telefones [ ]
+         │
+         ├── Telefone 1
+         │      ├── ddd
+         │      └── numero
+         │
+         └── Telefone 2
+                ├── ddd
+                └── numero
+```
+
+### 5.1. Acessando os telefones em JavaScript
+
+Considere:
+
+```javascript
+const pessoa = {
+  nome: "Pessoa Física Exemplo",
+  telefones: [
+    {
+      ddd: "61",
+      numero: "998887776"
+    },
+    {
+      ddd: "61",
+      numero: "33445566"
+    }
+  ]
+};
+
+console.log(pessoa.telefones[0].numero);
+
+console.log(pessoa.telefones[1].numero);
+```
+
+**Resultado esperado:**
+
+```text
+998887776
+33445566
+```
+
+Observe que utilizamos índices para acessar os elementos do array.
+
+O primeiro elemento possui índice `0`.
+
+O segundo elemento possui índice `1`.
+
+### 5.2. Percorrendo os telefones
+
+Também podemos utilizar uma estrutura de repetição para acessar todos os telefones.
+
+```javascript
+pessoa.telefones.forEach((telefone) => {
+  console.log(
+    `(${telefone.ddd}) ${telefone.numero}`
+  );
+});
+```
+
+**Resultado esperado:**
+
+```text
+(61) 998887776
+(61) 33445566
+```
+
+Esse exemplo demonstra como a representação em JSON pode ser manipulada utilizando recursos da linguagem JavaScript.
+
+:::info JSON e JavaScript
+
+JSON é um formato de representação de dados.
+
+JavaScript possui objetos e arrays com estruturas semelhantes, mas JSON e objetos JavaScript não são exatamente a mesma coisa.
+
+Por exemplo, em JSON, os nomes das propriedades precisam estar entre aspas duplas.
+
+Em JavaScript, essas aspas nem sempre são necessárias.
+
+:::
+
+---
+
+## 6. Representando o Título de Eleitor
+
+A Pessoa Física possui um objeto associado chamado `titulo`.
+
+Na documentação da API, esse objeto apresenta os seguintes atributos:
+
+| Atributo | Descrição |
+|---|---|
+| `numero` | Número do Título de Eleitor |
+| `zona` | Zona eleitoral |
+| `secao` | Seção eleitoral |
+
+Exemplo:
+
+```json
+{
+  "numero": "123456",
+  "zona": "001",
+  "secao": "002"
+}
+```
+
+Observe que esses valores foram representados como strings.
+
+Isso permite preservar caracteres como zeros à esquerda.
+
+Por exemplo, a zona eleitoral:
+
+```json
+"zona": "001"
+```
+
+não deve ser confundida com o número:
+
+```json
+"zona": 1
+```
+
+Embora os valores possam parecer semelhantes, a representação textual preserva exatamente a sequência informada.
+
+### 6.1. Associação com Pessoa Física
+
+O Título de Eleitor é apresentado dentro do documento de Pessoa Física:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "cpf": "12345678903",
+  "titulo": {
+    "numero": "123456",
+    "zona": "001",
+    "secao": "002"
+  }
+}
+```
+
+Na documentação da API, o Título de Eleitor é tratado como uma entidade vinculada à Pessoa Física.
+
+Esse relacionamento também aparece no comportamento da operação de exclusão, que remove o título associado quando a Pessoa Física é excluída.
+
+---
+
+## 7. Representando uma Pessoa Jurídica
+
+A Pessoa Jurídica apresenta uma organização semelhante à Pessoa Física.
+
+Entretanto, possui atributos específicos.
+
+Na documentação da API, os principais atributos são:
+
+| Atributo | Descrição |
+|---|---|
+| `nome` | Nome ou razão social |
+| `email` | E-mail |
+| `cnpj` | CNPJ |
+| `endereco` | Informações do endereço |
+| `telefones` | Lista de telefones |
+| `ie` | Informações da Inscrição Estadual |
+
+Considere o seguinte exemplo, adaptado dos dados apresentados na documentação:
+
+```json
+{
+  "nome": "Tech Soluções LTDA",
+  "email": "contato@tech.com.br",
+  "cnpj": "12345678000190",
+  "endereco": {
+    "cep": "72000-000",
+    "logradouro": "Avenida das Nações",
+    "bairro": "Taguatinga",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ],
+  "ie": {
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2023-01-01T00:00:00Z"
+  }
+}
+```
+
+Observe que o documento contém os atributos comuns às pessoas, mas utiliza:
+
+```json
+"cnpj": "12345678000190"
+```
+
+em vez de CPF.
+
+Também apresenta:
+
+```json
+"ie": {
+  "numero": "DF12345",
+  "estado": "DF",
+  "dataRegistro": "2023-01-01T00:00:00Z"
+}
+```
+
+em vez de Título de Eleitor.
+
+---
+
+## 8. Representando a Inscrição Estadual
+
+Na API, a Inscrição Estadual é representada pela propriedade `ie`.
+
+O objeto contém:
+
+| Atributo | Descrição |
+|---|---|
+| `numero` | Número da Inscrição Estadual |
+| `estado` | Unidade Federativa |
+| `dataRegistro` | Data de registro |
+
+Exemplo:
+
+```json
+{
+  "numero": "DF12345",
+  "estado": "DF",
+  "dataRegistro": "2023-01-01T00:00:00Z"
+}
+```
+
+Observe que `dataRegistro` contém uma representação textual de data e hora.
+
+### 8.1. Compreendendo a representação da data
+
+Considere:
+
+```text
+2023-01-01T00:00:00Z
+```
+
+Essa representação segue o padrão ISO 8601.
+
+Podemos identificar:
+
+| Parte | Significado |
+|---|---|
+| `2023` | Ano |
+| `01` | Mês |
+| `01` | Dia |
+| `T` | Separação entre data e hora |
+| `00:00:00` | Hora, minuto e segundo |
+| `Z` | Referência ao horário UTC |
+
+Observe que a API apresenta a data como uma string JSON.
+
+Isso é importante porque JSON não possui um tipo específico para representar datas.
+
+### 8.2. Interpretando a data em JavaScript
+
+Considere:
+
+```javascript
+const ie = {
+  numero: "DF12345",
+  estado: "DF",
+  dataRegistro: "2023-01-01T00:00:00Z"
+};
+
+const data = new Date(ie.dataRegistro);
+
+console.log(data.toISOString());
+```
+
+**Resultado esperado:**
+
+```text
+2023-01-01T00:00:00.000Z
+```
+
+O exemplo demonstra como uma string contendo data e hora pode ser interpretada pela linguagem JavaScript.
+
+:::tip Datas e fusos horários
+
+Ao apresentar datas e horários para usuários, é importante considerar o fuso horário.
+
+Uma data representada em UTC pode ser apresentada de maneira diferente quando convertida para o horário local.
+
+:::
+
+---
+
+## 9. Objetos aninhados e referências
+
+Até o momento, utilizamos exemplos em que os dados relacionados estão apresentados diretamente dentro do documento principal.
+
+Entretanto, a documentação da API informa que o serviço foi projetado para aceitar **objetos aninhados e referências por identificador**.
+
+Vamos compreender essa diferença.
+
+### 9.1. Objetos aninhados
+
+Considere:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "endereco": {
+    "cep": "71000-000",
+    "cidade": "Brasília",
+    "uf": "DF"
+  }
+}
+```
+
+Nesse caso, os dados do endereço estão apresentados diretamente dentro do objeto da pessoa.
+
+Essa organização é chamada de representação aninhada.
+
+### 9.2. Referências por identificador
+
+Outra possibilidade é representar o relacionamento por meio de um identificador.
+
+Considere o exemplo ilustrativo:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "endereco": "675b2e1b7a9d48a52b7a0005"
+}
+```
+
+Nesse exemplo, o atributo `endereco` não contém diretamente os dados do endereço.
+
+Ele contém uma referência para um registro identificado pelo valor informado.
+
+### 9.3. Comparando as representações
+
+**Objeto aninhado:**
+
+```json
+{
+  "endereco": {
+    "cep": "71000-000",
+    "cidade": "Brasília"
+  }
+}
+```
+
+**Referência:**
+
+```json
+{
+  "endereco": "675b2e1b7a9d48a52b7a0005"
+}
+```
+
+Observe que ambas as representações permitem indicar uma associação entre pessoa e endereço.
+
+Entretanto, apresentam estruturas diferentes.
+
+:::note Sobre a API de Pessoas
+
+A documentação informa que a API aceita tanto referências `_id` quanto objetos aninhados.
+
+Os exemplos de cadastro apresentados no documento utilizam objetos aninhados.
+
+O formato exato exigido para cada referência deve ser conferido na implementação do backend ou por meio de testes controlados. O exemplo de referência apresentado nesta seção é conceitual.
+
+:::
+
+---
+
+## 10. Compreendendo o atributo _id
+
+Nos exemplos de cadastro, não precisamos informar manualmente o identificador do novo registro.
+
+Entretanto, nas respostas da API, os registros apresentam o atributo `_id`.
+
+Considere o exemplo de resposta documentado para uma Pessoa Física:
+
+```json
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Leandro Vaguetti 3",
+  "email": "leandro@ifb.edu.br",
+  "cpf": "12345678903",
+  "endereco": {
+    "_id": "675b2e1b7a9d48a52b7a0005",
+    "cep": "71000-000",
+    "cidade": "Brasília"
+  },
+  "telefones": [
+    {
+      "_id": "675b2e1b7a9d48a52b7a0007",
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "_id": "675b2e1b7a9d48a52b7a0008",
+    "numero": "123456"
+  }
+}
+```
+
+Observe que o atributo `_id` aparece em diferentes objetos.
+
+Temos um identificador para a Pessoa Física e identificadores próprios para os objetos relacionados apresentados na resposta.
+
+Isso permite distinguir as entidades envolvidas.
+
+### 10.1. Identificador da pessoa
+
+```json
+"_id": "675b2e1b7a9d48a52b7a0009"
+```
+
+Identifica o registro da Pessoa Física.
+
+### 10.2. Identificador do endereço
+
+```json
+"_id": "675b2e1b7a9d48a52b7a0005"
+```
+
+Identifica o endereço apresentado na resposta.
+
+### 10.3. Identificador do telefone
+
+```json
+"_id": "675b2e1b7a9d48a52b7a0007"
+```
+
+Identifica o telefone apresentado.
+
+### 10.4. Identificador do título
+
+```json
+"_id": "675b2e1b7a9d48a52b7a0008"
+```
+
+Identifica o Título de Eleitor.
+
+:::info Identificadores e operações HTTP
+
+O identificador da pessoa será importante nas operações de atualização e exclusão.
+
+Por exemplo:
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+ou:
+
+```http
+DELETE /pf/675b2e1b7a9d48a52b7a0009
+```
+
+Nesses casos, utilizamos o identificador da pessoa, e não o identificador de seu endereço ou telefone.
+
+:::
+
+---
+
+## 11. Comparando os documentos de cadastro e resposta
+
+Uma característica importante da comunicação com APIs é que o documento enviado pelo cliente pode ser diferente do documento retornado pelo servidor.
+
+Vamos observar essa diferença.
+
+### 11.1. Documento enviado no cadastro
+
+Considere:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo",
+  "email": "pessoa.fisica@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+Esse documento representa as informações que o cliente deseja enviar.
+
+### 11.2. Documento retornado pelo servidor
+
+Uma resposta ilustrativa poderá apresentar:
+
+```json
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Pessoa Física Exemplo",
+  "email": "pessoa.fisica@exemplo.com",
+  "cpf": "12345678903"
+}
+```
+
+Observe que o documento retornado apresenta o atributo `_id`.
+
+Isso demonstra que o servidor pode acrescentar informações ao processar uma operação.
+
+### 11.3. Por que os documentos podem ser diferentes?
+
+Durante o processamento de uma requisição, o servidor pode:
+
+- Gerar identificadores;
+- Validar informações;
+- Processar objetos associados;
+- Recuperar dados relacionados;
+- Organizar a representação enviada na resposta.
+
+Os exemplos da API mostram que as respostas de cadastro incluem identificadores que não aparecem nos documentos enviados.
+
+Entretanto, o comportamento exato depende da implementação do serviço.
+
+---
+
+## 12. Relações entre as entidades
+
+A estrutura apresentada na documentação permite identificar diferentes associações.
+
+Podemos representar conceitualmente essas relações da seguinte maneira:
+
+```text
+                   PESSOA
+                      │
+           ┌──────────┴──────────┐
+           │                     │
+           ▼                     ▼
+     PESSOA FÍSICA        PESSOA JURÍDICA
+           │                     │
+           ├── Endereço          ├── Endereço
+           │                     │
+           ├── Telefones         ├── Telefones
+           │                     │
+           └── Título            └── Inscrição
+               Eleitoral             Estadual
+```
+
+A documentação informa que:
+
+- A Pessoa Física possui um Título de Eleitor associado;
+- A Pessoa Jurídica possui uma Inscrição Estadual associada;
+- Telefones e endereços podem ser entidades compartilhadas;
+- A exclusão de uma Pessoa Física remove seu título vinculado;
+- A exclusão de uma Pessoa Jurídica remove sua inscrição estadual vinculada;
+- Telefones e endereços compartilhados não são excluídos automaticamente nessas operações.
+
+Essas características serão importantes quando estudarmos os endpoints de exclusão.
+
+:::tip Relacionamentos entre entidades
+
+Uma associação entre entidades pode ser representada de diferentes maneiras em uma API.
+
+A representação enviada ou recebida em JSON não determina, por si só, como os dados são armazenados internamente.
+
+Por isso, devemos distinguir a estrutura de comunicação da implementação do banco de dados.
+
+:::
+
+---
+
+## 13. Atividade de fixação — Interpretando documentos JSON
+
+Nesta atividade, você deverá analisar a estrutura dos documentos utilizados pela API de Pessoas.
+
+### Parte A — Identificando atributos
+
+Considere o JSON:
+
+```json
+{
+  "nome": "Empresa Exemplo LTDA",
+  "email": "contato@empresaexemplo.com",
+  "cnpj": "12345678000190",
+  "endereco": {
+    "cep": "72000-000",
+    "logradouro": "Avenida Central",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ],
+  "ie": {
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2023-01-01T00:00:00Z"
+  }
+}
+```
+
+Responda:
+
+1. O documento representa uma Pessoa Física ou Jurídica?
+2. Qual atributo permite identificar o tipo de pessoa?
+3. Quais atributos são comuns às Pessoas Físicas e Jurídicas?
+4. Qual propriedade contém um objeto de endereço?
+5. Qual propriedade contém um array?
+6. Quantos telefones estão representados?
+7. Qual propriedade representa a Inscrição Estadual?
+8. Como a data de registro está representada?
+
+### Parte B — Construindo um documento JSON
+
+Construa um documento JSON que represente uma Pessoa Física fictícia contendo:
+
+- Nome;
+- E-mail;
+- CPF fictício;
+- Endereço;
+- Dois telefones;
+- Título de Eleitor.
+
+Utilize a estrutura apresentada nesta parte.
+
+**Atenção:** mantenha os nomes dos atributos utilizados pela API.
+
+### Parte C — Objetos aninhados e referências
+
+Explique a diferença entre:
+
+```json
+{
+  "endereco": {
+    "cep": "71000-000",
+    "cidade": "Brasília"
+  }
+}
+```
+
+e:
+
+```json
+{
+  "endereco": "675b2e1b7a9d48a52b7a0005"
+}
+```
+
+Em sua resposta, identifique qual representação contém os dados diretamente e qual utiliza um identificador.
+
+### Parte D — Interpretando identificadores
+
+Considere:
+
+```json
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Pessoa Física Exemplo",
+  "endereco": {
+    "_id": "675b2e1b7a9d48a52b7a0005",
+    "cidade": "Brasília"
+  }
+}
+```
+
+Responda:
+
+1. Qual é o identificador da pessoa?
+2. Qual é o identificador do endereço?
+3. Qual identificador deverá ser utilizado para atualizar a Pessoa Física?
+4. Por que os identificadores apresentados são diferentes?
+
+---
+
+## 14. Síntese da Parte 3
+
+Nesta parte, estudamos como a API REST de Pessoas organiza as informações transmitidas em formato JSON.
+
+Compreendemos:
+
+- A estrutura dos documentos de Pessoas Físicas;
+- A estrutura dos documentos de Pessoas Jurídicas;
+- A utilização de objetos aninhados;
+- A representação de arrays de telefones;
+- Os atributos de endereço, título eleitoral e inscrição estadual;
+- A representação textual de datas;
+- A diferença entre objetos aninhados e referências;
+- A utilização do atributo `_id`;
+- As diferenças entre documentos enviados e recebidos;
+- As associações existentes entre as entidades.
+
+Esses conceitos serão fundamentais para compreender as próximas operações HTTP.
+
+**Na próxima parte, estudaremos os endpoints de Pessoa Física, analisando as operações GET, POST, PUT e DELETE, além da filtragem por nome, com exemplos completos de requisições e respostas.**
+
+
+# Parte 4 — Endpoints de Pessoa Física
+
+Nas partes anteriores, estudamos os conceitos de API REST, comunicação HTTP e representação de dados em formato JSON.
+
+Agora, utilizaremos esses conhecimentos para compreender as operações disponibilizadas pela API de gerenciamento de Pessoas Físicas.
+
+A API permite consultar, cadastrar, atualizar e excluir Pessoas Físicas, além de realizar pesquisas por nome.
+
+Essas operações são disponibilizadas por meio de endpoints HTTP.
+
+:::info Objetivos de aprendizagem
+
+Ao final desta parte, você deverá ser capaz de:
+
+- Identificar os endpoints utilizados no gerenciamento de Pessoas Físicas;
+- Consultar os registros disponíveis utilizando `GET`;
+- Realizar pesquisas utilizando parâmetros de consulta;
+- Construir um documento JSON para cadastro;
+- Compreender o envio de dados utilizando `POST`;
+- Identificar um registro para atualização utilizando `PUT`;
+- Compreender a exclusão de registros utilizando `DELETE`;
+- Interpretar respostas e códigos de status HTTP;
+- Reconhecer a importância dos identificadores nas operações de atualização e exclusão.
+
+:::
+
+---
+
+## 1. Conhecendo os endpoints de Pessoa Física
+
+A API de Pessoas disponibiliza um conjunto de operações para manipulação dos registros de Pessoas Físicas.
+
+A URL base do serviço é:
+
+https://backend-pessoas.vercel.app/
+
+Os endpoints utilizados são:
+
+| Método HTTP | Endpoint | Finalidade |
+|---|---|---|
+| `GET` | `/pf` | Listar Pessoas Físicas |
+| `GET` | `/pf/filtrar?nome=texto` | Filtrar Pessoas Físicas pelo nome |
+| `POST` | `/pf` | Cadastrar uma Pessoa Física |
+| `PUT` | `/pf/:id` | Atualizar uma Pessoa Física |
+| `DELETE` | `/pf/:id` | Excluir uma Pessoa Física |
+
+Observe que algumas operações utilizam o mesmo endpoint.
+
+Por exemplo:
+
+```http
+GET /pf
+```
+
+e:
+
+```http
+POST /pf
+```
+
+Embora utilizem o mesmo recurso, representam operações diferentes.
+
+O método `GET` solicita uma consulta, enquanto o método `POST` solicita a criação de um registro.
+
+:::tip Método HTTP e endpoint
+
+Para compreender uma operação REST, precisamos observar dois elementos:
+
+- **Método HTTP:** indica o que desejamos fazer;
+- **Endpoint:** indica o recurso com o qual desejamos trabalhar.
+
+:::
+
+---
+
+## 2. Consultando Pessoas Físicas — GET /pf
+
+A primeira operação que estudaremos é a listagem de Pessoas Físicas.
+
+Essa operação utiliza o método HTTP `GET`.
+
+### 2.1. Estrutura da requisição
+
+**Método:**
+
+```http
+GET
+```
+
+**Endpoint:**
+
+```text
+/pf
+```
+
+**URL completa:**
+
+https://backend-pessoas.vercel.app/pf
+
+A requisição pode ser representada da seguinte maneira:
+
+```http
+GET /pf HTTP/1.1
+Host: backend-pessoas.vercel.app
+Accept: application/json
+```
+
+Observe que não precisamos enviar um documento JSON no corpo dessa requisição.
+
+Nosso objetivo é solicitar os registros disponíveis.
+
+### 2.2. Compreendendo a resposta
+
+Quando a consulta é realizada com sucesso, o servidor retorna os dados correspondentes.
+
+Uma resposta de listagem pode apresentar um array JSON.
+
+Considere o exemplo ilustrativo:
+
+```json
+[
+  {
+    "_id": "675b2e1b7a9d48a52b7a0009",
+    "nome": "Ana Silva",
+    "email": "ana@exemplo.com",
+    "cpf": "12345678903",
+    "endereco": {
+      "_id": "675b2e1b7a9d48a52b7a0005",
+      "cep": "71000-000",
+      "logradouro": "Rua das Palmeiras",
+      "bairro": "Centro",
+      "cidade": "Brasília",
+      "uf": "DF",
+      "regiao": "Centro-Oeste"
+    },
+    "telefones": [
+      {
+        "_id": "675b2e1b7a9d48a52b7a0007",
+        "ddd": "61",
+        "numero": "998887776"
+      }
+    ],
+    "titulo": {
+      "_id": "675b2e1b7a9d48a52b7a0008",
+      "numero": "123456",
+      "zona": "001",
+      "secao": "002"
+    }
+  }
+]
+```
+
+Observe que a resposta contém um array.
+
+Cada elemento representa uma Pessoa Física.
+
+Além dos atributos básicos, os registros podem apresentar objetos relacionados, como endereço, telefones e título eleitoral.
+
+:::note Sobre os resultados
+
+Os dados apresentados acima são ilustrativos.
+
+Os registros efetivamente retornados dependerão das informações existentes no servidor no momento da consulta.
+
+Se não houver registros, uma listagem poderá retornar um array vazio, dependendo do comportamento implementado no backend.
+
+:::
+
+### 2.3. Primeira consulta prática
+
+Abra uma nova aba do navegador e acesse:
+
+https://backend-pessoas.vercel.app/pf
+
+Observe o resultado apresentado.
+
+Identifique:
+
+1. Se a resposta contém um array;
+2. Quantos registros foram retornados;
+3. Quais atributos estão presentes;
+4. Como os objetos relacionados são representados;
+5. Qual atributo identifica cada Pessoa Física.
+
+:::info Consulta pelo navegador
+
+Quando informamos uma URL diretamente na barra de endereços do navegador, normalmente realizamos uma requisição `GET`.
+
+Por isso, essa é uma maneira simples de explorar endpoints de consulta.
+
+Para utilizar outros métodos HTTP, como `POST`, `PUT` e `DELETE`, precisaremos de uma ferramenta apropriada.
+
+:::
+
+---
+
+## 3. Filtrando Pessoas Físicas pelo nome
+
+Além da listagem completa, a API permite pesquisar Pessoas Físicas utilizando parte do nome.
+
+Essa operação também utiliza o método `GET`.
+
+Entretanto, apresenta um parâmetro de consulta.
+
+### 3.1. Estrutura da requisição
+
+**Método:**
+
+```http
+GET
+```
+
+**Endpoint:**
+
+```text
+/pf/filtrar
+```
+
+**Parâmetro de consulta:**
+
+```text
+nome
+```
+
+Considere:
+
+```http
+GET /pf/filtrar?nome=ana
+```
+
+URL completa:
+
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+
+Observe que a URL apresenta o símbolo `?`.
+
+Esse símbolo indica o início dos parâmetros de consulta.
+
+Em seguida, temos:
+
+```text
+nome=ana
+```
+
+Nesse exemplo, `nome` representa o parâmetro e `ana` representa o valor utilizado na pesquisa.
+
+### 3.2. Como funciona a filtragem?
+
+A documentação da API informa que a pesquisa apresenta as seguintes características:
+
+- Utiliza correspondência parcial;
+- Não diferencia letras maiúsculas e minúsculas;
+- Retorna os resultados organizados pelo nome.
+
+Isso significa que uma pesquisa por:
+
+```text
+ana
+```
+
+pode localizar registros como:
+
+```text
+Ana Silva
+Mariana Souza
+ANA CAROLINA
+```
+
+Observe que o texto pesquisado pode aparecer em diferentes posições do nome.
+
+### 3.3. Exemplo de resposta
+
+Considere a seguinte resposta ilustrativa:
+
+```json
+[
+  {
+    "_id": "675b2e1b7a9d48a52b7a0009",
+    "nome": "Ana Carolina",
+    "email": "ana.carolina@exemplo.com",
+    "cpf": "12345678903"
+  },
+  {
+    "_id": "675b2e1b7a9d48a52b7a0010",
+    "nome": "Ana Silva",
+    "email": "ana.silva@exemplo.com",
+    "cpf": "98765432100"
+  },
+  {
+    "_id": "675b2e1b7a9d48a52b7a0011",
+    "nome": "Mariana Souza",
+    "email": "mariana@exemplo.com",
+    "cpf": "11122233344"
+  }
+]
+```
+
+Observe que os nomes estão organizados em ordem alfabética.
+
+### 3.4. Exercício de exploração
+
+Acesse:
+
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+
+Depois, altere o valor do parâmetro `nome`.
+
+Experimente pesquisar por diferentes sequências de caracteres.
+
+Observe como o resultado muda.
+
+:::tip Parâmetros de consulta
+
+Quando um valor de pesquisa contém espaços ou caracteres especiais, é necessário representá-lo adequadamente na URL.
+
+Por exemplo, o texto:
+
+```text
+Ana Maria
+```
+
+pode ser representado como:
+
+```text
+Ana%20Maria
+```
+
+Assim, a URL será:
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=Ana%20Maria
+```
+
+Esse processo é conhecido como codificação de URL.
+
+:::
+
+---
+
+## 4. Cadastrando uma Pessoa Física — POST /pf
+
+A operação de cadastro utiliza o método HTTP `POST`.
+
+Diferentemente das consultas, precisamos enviar os dados do novo registro para o servidor.
+
+Esses dados serão representados por um documento JSON.
+
+### 4.1. Estrutura da requisição
+
+**Método:**
+
+```http
+POST
+```
+
+**Endpoint:**
+
+```text
+/pf
+```
+
+**URL completa:**
+
+https://backend-pessoas.vercel.app/pf
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+**Corpo:**
+
+Um documento JSON contendo os atributos da Pessoa Física.
+
+### 4.2. Exemplo completo de cadastro
+
+O documento original da API apresenta a seguinte estrutura de cadastro:
+
+```json
+{
+  "nome": "Leandro Vaguetti 3",
+  "email": "leandro@ifb.edu.br",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "numero": "123456",
+    "zona": "001",
+    "secao": "002"
+  }
+}
+```
+
+Observe que o documento contém todas as estruturas estudadas na Parte 3.
+
+Temos:
+
+- Atributos básicos da Pessoa Física;
+- Um objeto de endereço;
+- Um array de telefones;
+- Um objeto de título eleitoral.
+
+### 4.3. Compreendendo os dados enviados
+
+Vamos analisar os principais elementos.
+
+**Dados básicos:**
+
+```json
+{
+  "nome": "Leandro Vaguetti 3",
+  "email": "leandro@ifb.edu.br",
+  "cpf": "12345678903"
+}
+```
+
+Esses atributos identificam as informações principais da Pessoa Física.
+
+**Endereço:**
+
+```json
+{
+  "cep": "71000-000",
+  "logradouro": "Rua das Palmeiras",
+  "bairro": "Centro",
+  "cidade": "Brasília",
+  "uf": "DF",
+  "regiao": "Centro-Oeste"
+}
+```
+
+O endereço é apresentado como objeto aninhado.
+
+**Telefones:**
+
+```json
+[
+  {
+    "ddd": "61",
+    "numero": "998887776"
+  }
+]
+```
+
+Os telefones são representados por um array.
+
+**Título de Eleitor:**
+
+```json
+{
+  "numero": "123456",
+  "zona": "001",
+  "secao": "002"
+}
+```
+
+O título eleitoral é apresentado como um objeto associado à Pessoa Física.
+
+### 4.4. O que acontece após o envio?
+
+Quando o cliente envia a requisição, o servidor recebe o documento JSON e realiza o processamento necessário.
+
+De acordo com a documentação, o cadastro pode envolver a criação dos objetos relacionados e o registro da Pessoa Física.
+
+O processo pode ser representado conceitualmente da seguinte maneira:
+
+```text
+             CLIENTE
+                |
+                | POST /pf
+                | JSON da Pessoa Física
+                v
+             API REST
+                |
+                | Recebe os dados
+                |
+                | Processa os objetos
+                | relacionados
+                |
+                | Registra a pessoa
+                v
+             RESPOSTA
+                |
+                | Status HTTP
+                | Dados cadastrados
+                | Identificadores
+                v
+             CLIENTE
+```
+
+:::note Processamento interno
+
+O esquema acima representa conceitualmente a operação.
+
+A sequência exata de processamento depende da implementação do backend, que será estudada em capítulos posteriores.
+
+:::
+
+---
+
+## 5. Interpretando a resposta do cadastro
+
+Quando o cadastro é realizado com sucesso, a documentação apresenta uma resposta com status:
+
+```http
+201 Created
+```
+
+O código `201` indica que um novo recurso foi criado.
+
+A resposta pode incluir os dados da Pessoa Física e os identificadores dos objetos relacionados.
+
+Considere o exemplo ilustrativo, com estrutura semelhante à resposta documentada:
+
+```json
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Leandro Vaguetti 3",
+  "email": "leandro@ifb.edu.br",
+  "cpf": "12345678903",
+  "endereco": {
+    "_id": "675b2e1b7a9d48a52b7a0005",
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "_id": "675b2e1b7a9d48a52b7a0007",
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "_id": "675b2e1b7a9d48a52b7a0008",
+    "numero": "123456",
+    "zona": "001",
+    "secao": "002"
+  }
+}
+```
+
+Observe que a resposta apresenta atributos `_id`.
+
+Esses identificadores permitem distinguir os registros criados.
+
+### 5.1. Comparando envio e resposta
+
+No documento enviado, temos:
+
+```json
+{
+  "nome": "Leandro Vaguetti 3"
+}
+```
+
+Na resposta, podemos encontrar:
+
+```json
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Leandro Vaguetti 3"
+}
+```
+
+Observe que o servidor acrescentou um identificador.
+
+Esse identificador será importante para futuras operações de atualização e exclusão.
+
+---
+
+## 6. Atualizando uma Pessoa Física — PUT /pf/:id
+
+A atualização permite modificar informações de um registro existente.
+
+Na API de Pessoas, essa operação utiliza o método HTTP `PUT`.
+
+### 6.1. Estrutura da requisição
+
+**Método:**
+
+```http
+PUT
+```
+
+**Endpoint:**
+
+```text
+/pf/:id
+```
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+Observe que a rota apresenta o parâmetro `:id`.
+
+Esse parâmetro deverá ser substituído pelo identificador da Pessoa Física que desejamos atualizar.
+
+Por exemplo:
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+### 6.2. Identificando o registro
+
+Antes de realizar uma atualização, precisamos conhecer o identificador da pessoa.
+
+Esse valor pode ser obtido por meio de uma consulta à API ou da resposta de cadastro.
+
+Considere:
+
+```json
+{
+  "_id": "675b2e1b7a9d48a52b7a0009",
+  "nome": "Leandro Vaguetti 3"
+}
+```
+
+O identificador é:
+
+```text
+675b2e1b7a9d48a52b7a0009
+```
+
+Esse valor será utilizado na URL da requisição.
+
+:::warning Atenção
+
+Os identificadores apresentados neste material são exemplos.
+
+Para atualizar um registro real de teste, utilize o `_id` efetivamente retornado pela API.
+
+Não copie identificadores ilustrativos esperando que correspondam a registros existentes.
+
+:::
+
+### 6.3. Atualizando os dados
+
+A documentação apresenta exemplos de atualização utilizando objetos aninhados.
+
+Considere o seguinte exemplo didático:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo Atualizada",
+  "email": "pessoa.atualizada@exemplo.com",
+  "cpf": "12345678903",
+  "titulo": {
+    "_id": "675b2e1b7a9d48a52b7a0008",
+    "numero": "123456",
+    "zona": "002",
+    "secao": "003"
+  }
+}
+```
+
+Observe que o objeto `titulo` apresenta um atributo `_id`.
+
+Esse identificador representa o título eleitoral relacionado.
+
+O exemplo também apresenta novos valores para os atributos `zona` e `secao`.
+
+### 6.4. Identificadores na atualização
+
+Precisamos distinguir dois identificadores.
+
+O primeiro identifica a Pessoa Física:
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+O segundo identifica o título eleitoral associado:
+
+```json
+{
+  "titulo": {
+    "_id": "675b2e1b7a9d48a52b7a0008",
+    "numero": "123456",
+    "zona": "002",
+    "secao": "003"
+  }
+}
+```
+
+Observe que são identificadores diferentes.
+
+Um identifica a pessoa.
+
+O outro identifica um objeto relacionado.
+
+:::info Sobre atualizações parciais
+
+O exemplo acima destaca apenas alguns atributos para facilitar a compreensão.
+
+A documentação apresenta a utilização de `PUT` para atualização, mas não detalha completamente o tratamento de todos os campos omitidos.
+
+Por isso, nos testes práticos, é recomendável utilizar um documento completo baseado nos dados atuais do registro, alterando somente os valores desejados.
+
+:::
+
+---
+
+## 7. Excluindo uma Pessoa Física — DELETE /pf/:id
+
+A operação de exclusão utiliza o método HTTP `DELETE`.
+
+Essa operação solicita ao servidor a remoção de um registro existente.
+
+### 7.1. Estrutura da requisição
+
+**Método:**
+
+```http
+DELETE
+```
+
+**Endpoint:**
+
+```text
+/pf/:id
+```
+
+Considere:
+
+```http
+DELETE /pf/675b2e1b7a9d48a52b7a0009
+```
+
+Observe que o identificador da Pessoa Física é informado diretamente na URL.
+
+### 7.2. O que acontece na exclusão?
+
+De acordo com a documentação da API, a exclusão de uma Pessoa Física também remove seu Título de Eleitor associado.
+
+Entretanto, telefones e endereços compartilhados não são excluídos automaticamente.
+
+Podemos representar esse comportamento da seguinte maneira:
+
+```text
+           PESSOA FÍSICA
+                 |
+                 | DELETE /pf/:id
+                 v
+              API REST
+                 |
+          ┌──────┴──────┐
+          |             |
+          v             v
+     Remove PF     Remove Título
+                    de Eleitor
+```
+
+Os registros de endereço e telefone não são removidos automaticamente por essa operação, conforme descrito na documentação.
+
+### 7.3. Cuidados com a exclusão
+
+Uma exclusão pode modificar permanentemente os dados armazenados no servidor.
+
+Por isso, devemos ter cuidado ao executar essa operação.
+
+Durante as atividades práticas:
+
+1. Cadastre uma Pessoa Física fictícia;
+2. Registre o identificador retornado;
+3. Utilize esse identificador para testar a exclusão;
+4. Consulte novamente a listagem para verificar o resultado.
+
+:::warning Operação de exclusão
+
+Não exclua registros que não tenham sido criados por você para a atividade.
+
+Como a API está publicada, outras pessoas também poderão estar utilizando o serviço.
+
+:::
+
+---
+
+## 8. Tratamento de erros nas operações de Pessoa Física
+
+Nem toda requisição será processada com sucesso.
+
+A API poderá retornar códigos de erro quando identificar problemas nos dados ou na operação solicitada.
+
+A documentação apresenta os seguintes códigos:
+
+| Código | Significado | Situação |
+|---|---|---|
+| `400` | Bad Request | Dados inválidos ou incompletos |
+| `404` | Not Found | Registro solicitado não encontrado |
+| `500` | Internal Server Error | Erro interno do servidor |
+
+### 8.1. Exemplo de erro 400
+
+Considere uma tentativa de cadastro com informações incompletas:
+
+```json
+{
+  "nome": "Pessoa Física Exemplo"
+}
+```
+
+Esse documento não apresenta os demais atributos utilizados nos exemplos completos da API.
+
+Dependendo das validações implementadas, o servidor poderá rejeitar a requisição com o código:
+
+```http
+400 Bad Request
+```
+
+### 8.2. Exemplo de erro 404
+
+Considere uma tentativa de exclusão utilizando um identificador inexistente:
+
+```http
+DELETE /pf/000000000000000000000000
+```
+
+Se não existir uma Pessoa Física com esse identificador, a API poderá retornar:
+
+```http
+404 Not Found
+```
+
+### 8.3. Exemplo de erro 500
+
+O código:
+
+```http
+500 Internal Server Error
+```
+
+indica que ocorreu uma falha interna durante o processamento.
+
+A documentação menciona como exemplos problemas de conexão com o banco de dados ou falhas na camada de acesso aos dados.
+
+:::tip Interpretando erros
+
+Quando uma requisição falha, observe:
+
+- O método HTTP utilizado;
+- A URL informada;
+- Os cabeçalhos;
+- O JSON enviado;
+- O código de status;
+- A mensagem retornada pelo servidor, quando disponível.
+
+Essas informações ajudam a identificar a causa do problema.
+
+:::
+
+---
+
+## 9. Resumo das operações de Pessoa Física
+
+Agora que conhecemos os endpoints, podemos comparar suas principais características.
+
+| Operação | Método | Endpoint | Envia JSON? | Precisa de ID? |
+|---|---|---|---|---|
+| Listar | `GET` | `/pf` | Não | Não |
+| Filtrar | `GET` | `/pf/filtrar?nome=...` | Não | Não |
+| Cadastrar | `POST` | `/pf` | Sim | Não |
+| Atualizar | `PUT` | `/pf/:id` | Sim | Sim |
+| Excluir | `DELETE` | `/pf/:id` | Não, nos exemplos documentados | Sim |
+
+Observe que cada operação possui características específicas.
+
+As operações de consulta utilizam o método `GET`.
+
+O cadastro utiliza `POST`.
+
+A atualização utiliza `PUT`.
+
+A exclusão utiliza `DELETE`.
+
+Os métodos e endpoints permitem organizar a comunicação de maneira padronizada.
+
+---
+
+## 10. Atividade de fixação — Operações com Pessoa Física
+
+Nesta atividade, você deverá analisar e construir requisições relacionadas ao gerenciamento de Pessoas Físicas.
+
+### Parte A — Identificando operações
+
+Considere as requisições:
+
+```http
+GET /pf
+```
+
+```http
+GET /pf/filtrar?nome=maria
+```
+
+```http
+POST /pf
+```
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+```http
+DELETE /pf/675b2e1b7a9d48a52b7a0009
+```
+
+Para cada uma, identifique:
+
+1. O método HTTP;
+2. O endpoint;
+3. A finalidade da operação;
+4. A necessidade de enviar um corpo JSON;
+5. A necessidade de informar um identificador.
+
+### Parte B — Construindo um documento de cadastro
+
+Construa um JSON que represente uma Pessoa Física fictícia contendo:
+
+- Nome;
+- E-mail;
+- CPF fictício;
+- Endereço completo;
+- Dois telefones;
+- Título de Eleitor.
+
+Utilize os nomes de atributos apresentados na documentação.
+
+Depois, identifique qual método HTTP e qual endpoint seriam utilizados para enviar esse documento ao servidor.
+
+### Parte C — Interpretando uma atualização
+
+Considere:
+
+```http
+PUT /pf/675b2e1b7a9d48a52b7a0009
+```
+
+Com o corpo:
+
+```json
+{
+  "nome": "Pessoa Física Atualizada",
+  "titulo": {
+    "_id": "675b2e1b7a9d48a52b7a0008",
+    "numero": "123456",
+    "zona": "002",
+    "secao": "003"
+  }
+}
+```
+
+Responda:
+
+1. Qual é o identificador da Pessoa Física?
+2. Qual é o identificador do Título de Eleitor?
+3. Qual atributo da pessoa está sendo modificado no exemplo?
+4. Quais atributos do título apresentam novos valores?
+5. Por que o identificador da pessoa está na URL?
+6. Por que o objeto `titulo` apresenta outro identificador?
+
+### Parte D — Explorando consultas reais
+
+Acesse:
+
+https://backend-pessoas.vercel.app/pf
+
+Depois, utilize o endpoint de filtragem:
+
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+
+Observe as respostas e responda:
+
+1. Quantos registros foram retornados na primeira consulta?
+2. Quantos registros foram retornados na segunda consulta?
+3. Os resultados apresentam o atributo `_id`?
+4. Quais objetos relacionados aparecem nas respostas?
+5. O filtro retornou apenas registros cujo nome contém o texto pesquisado?
+6. Os resultados estão organizados em ordem alfabética?
+
+---
+
+## 11. Síntese da Parte 4
+
+Nesta parte, estudamos os endpoints disponibilizados pela API para gerenciamento de Pessoas Físicas.
+
+Compreendemos:
+
+- A listagem de registros utilizando `GET /pf`;
+- A filtragem por nome utilizando `GET /pf/filtrar`;
+- O cadastro utilizando `POST /pf`;
+- A atualização utilizando `PUT /pf/:id`;
+- A exclusão utilizando `DELETE /pf/:id`;
+- A importância do identificador `_id`;
+- A utilização de objetos aninhados nas requisições;
+- O comportamento documentado para exclusão do Título de Eleitor;
+- A interpretação dos códigos de erro.
+
+Essas operações representam a aplicação prática dos conceitos de HTTP e REST estudados anteriormente.
+
+**Na próxima parte, estudaremos os endpoints de Pessoa Jurídica, utilizando os métodos GET, POST, PUT e DELETE e analisando as particularidades do CNPJ e da Inscrição Estadual.**
+
+
+# Parte 5 — Endpoints de Pessoa Jurídica
+
+Nas partes anteriores, estudamos os conceitos de API REST, comunicação HTTP, representação de dados em JSON e as operações disponibilizadas para o gerenciamento de Pessoas Físicas.
+
+Agora, conheceremos os endpoints utilizados para o gerenciamento de **Pessoas Jurídicas (PJ)**.
+
+A API disponibiliza operações para consultar, cadastrar, atualizar e excluir Pessoas Jurídicas, além de permitir a pesquisa de registros pelo nome.
+
+Embora essas operações sejam semelhantes às utilizadas para Pessoas Físicas, existem diferenças importantes na estrutura dos dados.
+
+Enquanto uma Pessoa Física possui CPF e Título de Eleitor, uma Pessoa Jurídica possui CNPJ e Inscrição Estadual.
+
+:::info Objetivos de aprendizagem
+
+Ao final desta parte, você deverá ser capaz de:
+
+- Identificar os endpoints utilizados no gerenciamento de Pessoas Jurídicas;
+- Consultar registros utilizando o método `GET`;
+- Filtrar Pessoas Jurídicas pelo nome;
+- Construir documentos JSON para cadastro;
+- Compreender o envio de dados utilizando `POST`;
+- Identificar registros para atualização utilizando `PUT`;
+- Compreender a atualização da Inscrição Estadual;
+- Reconhecer a representação de datas em formato ISO 8601;
+- Compreender a exclusão de registros utilizando `DELETE`;
+- Interpretar os principais códigos de status HTTP;
+- Comparar as operações de Pessoas Físicas e Jurídicas.
+
+:::
+
+---
+
+## 1. Conhecendo os endpoints de Pessoa Jurídica
+
+A API disponibiliza um conjunto de endpoints para manipulação dos registros de Pessoas Jurídicas.
+
+A URL base do serviço é:
+
+https://backend-pessoas.vercel.app/
+
+Os endpoints disponíveis são:
+
+| Método HTTP | Endpoint | Finalidade |
+|---|---|---|
+| `GET` | `/pj` | Listar Pessoas Jurídicas |
+| `GET` | `/pj/filtrar?nome=texto` | Filtrar Pessoas Jurídicas pelo nome |
+| `POST` | `/pj` | Cadastrar uma Pessoa Jurídica |
+| `PUT` | `/pj/:id` | Atualizar uma Pessoa Jurídica |
+| `DELETE` | `/pj/:id` | Excluir uma Pessoa Jurídica |
+
+Observe que a organização é semelhante à utilizada para Pessoas Físicas.
+
+A principal diferença está no recurso solicitado.
+
+Para Pessoas Físicas, utilizamos:
+
+```http
+GET /pf
+```
+
+Para Pessoas Jurídicas, utilizamos:
+
+```http
+GET /pj
+```
+
+Essa padronização facilita a compreensão das operações disponibilizadas pela API.
+
+### 1.1. Comparando os recursos
+
+| Operação | Pessoa Física | Pessoa Jurídica |
+|---|---|---|
+| Listagem | `GET /pf` | `GET /pj` |
+| Filtragem | `GET /pf/filtrar` | `GET /pj/filtrar` |
+| Cadastro | `POST /pf` | `POST /pj` |
+| Atualização | `PUT /pf/:id` | `PUT /pj/:id` |
+| Exclusão | `DELETE /pf/:id` | `DELETE /pj/:id` |
+
+Observe que a diferença entre os endpoints está relacionada ao tipo de pessoa.
+
+Os métodos HTTP continuam representando as mesmas operações.
+
+---
+
+## 2. Consultando Pessoas Jurídicas — GET /pj
+
+A primeira operação que estudaremos é a listagem de Pessoas Jurídicas.
+
+Essa operação utiliza o método HTTP `GET`.
+
+### 2.1. Estrutura da requisição
+
+**Método:**
+
+```http
+GET
+```
+
+**Endpoint:**
+
+```text
+/pj
+```
+
+**URL completa:**
+
+https://backend-pessoas.vercel.app/pj
+
+A requisição pode ser representada da seguinte maneira:
+
+```http
+GET /pj HTTP/1.1
+Host: backend-pessoas.vercel.app
+Accept: application/json
+```
+
+Observe que não precisamos enviar um documento JSON no corpo dessa requisição.
+
+Estamos solicitando informações existentes no servidor.
+
+### 2.2. Compreendendo a resposta
+
+Quando a consulta é realizada com sucesso, o servidor retorna os registros disponíveis.
+
+Uma resposta de listagem pode apresentar um array JSON.
+
+Considere o exemplo ilustrativo:
+
+```json
+[
+  {
+    "_id": "675b301b7a9d48a52b7a0012",
+    "nome": "Tech Soluções LTDA",
+    "email": "contato@tech.com.br",
+    "cnpj": "12345678000190",
+    "endereco": {
+      "_id": "675b301b7a9d48a52b7a0013",
+      "cep": "72000-000",
+      "logradouro": "Avenida das Nações",
+      "bairro": "Taguatinga",
+      "cidade": "Brasília",
+      "uf": "DF",
+      "regiao": "Centro-Oeste"
+    },
+    "telefones": [
+      {
+        "_id": "675b301b7a9d48a52b7a0014",
+        "ddd": "61",
+        "numero": "33445566"
+      }
+    ],
+    "ie": {
+      "_id": "675b301b7a9d48a52b7a0015",
+      "numero": "DF12345",
+      "estado": "DF",
+      "dataRegistro": "2023-01-01T00:00:00Z"
+    }
+  }
+]
+```
+
+Observe que cada Pessoa Jurídica apresenta atributos básicos e objetos relacionados.
+
+Os principais elementos são:
+
+- `_id`: identificador do registro;
+- `nome`: nome da Pessoa Jurídica;
+- `email`: endereço de e-mail;
+- `cnpj`: Cadastro Nacional da Pessoa Jurídica;
+- `endereco`: objeto de endereço;
+- `telefones`: array de telefones;
+- `ie`: objeto de Inscrição Estadual.
+
+:::note Sobre os resultados
+
+O JSON apresentado é ilustrativo e segue a estrutura descrita na documentação.
+
+Os registros retornados pela API dependerão dos dados existentes no servidor no momento da consulta.
+
+:::
+
+### 2.3. Primeira consulta prática
+
+Abra uma nova aba do navegador e acesse:
+
+https://backend-pessoas.vercel.app/pj
+
+Observe os dados retornados.
+
+Identifique:
+
+1. Quantas Pessoas Jurídicas foram retornadas;
+2. Quais atributos aparecem em cada registro;
+3. Como o endereço está representado;
+4. Como os telefones estão organizados;
+5. Como a Inscrição Estadual está representada;
+6. Qual atributo identifica individualmente cada Pessoa Jurídica.
+
+:::tip Consulta pelo navegador
+
+O navegador permite realizar consultas `GET` diretamente pela barra de endereços.
+
+Essa abordagem é útil para uma primeira exploração da API.
+
+Posteriormente, utilizaremos o ReqBin para executar também operações de cadastro, atualização e exclusão.
+
+:::
+
+---
+
+## 3. Filtrando Pessoas Jurídicas pelo nome
+
+A API permite pesquisar Pessoas Jurídicas utilizando parte do nome.
+
+Essa operação utiliza o método `GET` e um parâmetro de consulta.
+
+### 3.1. Estrutura da requisição
+
+**Método:**
+
+```http
+GET
+```
+
+**Endpoint:**
+
+```text
+/pj/filtrar
+```
+
+**Parâmetro de consulta:**
+
+```text
+nome
+```
+
+Considere a seguinte requisição:
+
+```http
+GET /pj/filtrar?nome=tech
+```
+
+URL completa:
+
+https://backend-pessoas.vercel.app/pj/filtrar?nome=tech
+
+Observe que o parâmetro `nome` apresenta o valor `tech`.
+
+Esse valor será utilizado como critério de pesquisa.
+
+### 3.2. Compreendendo o funcionamento do filtro
+
+De acordo com a documentação da API, a pesquisa apresenta as seguintes características:
+
+- Realiza correspondência parcial;
+- Não diferencia letras maiúsculas e minúsculas;
+- Retorna os resultados organizados pelo nome.
+
+Isso significa que uma pesquisa por:
+
+```text
+tech
+```
+
+pode localizar registros como:
+
+```text
+Tech Soluções LTDA
+TECH Serviços Digitais
+InovaTech Sistemas
+```
+
+Observe que o texto pesquisado pode aparecer no início, no meio ou no final do nome.
+
+### 3.3. Exemplo de resposta
+
+Considere a resposta ilustrativa:
+
+```json
+[
+  {
+    "_id": "675b301b7a9d48a52b7a0012",
+    "nome": "InovaTech Sistemas",
+    "email": "contato@inovatech.com.br",
+    "cnpj": "12345678000190"
+  },
+  {
+    "_id": "675b301b7a9d48a52b7a0016",
+    "nome": "Tech Soluções LTDA",
+    "email": "contato@tech.com.br",
+    "cnpj": "98765432000110"
+  }
+]
+```
+
+Observe que os registros estão organizados alfabeticamente pelo nome.
+
+### 3.4. Experimentando diferentes pesquisas
+
+Acesse:
+
+https://backend-pessoas.vercel.app/pj/filtrar?nome=tech
+
+Depois, experimente alterar o parâmetro de pesquisa.
+
+Por exemplo:
+
+```text
+https://backend-pessoas.vercel.app/pj/filtrar?nome=solucoes
+```
+
+Compare os resultados retornados.
+
+:::info Atenção aos caracteres especiais
+
+Quando o texto pesquisado contém espaços ou caracteres especiais, devemos utilizar uma representação adequada na URL.
+
+Por exemplo, o texto:
+
+```text
+Tech Soluções
+```
+
+pode ser representado como:
+
+```text
+Tech%20Solu%C3%A7%C3%B5es
+```
+
+A URL será:
+
+```text
+https://backend-pessoas.vercel.app/pj/filtrar?nome=Tech%20Solu%C3%A7%C3%B5es
+```
+
+Essa codificação permite transmitir corretamente os caracteres utilizados no parâmetro.
+
+:::
+
+---
+
+## 4. Cadastrando uma Pessoa Jurídica — POST /pj
+
+A operação de cadastro utiliza o método HTTP `POST`.
+
+Nesse caso, precisamos enviar um documento JSON contendo os dados da Pessoa Jurídica.
+
+### 4.1. Estrutura da requisição
+
+**Método:**
+
+```http
+POST
+```
+
+**Endpoint:**
+
+```text
+/pj
+```
+
+**URL completa:**
+
+https://backend-pessoas.vercel.app/pj
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+**Corpo da requisição:**
+
+Um documento JSON contendo as informações da Pessoa Jurídica.
+
+### 4.2. Exemplo completo de cadastro
+
+A documentação da API apresenta o seguinte exemplo:
+
+```json
+{
+  "nome": "Tech Soluções LTDA 2",
+  "email": "contato@tech.com.br",
+  "cnpj": "12345678000190",
+  "endereco": {
+    "cep": "72000-000",
+    "logradouro": "Avenida das Nações",
+    "bairro": "Taguatinga",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ],
+  "ie": {
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2023-01-01T00:00:00Z"
+  }
+}
+```
+
+Observe que o documento apresenta:
+
+- Dados básicos da Pessoa Jurídica;
+- Um objeto de endereço;
+- Um array de telefones;
+- Um objeto de Inscrição Estadual.
+
+Essa estrutura é semelhante à utilizada no cadastro de Pessoas Físicas.
+
+Entretanto, os atributos específicos são diferentes.
+
+### 4.3. Dados básicos da Pessoa Jurídica
+
+Considere:
+
+```json
+{
+  "nome": "Tech Soluções LTDA 2",
+  "email": "contato@tech.com.br",
+  "cnpj": "12345678000190"
+}
+```
+
+Observe que o atributo `cnpj` é representado como uma string.
+
+Essa escolha permite preservar a sequência de caracteres utilizada para identificar a Pessoa Jurídica.
+
+### 4.4. Endereço
+
+O endereço é representado por um objeto aninhado:
+
+```json
+{
+  "cep": "72000-000",
+  "logradouro": "Avenida das Nações",
+  "bairro": "Taguatinga",
+  "cidade": "Brasília",
+  "uf": "DF",
+  "regiao": "Centro-Oeste"
+}
+```
+
+Observe que a estrutura é a mesma utilizada para Pessoas Físicas.
+
+### 4.5. Telefones
+
+Os telefones são representados por um array:
+
+```json
+[
+  {
+    "ddd": "61",
+    "numero": "33445566"
+  }
+]
+```
+
+O array permite representar um ou mais telefones associados à Pessoa Jurídica.
+
+### 4.6. Inscrição Estadual
+
+A Inscrição Estadual é representada pela propriedade `ie`:
+
+```json
+{
+  "numero": "DF12345",
+  "estado": "DF",
+  "dataRegistro": "2023-01-01T00:00:00Z"
+}
+```
+
+Observe que o objeto possui três atributos:
+
+| Atributo | Finalidade |
+|---|---|
+| `numero` | Número da Inscrição Estadual |
+| `estado` | Unidade Federativa |
+| `dataRegistro` | Data de registro |
+
+A representação de `dataRegistro` merece atenção especial.
+
+---
+
+## 5. Compreendendo a data de registro da Inscrição Estadual
+
+A documentação apresenta a data de registro da Inscrição Estadual no seguinte formato:
+
+```json
+"dataRegistro": "2023-01-01T00:00:00Z"
+```
+
+Esse valor é uma string que representa uma data e um horário.
+
+O formato utilizado segue o padrão ISO 8601.
+
+Podemos interpretar seus elementos da seguinte maneira:
+
+```text
+2023-01-01T00:00:00Z
+│    │  │ │  │  │  │
+│    │  │ │  │  │  └── Referência UTC
+│    │  │ │  │  └───── Segundos
+│    │  │ │  └──────── Minutos
+│    │  │ └─────────── Horas
+│    │  └───────────── Separador T
+│    └──────────────── Dia e mês
+└───────────────────── Ano
+```
+
+A tabela abaixo apresenta os elementos com mais detalhes:
+
+| Elemento | Valor | Significado |
+|---|---|---|
+| Ano | `2023` | Ano do registro |
+| Mês | `01` | Janeiro |
+| Dia | `01` | Primeiro dia do mês |
+| Separador | `T` | Separa data e hora |
+| Horário | `00:00:00` | Meia-noite |
+| Fuso | `Z` | Horário UTC |
+
+### 5.1. Por que a data é enviada como texto?
+
+O formato JSON possui tipos como:
+
+- String;
+- Número;
+- Booleano;
+- Objeto;
+- Array;
+- `null`.
+
+Entretanto, JSON não possui um tipo específico para datas.
+
+Por isso, é comum representar datas utilizando strings padronizadas.
+
+### 5.2. Interpretando a data em JavaScript
+
+Considere:
+
+```javascript
+const ie = {
+  numero: "DF12345",
+  estado: "DF",
+  dataRegistro: "2023-01-01T00:00:00Z"
+};
+
+const data = new Date(ie.dataRegistro);
+
+console.log(data.toISOString());
+```
+
+**Resultado esperado:**
+
+```text
+2023-01-01T00:00:00.000Z
+```
+
+Observe que a linguagem JavaScript permite converter a representação textual em um objeto `Date`.
+
+:::tip Datas e horários
+
+Ao trabalhar com datas, devemos considerar a diferença entre o horário UTC e o horário local.
+
+O caractere `Z` indica que o horário informado está representado em UTC.
+
+:::
+
+---
+
+## 6. Interpretando a resposta do cadastro
+
+Quando o cadastro é realizado com sucesso, a documentação apresenta o código:
+
+```http
+201 Created
+```
+
+Esse código indica que um novo recurso foi criado.
+
+A resposta pode apresentar os dados cadastrados e os identificadores gerados pelo servidor.
+
+Considere o exemplo ilustrativo:
+
+```json
+{
+  "_id": "675b301b7a9d48a52b7a0012",
+  "nome": "Tech Soluções LTDA 2",
+  "email": "contato@tech.com.br",
+  "cnpj": "12345678000190",
+  "endereco": {
+    "_id": "675b301b7a9d48a52b7a0013",
+    "cep": "72000-000",
+    "logradouro": "Avenida das Nações",
+    "bairro": "Taguatinga",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "_id": "675b301b7a9d48a52b7a0014",
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ],
+  "ie": {
+    "_id": "675b301b7a9d48a52b7a0015",
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2023-01-01T00:00:00Z"
+  }
+}
+```
+
+Observe que o documento retornado apresenta identificadores `_id`.
+
+Esses identificadores podem aparecer tanto no registro principal quanto nos objetos relacionados.
+
+### 6.1. Identificador da Pessoa Jurídica
+
+```json
+"_id": "675b301b7a9d48a52b7a0012"
+```
+
+Identifica a Pessoa Jurídica.
+
+### 6.2. Identificador do endereço
+
+```json
+"_id": "675b301b7a9d48a52b7a0013"
+```
+
+Identifica o endereço apresentado.
+
+### 6.3. Identificador do telefone
+
+```json
+"_id": "675b301b7a9d48a52b7a0014"
+```
+
+Identifica o telefone apresentado.
+
+### 6.4. Identificador da Inscrição Estadual
+
+```json
+"_id": "675b301b7a9d48a52b7a0015"
+```
+
+Identifica a Inscrição Estadual.
+
+:::info Identificadores
+
+Os identificadores apresentados são exemplos.
+
+Quando você cadastrar uma Pessoa Jurídica, deverá observar os valores efetivamente retornados pela API.
+
+Esses valores serão importantes nas operações posteriores de atualização e exclusão.
+
+:::
+
+---
+
+## 7. Atualizando uma Pessoa Jurídica — PUT /pj/:id
+
+A operação de atualização permite modificar informações de uma Pessoa Jurídica existente.
+
+Na API, essa operação utiliza o método HTTP `PUT`.
+
+### 7.1. Estrutura da requisição
+
+**Método:**
+
+```http
+PUT
+```
+
+**Endpoint:**
+
+```text
+/pj/:id
+```
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+Observe que a rota apresenta o parâmetro `:id`.
+
+Esse parâmetro deverá ser substituído pelo identificador da Pessoa Jurídica.
+
+Por exemplo:
+
+```http
+PUT /pj/675b301b7a9d48a52b7a0012
+```
+
+### 7.2. Identificando o registro
+
+Antes de atualizar uma Pessoa Jurídica, precisamos conhecer seu identificador.
+
+Considere:
+
+```json
+{
+  "_id": "675b301b7a9d48a52b7a0012",
+  "nome": "Tech Soluções LTDA 2"
+}
+```
+
+O identificador da Pessoa Jurídica é:
+
+```text
+675b301b7a9d48a52b7a0012
+```
+
+Esse valor deverá ser informado na URL.
+
+### 7.3. Atualizando a Inscrição Estadual
+
+A documentação apresenta exemplos de atualização envolvendo a Inscrição Estadual.
+
+Considere o seguinte documento ilustrativo:
+
+```json
+{
+  "nome": "Tech Soluções LTDA Atualizada",
+  "email": "contato@tech.com.br",
+  "cnpj": "12345678000190",
+  "ie": {
+    "_id": "675b301b7a9d48a52b7a0015",
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2024-02-15T00:00:00Z"
+  }
+}
+```
+
+Observe que o objeto `ie` apresenta um identificador `_id`.
+
+Esse identificador representa a Inscrição Estadual relacionada.
+
+O exemplo também apresenta uma nova data de registro.
+
+### 7.4. Identificadores na atualização
+
+Precisamos distinguir dois identificadores.
+
+**Identificador da Pessoa Jurídica:**
+
+```http
+PUT /pj/675b301b7a9d48a52b7a0012
+```
+
+**Identificador da Inscrição Estadual:**
+
+```json
+{
+  "ie": {
+    "_id": "675b301b7a9d48a52b7a0015",
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2024-02-15T00:00:00Z"
+  }
+}
+```
+
+Observe que o identificador informado na URL representa a Pessoa Jurídica.
+
+Já o identificador apresentado dentro do objeto `ie` representa a Inscrição Estadual.
+
+Essa distinção é importante para compreender a organização dos relacionamentos.
+
+:::note Atualização dos dados
+
+O exemplo destaca os atributos relacionados à Pessoa Jurídica e à Inscrição Estadual.
+
+A documentação utiliza o método `PUT` para atualização, mas não detalha completamente o tratamento de todos os atributos omitidos.
+
+Durante os testes, recomenda-se utilizar um documento completo baseado nos dados atuais do registro, modificando somente os valores desejados.
+
+:::
+
+---
+
+## 8. Excluindo uma Pessoa Jurídica — DELETE /pj/:id
+
+A operação de exclusão utiliza o método HTTP `DELETE`.
+
+Essa operação solicita a remoção de uma Pessoa Jurídica existente.
+
+### 8.1. Estrutura da requisição
+
+**Método:**
+
+```http
+DELETE
+```
+
+**Endpoint:**
+
+```text
+/pj/:id
+```
+
+Considere:
+
+```http
+DELETE /pj/675b301b7a9d48a52b7a0012
+```
+
+Observe que o identificador da Pessoa Jurídica é informado diretamente na URL.
+
+### 8.2. Comportamento da exclusão
+
+De acordo com a documentação, a exclusão de uma Pessoa Jurídica também remove sua Inscrição Estadual associada.
+
+Entretanto, endereços e telefones compartilhados não são excluídos automaticamente.
+
+Podemos representar esse comportamento da seguinte maneira:
+
+```text
+          PESSOA JURÍDICA
+                 |
+                 | DELETE /pj/:id
+                 v
+              API REST
+                 |
+          ┌──────┴──────┐
+          |             |
+          v             v
+     Remove PJ      Remove IE
+```
+
+Essa operação possui comportamento semelhante à exclusão de Pessoas Físicas.
+
+A diferença está no objeto específico associado a cada tipo de pessoa.
+
+### 8.3. Comparando as exclusões
+
+| Recurso | Registro principal removido | Objeto específico removido |
+|---|---|---|
+| Pessoa Física | Pessoa Física | Título de Eleitor |
+| Pessoa Jurídica | Pessoa Jurídica | Inscrição Estadual |
+
+A documentação informa que endereços e telefones compartilhados não são removidos automaticamente nessas operações.
+
+:::warning Atenção à exclusão
+
+A exclusão modifica os dados armazenados no servidor.
+
+Durante os testes, exclua apenas registros fictícios criados por você para a atividade.
+
+Não utilize identificadores de registros desconhecidos.
+
+:::
+
+---
+
+## 9. Tratamento de erros nas operações de Pessoa Jurídica
+
+As operações de Pessoa Jurídica também podem retornar erros.
+
+A documentação apresenta os seguintes códigos:
+
+| Código | Significado | Exemplo de situação |
+|---|---|---|
+| `400` | Bad Request | Dados inválidos ou incompletos |
+| `404` | Not Found | Registro solicitado não encontrado |
+| `500` | Internal Server Error | Falha interna no servidor |
+
+### 9.1. Exemplo de erro 400
+
+Considere uma tentativa de cadastro com informações incompletas:
+
+```json
+{
+  "nome": "Empresa Exemplo"
+}
+```
+
+Esse documento não apresenta os demais atributos utilizados nos exemplos completos da API.
+
+Dependendo das validações implementadas, o servidor poderá rejeitar a requisição.
+
+Nesse caso, poderá retornar:
+
+```http
+400 Bad Request
+```
+
+### 9.2. Exemplo de erro 404
+
+Considere uma tentativa de atualização utilizando um identificador inexistente:
+
+```http
+PUT /pj/000000000000000000000000
+```
+
+Se não existir uma Pessoa Jurídica com esse identificador, a API poderá retornar:
+
+```http
+404 Not Found
+```
+
+### 9.3. Exemplo de erro 500
+
+O código:
+
+```http
+500 Internal Server Error
+```
+
+indica uma falha interna no processamento.
+
+A documentação menciona problemas de conexão com o banco de dados ou falhas na camada de acesso aos dados como possíveis causas.
+
+:::tip Analisando erros
+
+Quando uma requisição não apresentar o resultado esperado, verifique:
+
+- O método HTTP utilizado;
+- O endpoint informado;
+- O identificador do registro;
+- Os cabeçalhos;
+- A estrutura do JSON;
+- O código de status;
+- A mensagem de erro retornada pelo servidor, quando disponível.
+
+:::
+
+---
+
+## 10. Comparando as operações de Pessoa Física e Jurídica
+
+Agora que conhecemos os dois conjuntos de endpoints, podemos comparar suas características.
+
+### 10.1. Endpoints
+
+| Operação | Pessoa Física | Pessoa Jurídica |
+|---|---|---|
+| Listar | `GET /pf` | `GET /pj` |
+| Filtrar | `GET /pf/filtrar` | `GET /pj/filtrar` |
+| Cadastrar | `POST /pf` | `POST /pj` |
+| Atualizar | `PUT /pf/:id` | `PUT /pj/:id` |
+| Excluir | `DELETE /pf/:id` | `DELETE /pj/:id` |
+
+### 10.2. Estrutura dos dados
+
+| Característica | Pessoa Física | Pessoa Jurídica |
+|---|---|---|
+| Identificador | `_id` | `_id` |
+| Nome | `nome` | `nome` |
+| E-mail | `email` | `email` |
+| Documento | `cpf` | `cnpj` |
+| Endereço | `endereco` | `endereco` |
+| Telefones | `telefones` | `telefones` |
+| Objeto específico | `titulo` | `ie` |
+
+### 10.3. Exclusão de objetos relacionados
+
+A documentação apresenta os seguintes comportamentos:
+
+**Pessoa Física:**
+
+```text
+DELETE /pf/:id
+       |
+       ├── Remove Pessoa Física
+       |
+       └── Remove Título de Eleitor
+```
+
+**Pessoa Jurídica:**
+
+```text
+DELETE /pj/:id
+       |
+       ├── Remove Pessoa Jurídica
+       |
+       └── Remove Inscrição Estadual
+```
+
+Observe que as operações apresentam uma organização semelhante.
+
+Essa padronização facilita a utilização da API por diferentes aplicações.
+
+---
+
+## 11. Atividade de fixação — Operações com Pessoa Jurídica
+
+Nesta atividade, você deverá analisar os endpoints de Pessoa Jurídica e construir documentos JSON compatíveis com a estrutura apresentada na documentação.
+
+### Parte A — Identificando operações
+
+Considere as seguintes requisições:
+
+```http
+GET /pj
+```
+
+```http
+GET /pj/filtrar?nome=tech
+```
+
+```http
+POST /pj
+```
+
+```http
+PUT /pj/675b301b7a9d48a52b7a0012
+```
+
+```http
+DELETE /pj/675b301b7a9d48a52b7a0012
+```
+
+Para cada requisição, identifique:
+
+1. O método HTTP;
+2. O endpoint;
+3. A finalidade da operação;
+4. Se é necessário enviar um documento JSON;
+5. Se é necessário informar um identificador.
+
+### Parte B — Construindo um documento JSON
+
+Construa um documento JSON para representar uma Pessoa Jurídica fictícia contendo:
+
+- Nome;
+- E-mail;
+- CNPJ fictício;
+- Endereço completo;
+- Dois telefones;
+- Inscrição Estadual;
+- Data de registro da Inscrição Estadual.
+
+Utilize os nomes dos atributos apresentados na documentação.
+
+Depois, responda:
+
+1. Qual método HTTP deverá ser utilizado para cadastrar essa Pessoa Jurídica?
+2. Qual endpoint deverá ser utilizado?
+3. Qual cabeçalho deverá informar o formato do corpo?
+4. Qual código de status indica a criação bem-sucedida de um recurso?
+
+### Parte C — Interpretando uma atualização
+
+Considere a requisição:
+
+```http
+PUT /pj/675b301b7a9d48a52b7a0012
+```
+
+Com o corpo:
+
+```json
+{
+  "nome": "Empresa Exemplo Atualizada",
+  "ie": {
+    "_id": "675b301b7a9d48a52b7a0015",
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2024-02-15T00:00:00Z"
+  }
+}
+```
+
+Responda:
+
+1. Qual é o identificador da Pessoa Jurídica?
+2. Qual é o identificador da Inscrição Estadual?
+3. Qual atributo da Pessoa Jurídica está sendo modificado?
+4. Qual atributo da Inscrição Estadual apresenta um novo valor?
+5. Por que o identificador da Pessoa Jurídica aparece na URL?
+6. Por que o objeto `ie` apresenta outro identificador?
+
+### Parte D — Explorando consultas reais
+
+Acesse:
+
+https://backend-pessoas.vercel.app/pj
+
+Depois, utilize o endpoint de filtragem:
+
+https://backend-pessoas.vercel.app/pj/filtrar?nome=tech
+
+Observe as respostas e responda:
+
+1. Quantos registros foram retornados na listagem?
+2. Quantos registros foram retornados na filtragem?
+3. Os registros apresentam o atributo `_id`?
+4. Quais objetos relacionados aparecem?
+5. Como a Inscrição Estadual está representada?
+6. O atributo `dataRegistro` está presente?
+7. Os resultados do filtro estão organizados alfabeticamente?
+
+### Parte E — Comparando PF e PJ
+
+Considere os endpoints:
+
+```http
+POST /pf
+```
+
+e:
+
+```http
+POST /pj
+```
+
+Responda:
+
+1. Qual é a finalidade de cada operação?
+2. Quais atributos são comuns aos documentos JSON?
+3. Quais atributos são específicos de cada tipo de pessoa?
+4. Qual objeto está associado ao Título de Eleitor?
+5. Qual objeto está associado à Inscrição Estadual?
+6. Qual é a diferença entre as operações `DELETE /pf/:id` e `DELETE /pj/:id` em relação aos objetos associados?
+
+---
+
+## 12. Síntese da Parte 5
+
+Nesta parte, estudamos os endpoints disponibilizados pela API para gerenciamento de Pessoas Jurídicas.
+
+Compreendemos:
+
+- A listagem de registros utilizando `GET /pj`;
+- A filtragem por nome utilizando `GET /pj/filtrar`;
+- O cadastro utilizando `POST /pj`;
+- A atualização utilizando `PUT /pj/:id`;
+- A exclusão utilizando `DELETE /pj/:id`;
+- A representação do CNPJ;
+- A estrutura da Inscrição Estadual;
+- A representação de datas em formato ISO 8601;
+- A importância dos identificadores `_id`;
+- O comportamento documentado para exclusão da Inscrição Estadual;
+- As semelhanças e diferenças entre os recursos PF e PJ.
+
+Com isso, conhecemos todas as operações principais disponibilizadas pela API de Pessoas.
+
+**Na próxima parte, realizaremos atividades práticas utilizando o ReqBin, construindo requisições HTTP, enviando documentos JSON e interpretando as respostas retornadas pelo servidor.**
+
+
+# Parte 6 — Laboratório prático: comunicação com a API REST
+
+Nas partes anteriores, estudamos os conceitos fundamentais da comunicação com APIs REST e conhecemos os endpoints disponibilizados para o gerenciamento de Pessoas Físicas (PF) e Pessoas Jurídicas (PJ).
+
+Compreendemos como os métodos HTTP permitem consultar, cadastrar, atualizar e excluir registros, além de estudar a organização dos documentos JSON utilizados nas requisições e respostas.
+
+Agora, colocaremos esses conhecimentos em prática.
+
+Neste laboratório, utilizaremos o **ReqBin**, uma ferramenta que permite construir e enviar requisições HTTP diretamente para uma API.
+
+Nosso objetivo será compreender a comunicação entre cliente e servidor, sem precisar desenvolver uma aplicação frontend ou implementar o backend.
+
+:::info Objetivos de aprendizagem
+
+Ao final deste laboratório, você deverá ser capaz de:
+
+- Utilizar uma ferramenta para realizar requisições HTTP;
+- Consultar os endpoints de Pessoas Físicas e Jurídicas;
+- Interpretar documentos JSON retornados pelo servidor;
+- Construir requisições `POST` para cadastrar registros;
+- Utilizar identificadores `_id` em operações de atualização;
+- Realizar requisições `PUT` para modificar informações;
+- Executar operações `DELETE` em registros de teste;
+- Interpretar códigos de status e mensagens de erro;
+- Relacionar as operações HTTP ao funcionamento de um sistema CRUD.
+
+:::
+
+---
+
+## 1. Preparando o ambiente de testes
+
+Para realizar as atividades, utilizaremos os seguintes recursos.
+
+| Recurso | Endereço | Finalidade |
+|---|---|---|
+| API de Pessoas | https://backend-pessoas.vercel.app/ | Serviço REST utilizado nos testes |
+| ReqBin | https://reqbin.com/ | Ferramenta para enviar requisições HTTP |
+| Repositório GitHub | https://github.com/vaguettibfd/backend_pessoas/ | Código-fonte do backend |
+
+A API já está publicada e disponibiliza os endpoints necessários para as atividades.
+
+Não será necessário instalar um servidor ou configurar um banco de dados localmente.
+
+### 1.1. Acessando o ReqBin
+
+Abra o navegador e acesse:
+
+https://reqbin.com/
+
+O ReqBin permite configurar os principais elementos de uma requisição HTTP:
+
+- Método HTTP;
+- URL da requisição;
+- Cabeçalhos;
+- Corpo da requisição;
+- Envio da requisição;
+- Visualização da resposta.
+
+A aparência e a organização dos controles podem variar conforme a versão da ferramenta.
+
+### 1.2. Elementos que utilizaremos
+
+Durante o laboratório, precisaremos identificar os seguintes elementos:
+
+| Elemento | Função |
+|---|---|
+| Método | Selecionar `GET`, `POST`, `PUT` ou `DELETE` |
+| URL | Informar o endpoint completo |
+| Headers | Configurar cabeçalhos HTTP |
+| Body | Informar o JSON enviado ao servidor |
+| Send | Enviar a requisição |
+| Response | Consultar o resultado retornado |
+
+:::tip Antes de começar
+
+O ReqBin funciona como um cliente HTTP.
+
+Isso significa que, ao enviar uma requisição pelo ReqBin, estamos realizando uma comunicação semelhante à que uma aplicação frontend poderá executar futuramente.
+
+A diferença está na maneira como construímos a requisição: neste laboratório, faremos isso manualmente.
+
+:::
+
+### 1.3. Cuidados com os dados de teste
+
+A API utilizada neste laboratório está publicada na internet.
+
+As operações de cadastro, atualização e exclusão podem modificar os dados armazenados pelo serviço.
+
+Por isso, utilizaremos exclusivamente registros fictícios.
+
+:::warning Importante
+
+- Não utilize dados pessoais reais;
+- Não utilize CPF ou CNPJ de terceiros;
+- Não altere registros que não tenham sido criados por você;
+- Não exclua registros desconhecidos;
+- Registre os identificadores dos seus próprios cadastros;
+- Ao finalizar o laboratório, exclua os registros fictícios que você criou, quando possível.
+
+Se a API estiver sendo utilizada por diferentes turmas, os resultados das consultas poderão mudar durante a atividade.
+
+:::
+
+---
+
+## 2. Atividade 1 — Consultando Pessoas Físicas
+
+Começaremos utilizando o método `GET`.
+
+Essa operação permite recuperar informações sem solicitar modificações nos registros armazenados.
+
+### Passo 1 — Configurando a requisição
+
+No ReqBin, informe:
+
+**Método HTTP:**
+
+```http
+GET
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pf
+```
+
+Não será necessário informar um corpo JSON.
+
+### Passo 2 — Enviando a requisição
+
+Execute a requisição utilizando o controle de envio disponibilizado pelo ReqBin.
+
+A ferramenta encaminhará a solicitação ao servidor.
+
+### Passo 3 — Analisando a resposta
+
+Observe o código de status HTTP e o corpo retornado.
+
+Uma resposta de listagem pode apresentar um array JSON semelhante ao exemplo:
+
+```json
+[
+  {
+    "_id": "675b2e1b7a9d48a52b7a0009",
+    "nome": "Pessoa Física Exemplo",
+    "email": "pessoa.fisica@exemplo.com",
+    "cpf": "12345678903",
+    "endereco": {
+      "cep": "71000-000",
+      "cidade": "Brasília",
+      "uf": "DF"
+    },
+    "telefones": [
+      {
+        "ddd": "61",
+        "numero": "998887776"
+      }
+    ],
+    "titulo": {
+      "numero": "123456",
+      "zona": "001",
+      "secao": "002"
+    }
+  }
+]
+```
+
+Esse JSON é ilustrativo. Os dados efetivamente retornados dependerão dos registros existentes na API.
+
+### Passo 4 — Identificando os elementos
+
+Observe que a resposta apresenta:
+
+- Um array de Pessoas Físicas;
+- Objetos JSON representando os registros;
+- Atributos básicos;
+- Objetos relacionados;
+- Identificadores `_id`, quando retornados.
+
+:::info Resultado esperado
+
+A requisição deverá solicitar os registros de Pessoas Físicas.
+
+Se a API estiver acessível e a operação for processada com sucesso, a resposta deverá apresentar os dados disponíveis no servidor.
+
+Caso não existam registros, o resultado poderá ser um array vazio.
+
+:::
+
+### Questões de análise
+
+1. Qual método HTTP foi utilizado?
+2. Qual endpoint foi acessado?
+3. Qual código de status foi retornado?
+4. Quantos registros foram encontrados?
+5. Qual atributo identifica individualmente uma Pessoa Física?
+6. Como os telefones são representados?
+7. Como o Título de Eleitor está representado?
+
+---
+
+## 3. Atividade 2 — Filtrando Pessoas Físicas pelo nome
+
+Agora, utilizaremos o endpoint de filtragem.
+
+Essa operação também utiliza o método `GET`, mas apresenta um parâmetro de consulta.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+GET
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+```
+
+### Passo 2 — Enviando a requisição
+
+Execute a consulta.
+
+Observe o corpo da resposta.
+
+### Passo 3 — Alterando o parâmetro
+
+Agora, substitua o valor `ana` por outro texto.
+
+Por exemplo:
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=maria
+```
+
+Execute novamente a requisição.
+
+### Passo 4 — Comparando os resultados
+
+Observe as diferenças entre as respostas.
+
+A documentação informa que a filtragem:
+
+- Realiza correspondência parcial;
+- Não diferencia letras maiúsculas e minúsculas;
+- Organiza os resultados pelo nome.
+
+:::tip Explorando a filtragem
+
+Experimente utilizar letras maiúsculas e minúsculas.
+
+Por exemplo:
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ANA
+```
+
+Compare o resultado com a consulta utilizando `ana`.
+
+:::
+
+### Questões de análise
+
+1. Qual parâmetro foi utilizado na consulta?
+2. Qual é a função do símbolo `?` na URL?
+3. O que acontece quando alteramos o valor do parâmetro?
+4. A pesquisa diferencia letras maiúsculas e minúsculas?
+5. Os resultados estão organizados alfabeticamente?
+
+---
+
+## 4. Atividade 3 — Cadastrando uma Pessoa Física
+
+Agora, realizaremos nossa primeira operação de cadastro.
+
+Para isso, utilizaremos o método `POST`.
+
+Diferentemente das consultas anteriores, precisaremos enviar um documento JSON contendo os dados do novo registro.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+POST
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pf
+```
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+### Passo 2 — Preparando o documento JSON
+
+Utilize o seguinte documento como referência:
+
+```json
+{
+  "nome": "PF Laboratorio REST Exemplo",
+  "email": "pf.laboratorio@exemplo.com",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "numero": "123456",
+    "zona": "001",
+    "secao": "002"
+  }
+}
+```
+
+O documento apresenta os atributos utilizados pela API de Pessoas Físicas.
+
+Antes de executar a requisição, altere o nome e o e-mail para identificar seu registro de teste.
+
+Utilize sempre informações fictícias.
+
+### Passo 3 — Informando o corpo da requisição
+
+No ReqBin, localize a área destinada ao corpo da requisição.
+
+Informe o documento JSON.
+
+Verifique se o cabeçalho `Content-Type` está configurado como `application/json`.
+
+### Passo 4 — Enviando a requisição
+
+Execute a operação `POST`.
+
+Observe o código de status e o documento retornado.
+
+A documentação apresenta o código:
+
+```http
+201 Created
+```
+
+para indicar a criação bem-sucedida de um recurso.
+
+### Passo 5 — Registrando o identificador
+
+Na resposta, localize o atributo:
+
+```json
+"_id": "IDENTIFICADOR_RETORNADO_PELA_API"
+```
+
+O valor efetivamente retornado deverá ser registrado.
+
+Utilizaremos esse identificador nas próximas atividades.
+
+:::warning Guarde o identificador
+
+Não utilize o identificador apresentado nos exemplos anteriores.
+
+Cada estudante deverá utilizar o `_id` retornado no cadastro do próprio registro.
+
+Esse identificador será necessário para atualizar e excluir a Pessoa Física.
+
+:::
+
+### Registro da atividade
+
+Preencha as informações:
+
+| Informação | Valor observado |
+|---|---|
+| Método HTTP | `POST` |
+| Endpoint | `/pf` |
+| Código de status | |
+| Nome cadastrado | |
+| Identificador `_id` | |
+| Cadastro realizado com sucesso? | |
+
+### Questões de análise
+
+1. Por que utilizamos o método `POST`?
+2. Qual é a finalidade do cabeçalho `Content-Type`?
+3. Por que precisamos enviar um documento JSON?
+4. Qual é a finalidade do atributo `_id`?
+5. O identificador foi enviado pelo cliente ou retornado pelo servidor?
+6. Quais objetos relacionados aparecem na resposta?
+
+---
+
+## 5. Atividade 4 — Atualizando uma Pessoa Física
+
+Nesta atividade, modificaremos as informações da Pessoa Física cadastrada anteriormente.
+
+Para isso, utilizaremos o método `PUT`.
+
+### Passo 1 — Identificando o registro
+
+Recupere o identificador `_id` obtido na Atividade 3.
+
+Considere o seguinte exemplo ilustrativo:
+
+```text
+675b2e1b7a9d48a52b7a0009
+```
+
+O valor acima é apenas um exemplo.
+
+Utilize o identificador real do seu registro de teste.
+
+### Passo 2 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+PUT
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pf/SEU_ID
+```
+
+Substitua `SEU_ID` pelo identificador retornado no cadastro.
+
+Por exemplo, utilizando um identificador ilustrativo:
+
+```text
+https://backend-pessoas.vercel.app/pf/675b2e1b7a9d48a52b7a0009
+```
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+### Passo 3 — Preparando os dados atualizados
+
+A documentação apresenta a atualização de Pessoas Físicas por meio de documentos JSON, incluindo a possibilidade de informar o identificador do Título de Eleitor associado.
+
+Para esta atividade, utilize como base os dados atuais do registro retornados pela API.
+
+Altere o atributo `nome` para:
+
+```text
+PF Laboratorio REST Atualizada
+```
+
+E modifique a zona eleitoral para:
+
+```text
+002
+```
+
+A estrutura poderá ser semelhante a:
+
+```json
+{
+  "nome": "PF Laboratorio REST Atualizada",
+  "email": "pf.laboratorio@exemplo.com",
+  "cpf": "12345678903",
+  "endereco": {
+    "cep": "71000-000",
+    "logradouro": "Rua das Palmeiras",
+    "bairro": "Centro",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "998887776"
+    }
+  ],
+  "titulo": {
+    "_id": "ID_REAL_DO_TITULO",
+    "numero": "123456",
+    "zona": "002",
+    "secao": "002"
+  }
+}
+```
+
+:::warning Identificadores dos objetos relacionados
+
+O valor `ID_REAL_DO_TITULO` é um marcador explicativo.
+
+Substitua-o pelo `_id` do título retornado pela API, caso esse identificador esteja disponível.
+
+Se o servidor retornar identificadores para endereço ou telefones, preserve-os conforme a estrutura de atualização documentada e os dados atuais do registro.
+
+Não envie o texto `ID_REAL_DO_TITULO` literalmente.
+
+:::
+
+### Passo 4 — Enviando a atualização
+
+Execute a requisição `PUT`.
+
+Observe o código de status e a resposta.
+
+### Passo 5 — Verificando o resultado
+
+Após a atualização, realize uma nova consulta:
+
+```http
+GET /pf
+```
+
+Localize o registro pelo identificador `_id`.
+
+Verifique se o nome e a zona eleitoral apresentam os novos valores.
+
+:::info Resultado esperado
+
+Se a atualização for processada com sucesso, os dados modificados deverão aparecer nas consultas posteriores.
+
+A documentação não especifica detalhadamente o tratamento de todos os campos omitidos em uma operação `PUT`.
+
+Por isso, utilizamos como referência um documento completo, preservando os demais dados do registro.
+
+:::
+
+### Questões de análise
+
+1. Qual método HTTP foi utilizado?
+2. Por que o identificador aparece na URL?
+3. Qual é a diferença entre `POST /pf` e `PUT /pf/:id`?
+4. Qual é a função do `_id` apresentado dentro do objeto `titulo`?
+5. Como podemos verificar se a atualização foi realizada?
+
+---
+
+## 6. Atividade 5 — Excluindo uma Pessoa Física
+
+Agora, concluiremos o ciclo CRUD de Pessoa Física.
+
+Utilizaremos o método `DELETE` para remover o registro fictício criado na Atividade 3.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+DELETE
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pf/SEU_ID
+```
+
+Substitua `SEU_ID` pelo identificador da Pessoa Física criada anteriormente.
+
+### Passo 2 — Enviando a requisição
+
+Execute a operação.
+
+Observe o código de status e a resposta retornada.
+
+### Passo 3 — Verificando a exclusão
+
+Realize uma nova consulta:
+
+```http
+GET /pf
+```
+
+Procure o registro pelo identificador ou pelo nome utilizado no laboratório.
+
+Verifique se ele continua presente.
+
+### Passo 4 — Compreendendo os relacionamentos
+
+A documentação informa que a exclusão de uma Pessoa Física também remove seu Título de Eleitor associado.
+
+Entretanto, endereços e telefones compartilhados não são removidos automaticamente.
+
+:::warning Atenção
+
+Exclua somente a Pessoa Física fictícia criada por você.
+
+Não utilize identificadores de registros pertencentes a outros usuários.
+
+:::
+
+### Questões de análise
+
+1. Qual método HTTP foi utilizado?
+2. Por que a exclusão precisa de um identificador?
+3. O registro continua aparecendo na listagem?
+4. Qual objeto associado é removido juntamente com a Pessoa Física?
+5. Por que endereços e telefones compartilhados não são necessariamente removidos?
+
+---
+
+## 7. Atividade 6 — Consultando Pessoas Jurídicas
+
+Agora, realizaremos operações com o recurso de Pessoas Jurídicas.
+
+Começaremos pela listagem.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+GET
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pj
+```
+
+### Passo 2 — Enviando a requisição
+
+Execute a consulta.
+
+Observe o código de status e o JSON retornado.
+
+### Passo 3 — Identificando os atributos
+
+Localize os seguintes atributos, quando presentes:
+
+```text
+_id
+nome
+email
+cnpj
+endereco
+telefones
+ie
+```
+
+Observe especialmente a estrutura da Inscrição Estadual.
+
+Ela poderá apresentar os atributos:
+
+```text
+numero
+estado
+dataRegistro
+```
+
+### Passo 4 — Filtrando pelo nome
+
+Agora, execute:
+
+```http
+GET /pj/filtrar?nome=tech
+```
+
+URL completa:
+
+```text
+https://backend-pessoas.vercel.app/pj/filtrar?nome=tech
+```
+
+Compare os resultados com a listagem completa.
+
+### Questões de análise
+
+1. Qual é a diferença entre `/pf` e `/pj`?
+2. Qual atributo representa o documento específico da Pessoa Jurídica?
+3. Como a Inscrição Estadual está representada?
+4. Qual é a finalidade do atributo `dataRegistro`?
+5. O endpoint de filtragem utiliza qual método HTTP?
+
+---
+
+## 8. Atividade 7 — Cadastrando uma Pessoa Jurídica
+
+Nesta atividade, utilizaremos o método `POST` para cadastrar uma Pessoa Jurídica fictícia.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+POST
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pj
+```
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+### Passo 2 — Preparando o JSON
+
+Utilize o seguinte documento:
+
+```json
+{
+  "nome": "PJ Laboratorio REST Exemplo",
+  "email": "pj.laboratorio@exemplo.com",
+  "cnpj": "12345678000190",
+  "endereco": {
+    "cep": "72000-000",
+    "logradouro": "Avenida das Nações",
+    "bairro": "Taguatinga",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ],
+  "ie": {
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2023-01-01T00:00:00Z"
+  }
+}
+```
+
+Antes de enviar, altere o nome e o e-mail para identificar seu registro de teste.
+
+### Passo 3 — Enviando a requisição
+
+Informe o JSON no corpo da requisição e execute a operação.
+
+Observe o código de status HTTP.
+
+A documentação apresenta o código `201 Created` para o cadastro bem-sucedido.
+
+### Passo 4 — Registrando os identificadores
+
+Na resposta, identifique:
+
+- O `_id` da Pessoa Jurídica;
+- O `_id` da Inscrição Estadual, quando retornado;
+- Os identificadores dos demais objetos relacionados, quando presentes.
+
+Registre os valores obtidos.
+
+### Registro da atividade
+
+| Informação | Valor observado |
+|---|---|
+| Método HTTP | `POST` |
+| Endpoint | `/pj` |
+| Código de status | |
+| Nome cadastrado | |
+| Identificador da PJ | |
+| Identificador da IE | |
+| Cadastro realizado com sucesso? | |
+
+:::tip Identificadores
+
+O identificador da Pessoa Jurídica será utilizado na URL das operações `PUT` e `DELETE`.
+
+O identificador da Inscrição Estadual poderá ser utilizado no documento JSON de atualização, conforme os exemplos da API.
+
+:::
+
+---
+
+## 9. Atividade 8 — Atualizando uma Pessoa Jurídica
+
+Agora, modificaremos a Pessoa Jurídica cadastrada anteriormente.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+PUT
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pj/SEU_ID
+```
+
+Substitua `SEU_ID` pelo identificador da Pessoa Jurídica criada na Atividade 7.
+
+**Cabeçalho:**
+
+```http
+Content-Type: application/json
+```
+
+### Passo 2 — Preparando os dados
+
+Utilize como base o documento atual da Pessoa Jurídica.
+
+Modifique o nome para:
+
+```text
+PJ Laboratorio REST Atualizada
+```
+
+E altere a data de registro da Inscrição Estadual para:
+
+```text
+2024-02-15T00:00:00Z
+```
+
+O documento poderá apresentar uma estrutura semelhante a:
+
+```json
+{
+  "nome": "PJ Laboratorio REST Atualizada",
+  "email": "pj.laboratorio@exemplo.com",
+  "cnpj": "12345678000190",
+  "endereco": {
+    "cep": "72000-000",
+    "logradouro": "Avenida das Nações",
+    "bairro": "Taguatinga",
+    "cidade": "Brasília",
+    "uf": "DF",
+    "regiao": "Centro-Oeste"
+  },
+  "telefones": [
+    {
+      "ddd": "61",
+      "numero": "33445566"
+    }
+  ],
+  "ie": {
+    "_id": "ID_REAL_DA_IE",
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2024-02-15T00:00:00Z"
+  }
+}
+```
+
+:::warning Atenção
+
+Substitua `ID_REAL_DA_IE` pelo identificador da Inscrição Estadual efetivamente retornado pela API.
+
+Preserve os identificadores dos demais objetos relacionados, conforme os dados atuais e a estrutura de atualização utilizada pelo serviço.
+
+Não envie os marcadores explicativos literalmente.
+
+:::
+
+### Passo 3 — Enviando a requisição
+
+Execute a operação `PUT`.
+
+Observe a resposta.
+
+### Passo 4 — Verificando a atualização
+
+Realize uma nova consulta:
+
+```http
+GET /pj
+```
+
+Localize a Pessoa Jurídica pelo identificador.
+
+Verifique se os dados foram modificados.
+
+### Questões de análise
+
+1. Qual método HTTP foi utilizado?
+2. Qual identificador aparece na URL?
+3. Qual identificador aparece dentro do objeto `ie`?
+4. Qual atributo representa a data de registro?
+5. Por que a data é representada como string no JSON?
+6. Como podemos confirmar que a atualização foi realizada?
+
+---
+
+## 10. Atividade 9 — Excluindo uma Pessoa Jurídica
+
+Nesta atividade, removeremos o registro fictício criado anteriormente.
+
+### Passo 1 — Configurando a requisição
+
+**Método HTTP:**
+
+```http
+DELETE
+```
+
+**URL:**
+
+```text
+https://backend-pessoas.vercel.app/pj/SEU_ID
+```
+
+Substitua `SEU_ID` pelo identificador da Pessoa Jurídica cadastrada na Atividade 7.
+
+### Passo 2 — Enviando a requisição
+
+Execute a operação.
+
+Observe o código de status e o corpo retornado, quando houver.
+
+### Passo 3 — Verificando a exclusão
+
+Execute:
+
+```http
+GET /pj
+```
+
+Procure o registro excluído.
+
+Verifique se ele continua presente na listagem.
+
+### Passo 4 — Compreendendo o comportamento da API
+
+A documentação informa que a exclusão de uma Pessoa Jurídica também remove sua Inscrição Estadual associada.
+
+Entretanto, endereços e telefones compartilhados não são removidos automaticamente.
+
+### Questões de análise
+
+1. Qual método HTTP foi utilizado?
+2. Qual identificador foi informado?
+3. O registro continua presente na listagem?
+4. Qual objeto associado é removido juntamente com a Pessoa Jurídica?
+5. Qual é a diferença entre a exclusão de uma Pessoa Física e a exclusão de uma Pessoa Jurídica?
+
+---
+
+## 11. Atividade 10 — Interpretando erros HTTP
+
+Até o momento, trabalhamos principalmente com operações que esperamos executar com sucesso.
+
+Entretanto, uma API também precisa informar quando não consegue processar uma requisição.
+
+A documentação apresenta os seguintes códigos de erro:
+
+| Código | Significado | Exemplo |
+|---|---|---|
+| `400` | Bad Request | Dados inválidos ou incompletos |
+| `404` | Not Found | Registro não encontrado |
+| `500` | Internal Server Error | Falha interna no servidor |
+
+### 11.1. Analisando uma requisição incompleta
+
+Considere a tentativa de cadastro:
+
+```http
+POST /pf
+```
+
+Com o corpo:
+
+```json
+{
+  "nome": "Pessoa Incompleta"
+}
+```
+
+O documento não apresenta os demais atributos utilizados nos exemplos completos da API.
+
+Dependendo das validações implementadas, o servidor poderá retornar um erro `400`.
+
+**Questões:**
+
+1. Quais atributos estão ausentes?
+2. Por que o servidor pode rejeitar essa requisição?
+3. Qual é a diferença entre um erro `400` e um erro `500`?
+
+### 11.2. Analisando um identificador inexistente
+
+Considere:
+
+```http
+DELETE /pf/000000000000000000000000
+```
+
+Se não existir uma Pessoa Física com esse identificador, a documentação prevê a possibilidade de retorno do código `404`.
+
+**Questões:**
+
+1. Qual é a finalidade do identificador na URL?
+2. O que significa o código `404`?
+3. Por que a operação não poderá excluir um registro inexistente?
+
+:::note Testes de erro
+
+Os exemplos acima podem ser analisados conceitualmente, sem executar operações que modifiquem dados.
+
+Caso o professor autorize testes reais, registre os códigos efetivamente retornados.
+
+O comportamento observado dependerá das validações e da implementação da API.
+
+:::
+
+---
+
+## 12. Consolidando as operações CRUD
+
+Agora que realizamos as atividades práticas, podemos organizar as operações estudadas.
+
+| Operação | Método HTTP | Pessoa Física | Pessoa Jurídica |
+|---|---|---|---|
+| Listar | `GET` | `/pf` | `/pj` |
+| Filtrar | `GET` | `/pf/filtrar?nome=...` | `/pj/filtrar?nome=...` |
+| Cadastrar | `POST` | `/pf` | `/pj` |
+| Atualizar | `PUT` | `/pf/:id` | `/pj/:id` |
+| Excluir | `DELETE` | `/pf/:id` | `/pj/:id` |
+
+Observe que os dois recursos apresentam a mesma organização de operações.
+
+Essa padronização permite que diferentes aplicações utilizem a API de maneira consistente.
+
+### 12.1. Ciclo completo de uma Pessoa Física
+
+```text
+             GET /pf
+                |
+                v
+       Consultar registros
+                |
+                v
+             POST /pf
+                |
+                v
+        Cadastrar pessoa
+                |
+                v
+          Obter o _id
+                |
+                v
+           PUT /pf/:id
+                |
+                v
+         Atualizar pessoa
+                |
+                v
+         DELETE /pf/:id
+                |
+                v
+          Excluir pessoa
+```
+
+### 12.2. Ciclo completo de uma Pessoa Jurídica
+
+```text
+             GET /pj
+                |
+                v
+       Consultar registros
+                |
+                v
+             POST /pj
+                |
+                v
+        Cadastrar pessoa
+                |
+                v
+          Obter o _id
+                |
+                v
+           PUT /pj/:id
+                |
+                v
+         Atualizar pessoa
+                |
+                v
+         DELETE /pj/:id
+                |
+                v
+          Excluir pessoa
+```
+
+Observe que o fluxo é semelhante.
+
+A diferença está no recurso utilizado e na estrutura dos dados enviados.
+
+---
+
+## 13. Desafio prático — Explorando a API de forma independente
+
+Agora, você deverá realizar um novo conjunto de operações sem seguir um roteiro detalhado.
+
+O objetivo será demonstrar que você compreendeu a comunicação com a API REST.
+
+### Situação-problema
+
+Uma organização deseja utilizar a API de Pessoas para manter registros de seus contatos.
+
+Sua tarefa será utilizar os endpoints disponibilizados para cadastrar, consultar, atualizar e excluir registros fictícios.
+
+### Etapa 1 — Pessoa Física
+
+Realize as seguintes operações:
+
+1. Cadastre uma Pessoa Física fictícia com endereço, dois telefones e Título de Eleitor;
+2. Registre o identificador retornado;
+3. Consulte a listagem de Pessoas Físicas;
+4. Utilize o filtro por nome para localizar o registro;
+5. Atualize o nome e a zona eleitoral;
+6. Consulte novamente o registro na listagem;
+7. Exclua a Pessoa Física;
+8. Verifique se o registro foi removido.
+
+### Etapa 2 — Pessoa Jurídica
+
+Realize as seguintes operações:
+
+1. Cadastre uma Pessoa Jurídica fictícia com endereço, dois telefones e Inscrição Estadual;
+2. Registre o identificador retornado;
+3. Consulte a listagem de Pessoas Jurídicas;
+4. Utilize o filtro por nome para localizar o registro;
+5. Atualize o nome e a data de registro da Inscrição Estadual;
+6. Consulte novamente o registro na listagem;
+7. Exclua a Pessoa Jurídica;
+8. Verifique se o registro foi removido.
+
+### Etapa 3 — Registro das evidências
+
+Para cada operação, registre:
+
+- Método HTTP utilizado;
+- URL da requisição;
+- Corpo JSON, quando necessário;
+- Código de status retornado;
+- Resultado observado.
+
+Utilize a tabela como referência:
+
+| Operação | Método | Endpoint | Status HTTP | Resultado |
+|---|---|---|---|---|
+| Listar PF | `GET` | `/pf` | | |
+| Cadastrar PF | `POST` | `/pf` | | |
+| Atualizar PF | `PUT` | `/pf/:id` | | |
+| Excluir PF | `DELETE` | `/pf/:id` | | |
+| Listar PJ | `GET` | `/pj` | | |
+| Cadastrar PJ | `POST` | `/pj` | | |
+| Atualizar PJ | `PUT` | `/pj/:id` | | |
+| Excluir PJ | `DELETE` | `/pj/:id` | | |
+
+:::tip Registro de evidências
+
+Se solicitado pelo professor, apresente capturas de tela das requisições e respostas realizadas no ReqBin.
+
+As evidências deverão demonstrar o método HTTP, a URL utilizada e o resultado retornado.
+
+Evite incluir informações pessoais reais.
+
+:::
+
+---
+
+## 14. Exercícios de fixação
+
+Responda às questões a seguir com base nos conceitos estudados e nas atividades realizadas.
+
+### Questão 1 — Comunicação HTTP
+
+Explique a diferença entre uma requisição HTTP e uma resposta HTTP.
+
+Identifique quais informações são enviadas pelo cliente e quais são retornadas pelo servidor.
+
+### Questão 2 — Métodos HTTP
+
+Relacione os métodos `GET`, `POST`, `PUT` e `DELETE` às operações CRUD.
+
+Explique a finalidade de cada método.
+
+### Questão 3 — Estrutura da URL
+
+Considere:
+
+```text
+https://backend-pessoas.vercel.app/pf/filtrar?nome=ana
+```
+
+Identifique:
+
+1. A URL base;
+2. O endpoint;
+3. O parâmetro de consulta;
+4. O valor do parâmetro;
+5. O método HTTP utilizado.
+
+### Questão 4 — Cadastro de Pessoa Física
+
+Explique quais informações deverão ser enviadas para cadastrar uma Pessoa Física contendo:
+
+- Nome;
+- E-mail;
+- CPF;
+- Endereço;
+- Telefones;
+- Título de Eleitor.
+
+Apresente um exemplo de documento JSON.
+
+### Questão 5 — Cadastro de Pessoa Jurídica
+
+Explique as principais diferenças entre os documentos JSON utilizados para cadastrar Pessoas Físicas e Jurídicas.
+
+Destaque os atributos `cpf`, `cnpj`, `titulo` e `ie`.
+
+### Questão 6 — Identificadores
+
+Explique a finalidade do atributo `_id`.
+
+Por que esse atributo é importante nas operações `PUT` e `DELETE`?
+
+### Questão 7 — Objetos relacionados
+
+Considere:
+
+```json
+{
+  "_id": "675b301b7a9d48a52b7a0012",
+  "nome": "Empresa Exemplo",
+  "ie": {
+    "_id": "675b301b7a9d48a52b7a0015",
+    "numero": "DF12345",
+    "estado": "DF",
+    "dataRegistro": "2023-01-01T00:00:00Z"
+  }
+}
+```
+
+Responda:
+
+1. Qual é o identificador da Pessoa Jurídica?
+2. Qual é o identificador da Inscrição Estadual?
+3. Por que existem dois identificadores?
+4. Qual identificador deverá ser utilizado na URL de atualização da Pessoa Jurídica?
+
+### Questão 8 — Códigos de status
+
+Explique o significado dos códigos:
+
+```text
+200
+201
+400
+404
+500
+```
+
+Apresente um exemplo de situação para cada código.
+
+### Questão 9 — Exclusão
+
+Explique o comportamento documentado da API quando uma Pessoa Física é excluída.
+
+Depois, compare esse comportamento com a exclusão de uma Pessoa Jurídica.
+
+### Questão 10 — Cliente e servidor
+
+Explique por que foi possível realizar todas as operações do laboratório utilizando o ReqBin, sem desenvolver uma aplicação ReactJS.
+
+---
+
+## 15. Síntese geral do capítulo
+
+Ao longo deste capítulo, estudamos os conceitos fundamentais necessários para compreender a comunicação com uma API REST.
+
+Iniciamos conhecendo a arquitetura cliente-servidor e a finalidade das APIs na comunicação entre aplicações.
+
+Em seguida, estudamos a estrutura das requisições e respostas HTTP, os métodos utilizados nas operações CRUD e a representação de dados em formato JSON.
+
+Também conhecemos os recursos de Pessoas Físicas e Jurídicas, analisando seus atributos e objetos relacionados.
+
+Por fim, utilizamos o ReqBin para construir requisições HTTP e explorar as operações disponibilizadas pelo backend.
+
+### Principais conhecimentos desenvolvidos
+
+- Conceito de API REST;
+- Arquitetura cliente-servidor;
+- Comunicação HTTP;
+- Métodos `GET`, `POST`, `PUT` e `DELETE`;
+- Estrutura de requisições e respostas;
+- Cabeçalhos HTTP;
+- Parâmetros de rota;
+- Parâmetros de consulta;
+- Documentos JSON;
+- Objetos aninhados;
+- Arrays de objetos;
+- Identificadores `_id`;
+- Códigos de status HTTP;
+- Operações CRUD;
+- Testes de endpoints utilizando o ReqBin.
+
+### Recursos utilizados
+
+**API REST de Pessoas:**
+
+https://backend-pessoas.vercel.app/
+
+**Ferramenta ReqBin:**
+
+https://reqbin.com/
+
+**Repositório do backend:**
+
+https://github.com/vaguettibfd/backend_pessoas/
+
+---
+
+## 16. Considerações finais
+
+A comunicação com APIs REST é um conhecimento importante no desenvolvimento de sistemas.
+
+Ao compreender como construir requisições HTTP e interpretar respostas, podemos utilizar serviços disponibilizados por diferentes aplicações, independentemente da linguagem ou tecnologia utilizada para implementá-los.
+
+Neste capítulo, nosso objetivo foi compreender **como utilizar uma API existente**.
+
+Não foi necessário desenvolver o frontend nem implementar o backend.
+
+Essa separação permite estudar o funcionamento dos serviços antes de conhecer os detalhes de sua implementação.
+
+Os conhecimentos desenvolvidos aqui servirão de referência para estudos posteriores, especialmente em dois contextos:
+
+**Integração com aplicações frontend:** utilização de requisições HTTP para conectar interfaces aos serviços disponibilizados pela API.
+
+**Desenvolvimento de backend:** implementação dos endpoints, processamento das requisições e gerenciamento dos dados utilizados pela aplicação.
+
+Assim, concluímos o estudo da comunicação com a API REST de gerenciamento de Pessoas Físicas e Jurídicas, estabelecendo uma base para compreender tanto o consumo quanto a construção de serviços HTTP.
